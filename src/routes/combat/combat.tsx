@@ -6,7 +6,6 @@ import {
   Divider,
   FormControlLabel,
   Grid,
-  Skeleton,
   TextField,
   Typography,
   MenuItem,
@@ -15,79 +14,52 @@ import {
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import { useRef, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { collection, orderBy, query, where } from "firebase/firestore";
-import { useCollectionData } from "react-firebase-hooks/firestore";
-import { User } from "firebase/auth";
-
-//import { SignIn } from "../../components/auth";
-//import { auth, firestore } from "../../firebase";
 import Layout from "../../components/Layout";
 import NpcPretty from "../../components/npc/Pretty";
 import PointBar from "../../components/PointBar";
 import { calcHP, calcMP } from "../../libs/npcs";
 import { useEffect } from "react";
-import React from "react";
 import { TypeNpc } from "../../types/Npcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
 import { useTranslate } from "../../translation/translate";
+import { getNpcs } from "../../utility/db";
 
 export default function Combat() {
   const { t } = useTranslate();
-  const user = null;
-  const loading = true;
-  const error = null;
-  console.debug("user, loading, error", user, loading, error);
 
   return (
     <Layout>
       <Typography variant="h4">{t("Combat")}</Typography>
-      {loading && <Skeleton />}
-
-      {!loading && !user && (
-        <>
-          <Typography sx={{ my: 1 }}>
-            {t("You must be logged in to use this feature")}
-          </Typography>
-        </>
-      )}
-
-      {user && <AuthCombat user={user} />}
+      <AuthCombat />
     </Layout>
   );
 }
 
-interface AuthCombatProps {
-  user: User;
-}
-
-function AuthCombat({ user }: AuthCombatProps) {
+function AuthCombat() {
   const { t } = useTranslate();
-  //const personalRef = collection(firestore, "npc-personal");
-  /*const personalQuery = query(
-    personalRef,
-    where("uid", "==", user.uid),
-    orderBy("lvl", "asc"),
-    orderBy("name", "asc")
-  );*/
-  /*const [personalList, loading] = useCollectionData(personalQuery, {
-    idField: "id",
-  });*/
 
-  const personalList = [{name: "", label: ""}];
-  const loading = true;
+  const [personalList, setPersonalList] = useState<TypeNpc[]>([]);
 
   const [npcs, setNpcs] = useState<TypeNpc[]>([]);
+
+  useEffect(() => {
+    const fetchNpcs = async () => {
+      try {
+        const npcsList = await getNpcs();
+        setPersonalList(npcsList);
+      } catch (err) {
+        console.error("Error fetching NPCs:", err);
+      }
+    };
+
+    fetchNpcs();
+  }, []);
 
   const addNpc = (e: any, newValue: any) => {
     setNpcs((prevState) => {
       return newValue ? [...prevState, newValue as TypeNpc] : prevState;
     });
   };
-
-  if (loading) {
-    return null;
-  }
 
   // Add label
   personalList?.forEach((npc) => {
@@ -98,12 +70,12 @@ function AuthCombat({ user }: AuthCombatProps) {
 
   return (
     <Grid container sx={{ mt: 2 }}>
-      {npcs?.map((npc) => {
+      {npcs?.map((npc, index) => {
         if (!npc) {
           return null;
         }
         return (
-          <Grid item xs={12} key={npc.id}>
+          <Grid item xs={12} key={index}>
             <NpcCombatant npc={npc}></NpcCombatant>
           </Grid>
         );
@@ -251,168 +223,181 @@ function NpcCombatant({ npc }: NpcProps) {
   const ref = useRef();
   const [downloadImage] = useDownloadImage(npc.name, ref);
 
-
   /************ ATTACK ROLL ************/
   // Initialize states for dice, hit throw, damage results, critical success and critical failure
-  const [diceResults, setDiceResults] = useState({ attribute1: 0, attribute2: 0 });
+  const [diceResults, setDiceResults] = useState({
+    attribute1: 0,
+    attribute2: 0,
+  });
   const [hitThrowResult, setHitThrowResult] = useState({ totalHitScore: 0 });
-  const [damageResult, setDamageResult] = useState({ damage: 0 }); 
+  const [damageResult, setDamageResult] = useState({ damage: 0 });
   const [isCriticalSuccess, setIsCriticalSuccess] = useState(false);
   const [isCriticalFailure, setIsCriticalFailure] = useState(false);
 
-// Handle Attack Roll
-const rollAttackDice = (attack, attackType) => {
-  let attribute1, attribute2, extraDamage, extraPrecision, type;
+  // Handle Attack Roll
+  const rollAttackDice = (attack, attackType) => {
+    let attribute1, attribute2, extraDamage, extraPrecision, type;
 
-  if (attackType === "weapon") {
-    // For weapon attacks
-    const { att1, att2 } = attack.weapon;
-    attribute1 = attributes[att1]; 
-    attribute2 = attributes[att2]; 
-    extraDamage = attack.weapon.damage + parseInt(attack.flatdmg) + (attack.extraDamage ? 5 : 0);
-    extraPrecision = (npc.extra?.precision ? 3 : 0) + attack.weapon.prec + parseInt(attack.flathit);
-    type = attack.weapon.type;
-  } else if (attackType === "spell") {
-    // For spells
-    const { attr1, attr2 } = attack;
-    attribute1 = attributes[attr1];
-    attribute2 = attributes[attr2];
-    extraDamage = 0;
-    extraPrecision = npc.extra?.magic ? 3 : 0;
-    type = "spell";
-  } else {
-    // For base attacks
-    const { attr1, attr2 } = attack;
-    attribute1 = attributes[attr1];
-    attribute2 = attributes[attr2];
-    extraDamage = attack.extraDamage ? 10 : 5;
-    extraPrecision = npc.extra?.precision ? 3 : 0;
-    type = attack.type;
-  }
+    if (attackType === "weapon") {
+      // For weapon attacks
+      const { att1, att2 } = attack.weapon;
+      attribute1 = attributes[att1];
+      attribute2 = attributes[att2];
+      extraDamage =
+        attack.weapon.damage +
+        parseInt(attack.flatdmg) +
+        (attack.extraDamage ? 5 : 0);
+      extraPrecision =
+        (npc.extra?.precision ? 3 : 0) +
+        attack.weapon.prec +
+        parseInt(attack.flathit);
+      type = attack.weapon.type;
+    } else if (attackType === "spell") {
+      // For spells
+      const { attr1, attr2 } = attack;
+      attribute1 = attributes[attr1];
+      attribute2 = attributes[attr2];
+      extraDamage = 0;
+      extraPrecision = npc.extra?.magic ? 3 : 0;
+      type = "spell";
+    } else {
+      // For base attacks
+      const { attr1, attr2 } = attack;
+      attribute1 = attributes[attr1];
+      attribute2 = attributes[attr2];
+      extraDamage = attack.extraDamage ? 10 : 5;
+      extraPrecision = npc.extra?.precision ? 3 : 0;
+      type = attack.type;
+    }
 
-  if (attribute1 === undefined || attribute2 === undefined) {
-    // Handle the case where attributes are not defined
-    console.error("Attributes not defined");
-    return;
-  }
+    if (attribute1 === undefined || attribute2 === undefined) {
+      // Handle the case where attributes are not defined
+      console.error("Attributes not defined");
+      return;
+    }
 
-  // Simulate rolling the dice for each attribute
-  const rollDice = (attribute) => Math.floor(Math.random() * attribute) + 1;
-  const roll1 = rollDice(attribute1);
-  const roll2 = rollDice(attribute2);
+    // Simulate rolling the dice for each attribute
+    const rollDice = (attribute) => Math.floor(Math.random() * attribute) + 1;
+    const roll1 = rollDice(attribute1);
+    const roll2 = rollDice(attribute2);
 
-  // Check for critical success / failure
-  const isCriticalSuccess = roll1 === roll2 && roll1 >= 6 && roll2 >= 6;
-  const isCriticalFailure = roll1 === 1 && roll2 === 1;
-  setIsCriticalSuccess(isCriticalSuccess);
-  setIsCriticalFailure(isCriticalFailure);
+    // Check for critical success / failure
+    const isCriticalSuccess = roll1 === roll2 && roll1 >= 6 && roll2 >= 6;
+    const isCriticalFailure = roll1 === 1 && roll2 === 1;
+    setIsCriticalSuccess(isCriticalSuccess);
+    setIsCriticalFailure(isCriticalFailure);
 
-  // Update dice results state
-  setDiceResults({ attribute1: roll1, attribute2: roll2 });
+    // Update dice results state
+    setDiceResults({ attribute1: roll1, attribute2: roll2 });
 
-  // Calculate results
-  const totalHitScore = roll1 + roll2 + extraPrecision;
-  let baseDamage = Math.max(roll1, roll2);
+    // Calculate results
+    const totalHitScore = roll1 + roll2 + extraPrecision;
+    let baseDamage = Math.max(roll1, roll2);
 
-  let damage = 0;
-  if (type !== "nodmg"){
-    damage = baseDamage + extraDamage;
+    let damage = 0;
+    if (type !== "nodmg") {
+      damage = baseDamage + extraDamage;
+    }
+
+    // Update results
+    setHitThrowResult({ totalHitScore });
+    setDamageResult({ damage });
+
+    return { totalHitScore, damage };
   };
-  
 
-  // Update results
-  setHitThrowResult({ totalHitScore });
-  setDamageResult({ damage });
+  // Handle the Attack Button Label
+  const generateButtonLabel = (attack) => {
+    let translatedAttribute1, translatedAttribute2;
 
-  return { totalHitScore, damage };
-};
+    if (attack.weapon) {
+      // For weapon attacks
+      const { name, weapon } = attack;
+      const { att1, att2 } = weapon;
+      const attributeMap = {
+        dexterity: "DEX",
+        insight: "INS",
+        might: "MIG",
+        will: "WLP",
+      };
 
+      translatedAttribute1 = `${t(attributeMap[att1])} d${attributes[att1]}`;
+      translatedAttribute2 = `${t(attributeMap[att2])} d${attributes[att2]}`;
 
-// Handle the Attack Button Label
-const generateButtonLabel = (attack) => {
-  let translatedAttribute1, translatedAttribute2;
+      return `${name} [${translatedAttribute1} + ${translatedAttribute2}]`;
+    } else if (attack.spell) {
+      // For spells
+      const { name, spell } = attack;
+      const { attr1, attr2 } = spell;
+      const attributeMap = {
+        dexterity: "DEX",
+        insight: "INS",
+        might: "MIG",
+        will: "WLP",
+      };
 
-  if (attack.weapon) {
-    // For weapon attacks
-    const { name, weapon } = attack;
-    const { att1, att2 } = weapon;
-    const attributeMap = {
-      dexterity: "DEX",
-      insight: "INS",
-      might: "MIG",
-      will: "WLP",
-    };
+      translatedAttribute1 = `${t(attributeMap[attr1])} d${attributes[attr1]}`;
+      translatedAttribute2 = `${t(attributeMap[attr2])} d${attributes[attr2]}`;
 
-    translatedAttribute1 = `${t(attributeMap[att1])} d${attributes[att1]}`;
-    translatedAttribute2 = `${t(attributeMap[att2])} d${attributes[att2]}`;
+      return `${name} [${translatedAttribute1} + ${translatedAttribute2}]`;
+    }
+    {
+      // For base attacks
+      const { name, attr1, attr2 } = attack;
+      const attributeMap = {
+        dexterity: "DEX",
+        insight: "INS",
+        might: "MIG",
+        will: "WLP",
+      };
 
-    return `${name} [${translatedAttribute1} + ${translatedAttribute2}]`;
-  } else if (attack.spell){
-    // For spells
-    const { name, spell } = attack;
-    const { attr1, attr2 } = spell;
-    const attributeMap = {
-      dexterity: "DEX",
-      insight: "INS",
-      might: "MIG",
-      will: "WLP",
-    };
+      translatedAttribute1 = `${t(attributeMap[attr1])} d${attributes[attr1]}`;
+      translatedAttribute2 = `${t(attributeMap[attr2])} d${attributes[attr2]}`;
 
-    translatedAttribute1 = `${t(attributeMap[attr1])} d${attributes[attr1]}`;
-    translatedAttribute2 = `${t(attributeMap[attr2])} d${attributes[attr2]}`;
-
-    return `${name} [${translatedAttribute1} + ${translatedAttribute2}]`;
-  } {
-    // For base attacks
-    const { name, attr1, attr2 } = attack;
-    const attributeMap = {
-      dexterity: "DEX",
-      insight: "INS",
-      might: "MIG",
-      will: "WLP",
-    };
-
-    translatedAttribute1 = `${t(attributeMap[attr1])} d${attributes[attr1]}`;
-    translatedAttribute2 = `${t(attributeMap[attr2])} d${attributes[attr2]}`;
-
-    return `${name} [${translatedAttribute1} + ${translatedAttribute2}]`;
-  }
-};
+      return `${name} [${translatedAttribute1} + ${translatedAttribute2}]`;
+    }
+  };
 
   return (
     <Grid container spacing={1} sx={{ my: 1 }}>
       <Grid item xs={6}>
-        <NpcPretty npc={npc} study={selectedStudy} npcImage={npc.imgurl} ref={ref} collapse={true} />
+        <NpcPretty
+          npc={npc}
+          study={selectedStudy}
+          npcImage={npc.imgurl}
+          ref={ref}
+          collapse={true}
+        />
         <Grid item container xs={12} mt={5}>
-            <Grid item xs={2}>
-              <Typography variant="h5">{t("Study Roll:")}</Typography>
-            </Grid>
-            <Grid item xs={2}>
-              <Select
-                labelId="study"
-                id="study"
-                value={selectedStudy}
-                onChange={handleStudyChange}
-                fullWidth
-              >
-                <MenuItem value={0}>-</MenuItem>
-                <MenuItem value={1}>7+</MenuItem>
-                <MenuItem value={2}>10+</MenuItem>
-                <MenuItem value={3}>13+</MenuItem>
-              </Select>
-            </Grid>
-            {/* Download Button */}
-            <Button
-              color="primary"
-              aria-label="download"
-              onClick={downloadImage}
-              style={{ cursor: "pointer" }}
-            >
-              <Tooltip title="Download Sheet" placement="bottom">
-                <Download />
-              </Tooltip>
-            </Button>
+          <Grid item xs={2}>
+            <Typography variant="h5">{t("Study Roll:")}</Typography>
           </Grid>
+          <Grid item xs={2}>
+            <Select
+              labelId="study"
+              id="study"
+              value={selectedStudy}
+              onChange={handleStudyChange}
+              fullWidth
+            >
+              <MenuItem value={0}>-</MenuItem>
+              <MenuItem value={1}>7+</MenuItem>
+              <MenuItem value={2}>10+</MenuItem>
+              <MenuItem value={3}>13+</MenuItem>
+            </Select>
+          </Grid>
+          {/* Download Button */}
+          <Button
+            color="primary"
+            aria-label="download"
+            onClick={downloadImage}
+            style={{ cursor: "pointer" }}
+          >
+            <Tooltip title="Download Sheet" placement="bottom">
+              <Download />
+            </Tooltip>
+          </Button>
+        </Grid>
       </Grid>
       <Grid xs={6} item>
         <Grid container spacing={1} rowSpacing={2} sx={{ px: 2 }}>
@@ -424,8 +409,13 @@ const generateButtonLabel = (attack) => {
               {crisis && <Typography variant="h5">{t("Crisis!")}</Typography>}
             </Grid>
             <Grid item xs={10}>
-              <PointBar pt={hp} maxPt={calcHP(npc)} color1={'#17b924'} color2={'#d1232a'} />
-            </Grid>       
+              <PointBar
+                pt={hp}
+                maxPt={calcHP(npc)}
+                color1={"#17b924"}
+                color2={"#d1232a"}
+              />
+            </Grid>
           </Grid>
           <Grid item xs={5}>
             <ButtonGroup variant="outlined" size="small" color="error">
@@ -452,8 +442,13 @@ const generateButtonLabel = (attack) => {
               </Typography>
             </Grid>
             <Grid item xs={10}>
-              <PointBar pt={mp} maxPt={calcMP(npc)} color1={'#16aad6'} color2={'#0e8aae'} />
-            </Grid>       
+              <PointBar
+                pt={mp}
+                maxPt={calcMP(npc)}
+                color1={"#16aad6"}
+                color2={"#0e8aae"}
+              />
+            </Grid>
           </Grid>
           <Grid item xs={5}>
             <ButtonGroup variant="outlined" size="small" color="info">
@@ -495,7 +490,7 @@ const generateButtonLabel = (attack) => {
               </Typography>
             </Grid>
           </Grid>
-          
+
           <Grid item container xs={12}>
             <Grid item xs>
               <FormControlLabel
@@ -615,80 +610,94 @@ const generateButtonLabel = (attack) => {
               </Grid>
             ))}
             {npc.weaponattacks?.map((wattack, index) => (
-            <Grid item key={index}>
-              <Button
-                variant="outlined"
-                onClick={() => rollAttackDice(wattack, "weapon")}
-                sx={{
-                  width: "100%",
-                  textAlign: "center",
-                  padding: "8px",
-                  margin: "4px 0",
-                }}
-              >
-                {generateButtonLabel(wattack)}
-              </Button>
-            </Grid>
-          ))}
-          {npc.spells
-          ?.filter((spell) => spell.type === 'offensive')
-          .map((spell, index) => (
-            <Grid item key={index}>
-              <Button
-                variant="contained"
-                color="info"
-                onClick={() => rollAttackDice(spell, "spell")}
-                sx={{
-                  width: "100%",
-                  textAlign: "center",
-                  padding: "8px",
-                  margin: "4px 0",
-                }}
-              >
-                {generateButtonLabel(spell)}
-              </Button>
-            </Grid>
-          ))}
+              <Grid item key={index}>
+                <Button
+                  variant="outlined"
+                  onClick={() => rollAttackDice(wattack, "weapon")}
+                  sx={{
+                    width: "100%",
+                    textAlign: "center",
+                    padding: "8px",
+                    margin: "4px 0",
+                  }}
+                >
+                  {generateButtonLabel(wattack)}
+                </Button>
+              </Grid>
+            ))}
+            {npc.spells
+              ?.filter((spell) => spell.type === "offensive")
+              .map((spell, index) => (
+                <Grid item key={index}>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    onClick={() => rollAttackDice(spell, "spell")}
+                    sx={{
+                      width: "100%",
+                      textAlign: "center",
+                      padding: "8px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    {generateButtonLabel(spell)}
+                  </Button>
+                </Grid>
+              ))}
             <Grid item container pb={1} mt={2} border={1} borderRadius={1}>
               <Grid item xs={4} pt={1} pl={1}>
                 <Typography variant="h6">{t("Dice Results")}</Typography>
-                <Typography variant="body1">{t("Die 1")}: <b>{diceResults.attribute1}</b></Typography>
-                <Typography variant="body1">{t("Die 2")}: <b>{diceResults.attribute2}</b></Typography>
+                <Typography variant="body1">
+                  {t("Die 1")}: <b>{diceResults.attribute1}</b>
+                </Typography>
+                <Typography variant="body1">
+                  {t("Die 2")}: <b>{diceResults.attribute2}</b>
+                </Typography>
               </Grid>
               <Grid item xs={4} pt={1} pl={1}>
                 <Typography variant="h6">{t("Hit Throw Result")}</Typography>
-                <Typography variant="body1">{t("Hit Score")}: <b>{hitThrowResult.totalHitScore}</b></Typography>
+                <Typography variant="body1">
+                  {t("Hit Score")}: <b>{hitThrowResult.totalHitScore}</b>
+                </Typography>
               </Grid>
               <Grid item xs={4} pt={1} pl={1}>
                 <Typography variant="h6">{t("Damage Result")}</Typography>
-                <Typography variant="body1">{t("Damage")}: <b>{damageResult.damage}</b></Typography>
+                <Typography variant="body1">
+                  {t("Damage")}: <b>{damageResult.damage}</b>
+                </Typography>
               </Grid>
               {isCriticalSuccess && (
                 <Grid item xs={12}>
-                  <Typography variant="h4" color="green" 
+                  <Typography
+                    variant="h4"
+                    color="green"
                     sx={{
                       width: "100%",
-                      textAlign: "center"
-                    }}>
+                      textAlign: "center",
+                    }}
+                  >
                     {t("Critical Success!")}
                   </Typography>
                 </Grid>
               )}
               {isCriticalFailure && (
                 <Grid item xs={12}>
-                  <Typography variant="h4" color="error"
+                  <Typography
+                    variant="h4"
+                    color="error"
                     sx={{
                       width: "100%",
-                      textAlign: "center"
-                    }}>
+                      textAlign: "center",
+                    }}
+                  >
                     {t("Critical Failure!")}
                   </Typography>
                 </Grid>
               )}
             </Grid>
-            {/*********************/}     
+            {/*********************/}
             {/*<Button variant="outlined" onClick={() => console.log(npc)}>LOG NPC OBJECT</Button>*/}
-          </Grid> 
+          </Grid>
         </Grid>
       </Grid>
       <Divider flexItem sx={{ p: 1, my: 2, width: "100%" }} />

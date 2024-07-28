@@ -1,21 +1,7 @@
 import { Link as RouterLink } from "react-router-dom";
-
-import {
-  query,
-  orderBy,
-  collection,
-  where,
-  doc,
-  addDoc,
-  deleteDoc,
-} from "firebase/firestore";
-import { useAuthState } from "react-firebase-hooks/auth";
-
 import {
   IconButton,
-  Skeleton,
   Tooltip,
-  Typography,
   Grid,
   Snackbar,
   CircularProgress,
@@ -30,7 +16,6 @@ import {
 } from "@mui/material";
 import Layout from "../../components/Layout";
 import NpcPretty from "../../components/npc/Pretty";
-// import NpcUgly from "../../components/npc/Ugly";
 import {
   ContentCopy,
   Delete,
@@ -39,12 +24,11 @@ import {
   Edit,
   HistoryEdu,
 } from "@mui/icons-material";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useEffect, useRef, useState } from "react";
 import useDownloadImage from "../../hooks/useDownloadImage";
 import Export from "../../components/Export";
 import { useTranslate } from "../../translation/translate";
-import { addNpc, getNpcs, deleteNpc, updateNpc } from "../../utility/db";
+import { addNpc, getNpcs, deleteNpc } from "../../utility/db";
 
 export default function NpcGallery() {
   return (
@@ -54,7 +38,7 @@ export default function NpcGallery() {
   );
 }
 
-function Personal({ user }) {
+function Personal() {
   const { t } = useTranslate();
   const [name, setName] = useState("");
   const [rank, setRank] = useState("");
@@ -67,6 +51,8 @@ function Personal({ user }) {
   const [personalList, setPersonalList] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchNpcs();
@@ -116,38 +102,56 @@ function Personal({ user }) {
     fetchNpcs();
   };
 
-  /*const copyNpc = function (npc) {
-    return async function () {
-      const data = Object.assign({}, npc);
-      data.uid = user.uid;
-      delete data.id;
-      data.published = false;
-
-      //const ref = collection(firestore, "npc-personal");
-      const ref = null;
-      if (window.confirm("Are you sure you want to copy?")) {
-        addDoc(ref, data)
-          .then(function (docRef) {
-            window.location.href = `/npc-gallery/${docRef.id}`;
-          })
-          .catch(function (error) {
-            console.error("Error adding document: ", error);
-          });
-      }
-    };
-  };*/
-
   const handleCopyNpc = (npc) => async () => {
-    const data = { ...npc, uid: "local" };
-    delete data.id;
-    await addNpc(data);
-    fetchNpcs();
+    try {
+      const data = { ...npc, uid: "local" };
+      delete data.id;
+
+      // Add the NPC to the database
+      await addNpc(data);
+
+      // After adding, fetch the updated list and find the newly added NPC
+      const npcs = await getNpcs();
+      const newNpc = npcs[npcs.length - 1]; // Assuming the new NPC is the last one in the list
+
+      if (newNpc) {
+        window.location.href = `/#/npc-gallery/${newNpc.id}`;
+      }
+    } catch (error) {
+      console.error("Error copying NPC:", error);
+    }
   };
 
   const handleDeleteNpc = (npc) => async () => {
     if (window.confirm("Are you sure you want to delete?")) {
       await deleteNpc(npc.id);
       fetchNpcs();
+    }
+  };
+
+  const getNextId = async () => {
+    const npcs = await getNpcs();
+    if (npcs.length === 0) return 1;
+    const maxId = Math.max(...npcs.map((npc) => npc.id));
+    return maxId + 1;
+  };
+
+  const handleFileUpload = async (jsonData) => {
+    try {
+      if (
+        jsonData &&
+        typeof jsonData === "object" &&
+        !Array.isArray(jsonData)
+      ) {
+        jsonData.id = await getNextId();
+        jsonData.uid = "local";
+        await addNpc(jsonData);
+        fetchNpcs();
+      } else {
+        console.error("Invalid JSON format. Must be a single NPC object.");
+      }
+    } catch (error) {
+      console.error("Error uploading NPC from JSON:", error);
     }
   };
 
@@ -452,6 +456,36 @@ function Personal({ user }) {
               >
                 {t("Create NPC")}
               </Button>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => fileInputRef.current.click()}
+              >
+                {t("Add NPC from JSON")}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      try {
+                        const result = JSON.parse(reader.result);
+                        handleFileUpload(result);
+                      } catch (err) {
+                        console.error("Error parsing JSON:", err);
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                }}
+                style={{ display: "none" }}
+              />
             </Grid>
           </Grid>
         </Paper>
