@@ -20,8 +20,8 @@ import { collection, orderBy, query, where } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { User } from "firebase/auth";
 
-import { SignIn } from "../../components/auth";
-import { auth, firestore } from "../../firebase";
+//import { SignIn } from "../../components/auth";
+//import { auth, firestore } from "../../firebase";
 import Layout from "../../components/Layout";
 import NpcPretty from "../../components/npc/Pretty";
 import PointBar from "../../components/PointBar";
@@ -34,7 +34,9 @@ import { useTranslate } from "../../translation/translate";
 
 export default function Combat() {
   const { t } = useTranslate();
-  const [user, loading, error] = useAuthState(auth);
+  const user = null;
+  const loading = true;
+  const error = null;
   console.debug("user, loading, error", user, loading, error);
 
   return (
@@ -47,7 +49,6 @@ export default function Combat() {
           <Typography sx={{ my: 1 }}>
             {t("You must be logged in to use this feature")}
           </Typography>
-          <SignIn />
         </>
       )}
 
@@ -62,16 +63,19 @@ interface AuthCombatProps {
 
 function AuthCombat({ user }: AuthCombatProps) {
   const { t } = useTranslate();
-  const personalRef = collection(firestore, "npc-personal");
-  const personalQuery = query(
+  //const personalRef = collection(firestore, "npc-personal");
+  /*const personalQuery = query(
     personalRef,
     where("uid", "==", user.uid),
     orderBy("lvl", "asc"),
     orderBy("name", "asc")
-  );
-  const [personalList, loading] = useCollectionData(personalQuery, {
+  );*/
+  /*const [personalList, loading] = useCollectionData(personalQuery, {
     idField: "id",
-  });
+  });*/
+
+  const personalList = [{name: "", label: ""}];
+  const loading = true;
 
   const [npcs, setNpcs] = useState<TypeNpc[]>([]);
 

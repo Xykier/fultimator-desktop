@@ -10,8 +10,6 @@ import {
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import React, { useState } from "react";
-import { firestore } from "../../firebase";
-import { auth } from "../../firebase";
 import HelpFeedbackDialog from "../../components/appbar/HelpFeedbackDialog";
 
 import {
@@ -34,7 +32,6 @@ import {
   MenuItem,
 } from "@mui/material";
 import Layout from "../../components/Layout";
-import { SignIn } from "../../components/auth";
 // import NpcUgly from "../../components/npc/Ugly";
 import {
   ContentCopy,
@@ -54,7 +51,9 @@ import SearchIcon from "@mui/icons-material/Search";
 
 export default function PlayerGallery() {
   const { t } = useTranslate();
-  const [user, loading] = useAuthState(auth);
+  //const [user, loading] = useAuthState(auth);
+  const user = null;
+  const loading = false;
 
   return (
     <Layout>
@@ -65,7 +64,7 @@ export default function PlayerGallery() {
           <Typography sx={{ my: 1 }}>
             {t("You have to be logged in to access this feature")}
           </Typography>
-          <SignIn />
+          
         </>
       )}
 
@@ -86,11 +85,13 @@ function Personal({ user }) {
   const canAccessTest =
     testUsers.includes(user.uid) || moderators.includes(user.uid);
 
-  const personalRef = collection(firestore, "player-personal");
+  /*const personalRef = collection(firestore, "player-personal");
   const personalQuery = query(personalRef, where("uid", "==", user.uid));
   const [personalList, err] = useCollectionData(personalQuery, {
     idField: "id",
-  });
+  });*/
+  const personalList = [];
+  const err = null;
 
   const handleDialogClose = () => {
     setIsDialogOpen(false);
@@ -276,7 +277,8 @@ function Personal({ user }) {
         magicPrec: 0,
       },
     };
-    const ref = collection(firestore, "player-personal");
+    //const ref = collection(firestore, "player-personal");
+    const ref = null;
 
     try {
       const res = await addDoc(ref, data);
@@ -293,7 +295,8 @@ function Personal({ user }) {
       delete data.id;
       data.published = false;
 
-      const ref = collection(firestore, "player-personal");
+      //const ref = collection(firestore, "player-personal");
+      const ref = null;
       if (window.confirm("Are you sure you want to copy?")) {
         addDoc(ref, data)
           .then(function (docRef) {
@@ -309,7 +312,8 @@ function Personal({ user }) {
   const deletePlayer = function (player) {
     return function () {
       if (window.confirm("Are you sure you want to delete?")) {
-        deleteDoc(doc(firestore, "player-personal", player.id));
+        //deleteDoc(doc(firestore, "player-personal", player.id));
+        return;
       }
     };
   };

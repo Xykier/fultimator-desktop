@@ -11,9 +11,6 @@ import {
 } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-import { firestore } from "../../firebase";
-import { auth } from "../../firebase";
-
 import {
   IconButton,
   Skeleton,
@@ -32,7 +29,6 @@ import {
   Autocomplete,
 } from "@mui/material";
 import Layout from "../../components/Layout";
-import { SignIn } from "../../components/auth";
 import NpcPretty from "../../components/npc/Pretty";
 // import NpcUgly from "../../components/npc/Ugly";
 import {
@@ -48,25 +44,12 @@ import { useEffect, useRef, useState } from "react";
 import useDownloadImage from "../../hooks/useDownloadImage";
 import Export from "../../components/Export";
 import { useTranslate } from "../../translation/translate";
+import { addNpc, getNpcs, deleteNpc, updateNpc } from "../../utility/db";
 
 export default function NpcGallery() {
-  const { t } = useTranslate();
-  const [user, loading] = useAuthState(auth);
-
   return (
     <Layout>
-      {loading && <Skeleton />}
-
-      {!loading && !user && (
-        <>
-          <Typography sx={{ my: 1 }}>
-            {t("You have to be logged in to access this feature")}
-          </Typography>
-          <SignIn />
-        </>
-      )}
-
-      {user && <Personal user={user} />}
+      <Personal />
     </Layout>
   );
 }
@@ -81,17 +64,19 @@ function Personal({ user }) {
   const [tagSearch] = useState("");
   const [tagSort, setTagSort] = useState(null);
   const [collapse, setCollapse] = useState(false);
+  const [personalList, setPersonalList] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const personalRef = collection(firestore, "npc-personal");
-  const personalQuery = query(
-    personalRef,
-    where("uid", "==", user.uid),
-    orderBy("lvl", "asc"),
-    orderBy("name", "asc")
-  );
-  const [personalList, loading, err] = useCollectionData(personalQuery, {
-    idField: "id",
-  });
+  useEffect(() => {
+    fetchNpcs();
+  }, []);
+
+  const fetchNpcs = async () => {
+    const npcs = await getNpcs();
+    setPersonalList(npcs);
+    setLoading(false);
+  };
 
   const tagCounts = personalList
     ? personalList.reduce((accumulator, npc) => {
@@ -111,13 +96,13 @@ function Personal({ user }) {
     (a, b) => tagCounts[b] - tagCounts[a]
   );
 
-  const addNpc = async function () {
+  const handleAddNpc = async () => {
     const data = {
       name: "-",
       species: "Beast",
       lvl: 5,
       imgurl: "",
-      uid: user.uid,
+      uid: "local", // Placeholder for user ID, can be changed as needed
       attributes: {
         dexterity: 8,
         might: 8,
@@ -127,24 +112,19 @@ function Personal({ user }) {
       attacks: [],
       affinities: {},
     };
-    const ref = collection(firestore, "npc-personal");
-
-    try {
-      const res = await addDoc(ref, data);
-      console.debug(res);
-    } catch (e) {
-      console.debug(e);
-    }
+    await addNpc(data);
+    fetchNpcs();
   };
 
-  const copyNpc = function (npc) {
+  /*const copyNpc = function (npc) {
     return async function () {
       const data = Object.assign({}, npc);
       data.uid = user.uid;
       delete data.id;
       data.published = false;
 
-      const ref = collection(firestore, "npc-personal");
+      //const ref = collection(firestore, "npc-personal");
+      const ref = null;
       if (window.confirm("Are you sure you want to copy?")) {
         addDoc(ref, data)
           .then(function (docRef) {
@@ -155,17 +135,21 @@ function Personal({ user }) {
           });
       }
     };
+  };*/
+
+  const handleCopyNpc = (npc) => async () => {
+    const data = { ...npc, uid: "local" };
+    delete data.id;
+    await addNpc(data);
+    fetchNpcs();
   };
 
-  const deleteNpc = function (npc) {
-    return function () {
-      if (window.confirm("Are you sure you want to delete?")) {
-        deleteDoc(doc(firestore, "npc-personal", npc.id));
-      }
-    };
+  const handleDeleteNpc = (npc) => async () => {
+    if (window.confirm("Are you sure you want to delete?")) {
+      await deleteNpc(npc.id);
+      fetchNpcs();
+    }
   };
-
-  const [open, setOpen] = useState(false);
 
   const handleClose = () => {
     setOpen(false);
@@ -179,6 +163,8 @@ function Personal({ user }) {
   };
 
   const isMobile = window.innerWidth < 900;
+
+  const err = null;
 
   if (err?.code === "resource-exhausted") {
     return (
@@ -347,7 +333,9 @@ function Personal({ user }) {
                   <MenuItem value={"champion5"}>{t("Champion(5)")}</MenuItem>
                   <MenuItem value={"champion6"}>{t("Champion(6)")}</MenuItem>
                   <MenuItem value={"companion"}>{t("Companion")}</MenuItem>
-                  <MenuItem value={"groupvehicle"}>{t("Group Vehicle")}</MenuItem>
+                  <MenuItem value={"groupvehicle"}>
+                    {t("Group Vehicle")}
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -460,7 +448,7 @@ function Personal({ user }) {
                 fullWidth
                 variant="contained"
                 startIcon={<HistoryEdu />}
-                onClick={addNpc}
+                onClick={handleAddNpc}
               >
                 {t("Create NPC")}
               </Button>
@@ -476,8 +464,8 @@ function Personal({ user }) {
               <Npc
                 key={i}
                 npc={npc}
-                copyNpc={copyNpc}
-                deleteNpc={deleteNpc}
+                copyNpc={handleCopyNpc}
+                deleteNpc={handleDeleteNpc}
                 shareNpc={shareNpc}
                 collapseGet={collapse}
               />
@@ -495,8 +483,8 @@ function Personal({ user }) {
                 <Npc
                   key={i}
                   npc={npc}
-                  copyNpc={copyNpc}
-                  deleteNpc={deleteNpc}
+                  copyNpc={handleCopyNpc}
+                  deleteNpc={handleDeleteNpc}
                   shareNpc={shareNpc}
                   collapseGet={collapse}
                 />
@@ -510,8 +498,8 @@ function Personal({ user }) {
                 <Npc
                   key={i}
                   npc={npc}
-                  copyNpc={copyNpc}
-                  deleteNpc={deleteNpc}
+                  copyNpc={handleCopyNpc}
+                  deleteNpc={handleDeleteNpc}
                   shareNpc={shareNpc}
                   collapseGet={collapse}
                 />

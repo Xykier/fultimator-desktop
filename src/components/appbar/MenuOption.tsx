@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Menu,
   MenuItem,
@@ -7,28 +7,25 @@ import {
   ListItemText,
   Divider,
   Snackbar,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
   Help,
-  Logout,
-  Login,
-  SwitchAccount,
+  FileDownload,
+  FileUpload,
 } from "@mui/icons-material";
 import { useTranslate } from "../../translation/translate";
-
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut as firebaseSignOut,
-  UserCredential,
-} from "firebase/auth";
-import { auth, googleAuthProvider } from "../../firebase";
-import { signInWithPopup } from "@firebase/auth";
 
 import ThemeSwitcher, { ThemeSwitcherProps } from "./ThemeSwitcher";
 import LanguageMenu from "./LanguageMenu";
 import HelpFeedbackDialog from "./HelpFeedbackDialog"; // Import the dialog component
+import { exportDatabase, importDatabase } from "../../utility/dbExportImport"; // Import the new functions
 
 interface MenuOptionProps extends ThemeSwitcherProps {}
 
@@ -40,27 +37,11 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
+  const [isImportWarningOpen, setIsImportWarningOpen] = useState(false); // State for import warning dialog
   const [userEmail, setUserEmail] = useState("");
   const [userUUID, setUserUUID] = useState("");
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsAuthenticated(true);
-        setUserEmail(user.email || "");
-        setUserUUID(user.uid);
-      } else {
-        setIsAuthenticated(false);
-        setUserEmail("");
-        setUserUUID("");
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -83,66 +64,38 @@ const MenuOption: React.FC<MenuOptionProps> = ({
     setIsSnackbarOpen(false);
   };
 
-  const handleAuthentication = async (
-    authAction: () => Promise<UserCredential | void>,
-    successMessage: string,
-    errorMessagePrefix: string
-  ): Promise<void> => {
-    try {
-      const userCredential = await authAction();
-      if (userCredential) {
-        setMessage(successMessage);
-        setIsSnackbarOpen(true);
-        setIsAuthenticated(true);
-      } else {
-        setMessage(t("Signed Out", true));
-        setIsSnackbarOpen(true);
-        setIsAuthenticated(false);
+  const handleExport = async () => {
+    await exportDatabase();
+    setMessage(t("Database exported successfully!"));
+    setIsSnackbarOpen(true);
+  };
+
+  const handleImportClick = () => {
+    setIsImportWarningOpen(true);
+  };
+
+  const handleImportConfirm = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+    setIsImportWarningOpen(false);
+  };
+
+  const handleImportCancel = () => {
+    setIsImportWarningOpen(false);
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      try {
+        await importDatabase(event.target.files[0]);
+        setMessage(t("Database imported successfully!"));
+      } catch (error) {
+        console.error(error);
+        setMessage(t("Failed to import database."));
       }
-    } catch (error) {
-      const errorMessage =
-        (error as { message?: string })?.message ||
-        t("An error occurred", true);
-      setMessage(`${errorMessagePrefix}: ${errorMessage}`);
       setIsSnackbarOpen(true);
     }
-  };
-
-  const handleSignOut = async () => {
-    await handleAuthentication(
-      () => firebaseSignOut(auth),
-      t("Signed Out", true),
-      t("Sign-out Error", true)
-    );
-  };
-
-  const signInWithGoogle = async () => {
-    googleAuthProvider.setCustomParameters({
-      prompt: "select_account",
-    });
-
-    await handleAuthentication(
-      () => signInWithPopup(auth, googleAuthProvider),
-      t("Signed In", true),
-      t("Sign-in Error", true)
-    );
-  };
-
-  const switchGoogleAccount = async () => {
-    googleAuthProvider.setCustomParameters({
-      prompt: "select_account",
-    });
-
-    await handleAuthentication(
-      () => signInWithPopup(auth, googleAuthProvider),
-      t("Switched Google Account", true),
-      t("Account Switch Error", true)
-    );
-  };
-
-  const handleSwitchAccount = async () => {
-    handleClose();
-    await switchGoogleAccount();
   };
 
   return (
@@ -163,28 +116,27 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           horizontal: "right",
         }}
       >
-        <MenuItem onClick={handleSwitchAccount}>
+        <MenuItem onClick={handleExport}>
           <ListItemIcon>
-            <SwitchAccount />
+            <FileDownload />
           </ListItemIcon>
-          <ListItemText primary={t("Switch Account")} />
+          <ListItemText primary={t("Export Database")} />
         </MenuItem>
 
-        {isAuthenticated ? (
-          <MenuItem onClick={handleSignOut}>
-            <ListItemIcon>
-              <Logout />
-            </ListItemIcon>
-            <ListItemText primary={t("Sign Out")} />
-          </MenuItem>
-        ) : (
-          <MenuItem onClick={signInWithGoogle}>
-            <ListItemIcon>
-              <Login />
-            </ListItemIcon>
-            <ListItemText primary={t("Sign In")} />
-          </MenuItem>
-        )}
+        <MenuItem onClick={handleImportClick}>
+          <ListItemIcon>
+            <FileUpload />
+          </ListItemIcon>
+          <ListItemText primary={t("Import Database")} />
+        </MenuItem>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json"
+          style={{ display: 'none' }}
+          onChange={handleImport}
+        />
+
         <Divider key="sign-in-out-divider" />
 
         <ThemeSwitcher
@@ -223,6 +175,26 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         onSuccess={() => console.log("Successfully submitted feedback")}
         webhookUrl={process.env.REACT_APP_DISCORD_FEEDBACK_WEBHOOK_URL || ""}
       /> {/* Render the dialog */}
+
+      <Dialog
+        open={isImportWarningOpen}
+        onClose={handleImportCancel}
+      >
+        <DialogTitle>{t("Import Database")}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t("Importing a database will delete all current saved NPCs. Do you want to continue?")}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleImportCancel} color="primary">
+            {t("Cancel")}
+          </Button>
+          <Button onClick={handleImportConfirm} color="primary" autoFocus>
+            {t("Yes, Import")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

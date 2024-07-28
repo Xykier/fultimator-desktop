@@ -23,8 +23,8 @@ import EditHeroicSkillModal from "./EditHeroicSkillModal";
 import SelectCompanionModal from "./SelectCompanionModal";
 import spellClasses from "../../../libs/spellClasses";
 import Export from "../../Export";
-import { firestore } from "../../../firebase";
-import { query, orderBy, collection, where, getDocs } from "firebase/firestore";
+//import { firestore } from "../../../firebase";
+//import { query, orderBy, collection, where, getDocs } from "firebase/firestore";
 
 export default function PlayerClassCard({
   allClasses,
@@ -309,7 +309,7 @@ export default function PlayerClassCard({
     faithfulCompanionSkillsInClassItem.length === 1;
 
   // Only query Firestore when the necessary conditions are met
-  useEffect(() => {
+  /*useEffect(() => {
     if (
       !hasMultipleFaithfulCompanionSkills &&
       hasSingleFaithfulCompanionSkill
@@ -343,7 +343,7 @@ export default function PlayerClassCard({
     hasMultipleFaithfulCompanionSkills,
     hasSingleFaithfulCompanionSkill,
     userId,
-  ]);
+  ]);*/
 
   return (
     <Paper

@@ -27,11 +27,6 @@ function Home() {
       hoverKey: "adversary_designer",
     },
     {
-      image: adversary_compedium,
-      link: "/npc-compedium",
-      hoverKey: "adversary_compedium",
-    },
-    {
       image: combat_simulator,
       link: "/combat",
       hoverKey: "combat_simulator",
@@ -40,11 +35,6 @@ function Home() {
       image: items_rituals_projects,
       link: "/generate",
       hoverKey: "items_rituals_projects",
-    },
-    {
-      image: dice_roller,
-      link: "/roller",
-      hoverKey: "dice_roller",
     },
   ];
 
@@ -145,7 +135,6 @@ function Home() {
         </Typography>
         <Typography variant="body1" sx={{ mt: 0 }}>
           Fultimator is an independent production by
-
           <Link
             href="https://github.com/fultimator"
             target="_blank"
@@ -169,7 +158,7 @@ function Home() {
           <br />
           Fabula Ultima is a roleplaying game created by Emanuele Galletto and published by Need Games.<br />
           Fabula Ultima is © Need Games and Rooster Games.
-        </Typography>;
+        </Typography>
       </Box>
     </Layout>
   );

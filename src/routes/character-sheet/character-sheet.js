@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslate } from "../../translation/translate";
-import { firestore } from "../../firebase";
+//import { firestore } from "../../firebase";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc } from "@firebase/firestore";
 import { Grid, Button, Typography, Stack } from "@mui/material";
@@ -25,8 +25,9 @@ import PlayerCardShort from "../../components/player/playerSheet/PlayerCardShort
 export default function CharacterSheet() {
   const { t } = useTranslate();
   let params = useParams();
-  const ref = doc(firestore, "player-personal", params.playerId);
-  const [player] = useDocumentData(ref, { idField: "id" });
+  //const ref = doc(firestore, "player-personal", params.playerId);
+  //const [player] = useDocumentData(ref, { idField: "id" });
+  const player = null;
 
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [fullCharacterSheet, setFullCharacterSheet] = useState(true);

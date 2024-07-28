@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { firestore, auth } from "../../firebase";
 import { useDocumentData } from "react-firebase-hooks/firestore";
 import { doc, setDoc } from "@firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -80,10 +79,10 @@ export default function PlayerEdit() {
   const isSmallScreen = useMediaQuery("(max-width: 899px)");
 
   let params = useParams(); // URL parameters hook
-  const ref = doc(firestore, "player-personal", params.playerId); // Firestore document reference
-
-  const [user] = useAuthState(auth); // Authentication state hook
-
+  //const ref = doc(firestore, "player-personal", params.playerId); // Firestore document reference
+  const ref = null;
+  //const [user] = useAuthState(auth); // Authentication state hook
+  const user = null;
   let canAccessTest = false;
 
   if (user && (testUsers.includes(user.uid) || moderators.includes(user.uid))) {
