@@ -102,14 +102,24 @@
       }
     ],
     "mac": {
-      "target": "dmg"
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        "nsis",
+        "zip"
+      ],
       "icon": "public/icons/app.ico"
     },
     "linux": {
-      "target": "AppImage",
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
       "icon": "public/icons/app.png"
     }
   }
