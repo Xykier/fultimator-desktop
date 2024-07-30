@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import { doc, setDoc, collection, addDoc } from "@firebase/firestore";
-import { useAuthState } from "react-firebase-hooks/auth";
 import {
   Grid,
   Divider,
@@ -13,18 +10,15 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
-  Alert,
 } from "@mui/material";
 import {
   Download,
   Save,
   Share,
   ArrowUpward,
-  ContentCopy,
 } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import NpcPretty from "../../components/npc/Pretty";
-// import NpcUgly from "../../components/npc/Ugly";
 import EditBasics from "../../components/npc/EditBasics";
 import ExplainSkills from "../../components/npc/ExplainSkills";
 import EditAttacks from "../../components/npc/EditAttacks";
@@ -37,17 +31,14 @@ import EditSpells from "../../components/npc/EditSpells";
 import EditActions from "../../components/npc/EditActions";
 import EditNotes from "../../components/npc/EditNotes";
 import EditRareGear from "../../components/npc/EditRareGear";
-import EditPublish from "../../components/npc/EditPublish";
 import Probs from "../probs/probs";
 import useDownloadImage from "../../hooks/useDownloadImage";
 import Export from "../../components/Export";
 import { useTranslate } from "../../translation/translate";
 import CustomHeader from "../../components/common/CustomHeader";
 import TagList from "../../components/TagList";
-import { moderators } from "../../libs/userGroups";
-import deepEqual from "deep-equal";
 import { NpcProvider } from "../../components/npc/NpcContext";
-import { addNpc, getNpcs, deleteNpc, updateNpc } from "../../utility/db";
+import { getNpcs, updateNpc } from "../../utility/db";
 
 export default function NpcEdit() {
   const { t } = useTranslate(); // Translation hook
@@ -60,21 +51,6 @@ export default function NpcEdit() {
   const npcId = parseInt(params.npcId, 10);
   const [showScrollTop, setShowScrollTop] = useState(true); // State for scroll-to-top button visibility
 
-  const [checkedRules, setCheckedRules] = useState(false);
-  const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
-
-  const handleCheckboxChange = (event) => {
-    setCheckedRules(event.target.checked);
-  };
-
-  const handleDialogOpen = (event) => {
-    event.preventDefault();
-    setRulesDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setRulesDialogOpen(false);
-  };
 
   // Scroll-to-top handler
   const handleMoveToTop = () => {

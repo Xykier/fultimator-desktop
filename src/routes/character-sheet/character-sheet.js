@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useTranslate } from "../../translation/translate";
-//import { firestore } from "../../firebase";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import { doc } from "@firebase/firestore";
 import { Grid, Button, Typography, Stack } from "@mui/material";
 import html2canvas from "html2canvas";
 import PlayerCard from "../../components/player/playerSheet/PlayerCard";
@@ -21,42 +18,55 @@ import powered_by_fu from "../powered_by_fu.png";
 import Layout from "../../components/Layout";
 import { Download } from "@mui/icons-material";
 import PlayerCardShort from "../../components/player/playerSheet/PlayerCardShort";
+import { getPc } from "../../utility/db";
 
 export default function CharacterSheet() {
   const { t } = useTranslate();
-  let params = useParams();
-  //const ref = doc(firestore, "player-personal", params.playerId);
-  //const [player] = useDocumentData(ref, { idField: "id" });
-  const player = null;
-
+  const { playerId } = useParams();
+  
+  const [player, setPlayer] = useState(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [fullCharacterSheet, setFullCharacterSheet] = useState(true);
 
   useEffect(() => {
-    // Ensure all images are loaded before setting imagesLoaded to true
-    const images = document.querySelectorAll("img");
-    const promises = [];
-
-    images.forEach((image) => {
-      if (!image.complete) {
-        promises.push(
-          new Promise((resolve) => {
-            image.onload = resolve;
-          })
-        );
+    const fetchPlayer = async () => {
+      try {
+        const playerData = await getPc(parseInt(playerId, 10)); // Ensure playerId is a number
+        setPlayer(playerData);
+      } catch (error) {
+        console.error("Error fetching player data:", error);
       }
-    });
-
-    Promise.all(promises).then(() => {
-      setImagesLoaded(true);
-    });
-
-    // Clean up
-    return () => {
-      images.forEach((image) => {
-        image.onload = null;
-      });
     };
+
+    fetchPlayer();
+  }, [playerId]);
+
+  useEffect(() => {
+    if (player) {
+      const images = document.querySelectorAll("img");
+      const promises = [];
+
+      images.forEach((image) => {
+        if (!image.complete) {
+          promises.push(
+            new Promise((resolve) => {
+              image.onload = resolve;
+            })
+          );
+        }
+      });
+
+      Promise.all(promises).then(() => {
+        setImagesLoaded(true);
+      });
+
+      // Clean up
+      return () => {
+        images.forEach((image) => {
+          image.onload = null;
+        });
+      };
+    }
   }, [player]);
 
   const takeScreenshot = async () => {
@@ -85,7 +95,6 @@ export default function CharacterSheet() {
 
       // Restore original size and transformations
       element.style.width = originalStyle.width;
-      element.style.height = originalStyle.height;
 
       // Create a link to download the image
       const link = document.createElement("a");
@@ -98,7 +107,7 @@ export default function CharacterSheet() {
   };
 
   if (!player) {
-    return null;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -187,13 +196,13 @@ export default function CharacterSheet() {
           </Grid>
         </Grid>
       ) : (
-        <Grid container sx={{ padding: 1 }} justifyContent={"center"} id="character-sheet-short" >
-          <Grid container item xs={12} >
-              <PlayerCardShort
-                player={player}
-                isCharacterSheet={true}
-                characterImage={player.info.imgurl}
-              />
+        <Grid container sx={{ padding: 1 }} justifyContent={"center"} id="character-sheet-short">
+          <Grid container item xs={12}>
+            <PlayerCardShort
+              player={player}
+              isCharacterSheet={true}
+              characterImage={player.info.imgurl}
+            />
           </Grid>
         </Grid>
       )}

@@ -39,8 +39,6 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false); // State for import warning dialog
-  const [userEmail, setUserEmail] = useState("");
-  const [userUUID, setUserUUID] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -168,8 +166,8 @@ const MenuOption: React.FC<MenuOptionProps> = ({
       <HelpFeedbackDialog 
         open={isDialogOpen} 
         onClose={handleDialogClose} 
-        userEmail={userEmail}
-        userUUID={userUUID}
+        userEmail={"local"}
+        userUUID={"local"}
         title={"Help & Feedback"}
         placeholder={t("How can we help you today? Please leave a message in english!")}
         onSuccess={() => console.log("Successfully submitted feedback")}

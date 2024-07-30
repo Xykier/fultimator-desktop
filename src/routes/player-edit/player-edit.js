@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDocumentData } from "react-firebase-hooks/firestore";
-import { doc, setDoc } from "@firebase/firestore";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useTheme, useMediaQuery } from "@mui/material";
 import {
   Divider,
@@ -53,10 +50,8 @@ import PlayerCompanion from "../../components/player/playerSheet/PlayerCompanion
 import { useTranslate } from "../../translation/translate";
 import { styled } from "@mui/system";
 import { BugReport, Save, Info } from "@mui/icons-material";
-import { testUsers, moderators } from "../../libs/userGroups";
 import { usePrompt } from "../../hooks/usePrompt";
 import deepEqual from "deep-equal";
-import { useNavigate } from "react-router-dom";
 import PlayerRituals from "../../components/player/playerSheet/PlayerRituals";
 import PlayerQuirk from "../../components/player/playerSheet/PlayerQuirk";
 import HelpFeedbackDialog from "../../components/appbar/HelpFeedbackDialog";
@@ -71,6 +66,8 @@ import {
   NotesIcon2 as NotesIcon,
 } from "../../components/icons";
 
+import { getPcs, updatePc } from "../../utility/db";
+
 export default function PlayerEdit() {
   const { t } = useTranslate();
   const theme = useTheme();
@@ -79,21 +76,13 @@ export default function PlayerEdit() {
   const isSmallScreen = useMediaQuery("(max-width: 899px)");
 
   let params = useParams(); // URL parameters hook
-  //const ref = doc(firestore, "player-personal", params.playerId); // Firestore document reference
-  const ref = null;
-  //const [user] = useAuthState(auth); // Authentication state hook
-  const user = null;
-  let canAccessTest = false;
+  const pcId = parseInt(params.playerId, 10);
 
-  if (user && (testUsers.includes(user.uid) || moderators.includes(user.uid))) {
-    canAccessTest = true;
-  }
-
-  const [player] = useDocumentData(ref, { idField: "id" }); // Firestore document data hook
-
+  const [player, setPlayer] = useState(null); // Character State
+  const [playerTemp, setPlayerTemp] = useState(null); // Temporary Character State
   const [isUpdated, setIsUpdated] = useState(false); // State for unsaved changes
+
   const [showScrollTop] = useState(true);
-  const [playerTemp, setPlayerTemp] = useState(player);
   const [openTab, setOpenTab] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [battleMode, setBattleMode] = useState(false);
@@ -105,7 +94,24 @@ export default function PlayerEdit() {
 
   const [isBugDialogOpen, setIsBugDialogOpen] = useState(false);
 
-  const navigate = useNavigate();
+    // Effect to fetch PC data from IndexedDB
+    useEffect(() => {
+      const fetchPc = async () => {
+        const pcs = await getPcs();
+        const currentPc = pcs.find((pc) => pc.id === pcId);
+        setPlayer(currentPc);
+        setPlayerTemp(currentPc ? { ...currentPc } : null);
+      };
+  
+      fetchPc();
+    }, [pcId]);
+  
+    useEffect(() => {
+      if (player) {
+        setPlayerTemp({ ...player });
+        setIsUpdated(false);
+      }
+    }, [player]);
 
   // Effect to update temporary Player state and check for unsaved changes
   useEffect(() => {
@@ -146,7 +152,7 @@ export default function PlayerEdit() {
     isUpdated
   );
 
-  const isOwner = user?.uid === player?.uid;
+  const isOwner = true;
 
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
@@ -265,12 +271,12 @@ export default function PlayerEdit() {
     setIsBugDialogOpen(false);
   };
 
-  if (!playerTemp) {
-    return null;
-  }
+  const savePlayer = () => {
+    setIsUpdated(false);
+    updatePc(playerTemp);
+  };
 
-  if (!canAccessTest) {
-    navigate("/pc-gallery");
+  if (!playerTemp) {
     return null;
   }
 
@@ -526,10 +532,7 @@ export default function PlayerEdit() {
               <Fab
                 color="primary"
                 aria-label="save"
-                onClick={() => {
-                  setIsUpdated(false);
-                  setDoc(ref, playerTemp);
-                }}
+                onClick={savePlayer}
                 disabled={!isUpdated}
                 size="medium"
                 style={{
@@ -545,8 +548,8 @@ export default function PlayerEdit() {
       <HelpFeedbackDialog
         open={isBugDialogOpen}
         onClose={handleBugDialogClose}
-        userEmail={user.email}
-        userUUID={user.uid}
+        userEmail={"local"}
+        userUUID={"local"}
         title={"Report a Bug"}
         placeholder="Please describe the bug. Please leave a message in english!"
         onSuccess={null}

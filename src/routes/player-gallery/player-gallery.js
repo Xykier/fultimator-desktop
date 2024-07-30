@@ -1,20 +1,9 @@
 import { Link as RouterLink } from "react-router-dom";
-
-import {
-  query,
-  collection,
-  where,
-  doc,
-  addDoc,
-  deleteDoc,
-} from "firebase/firestore";
-import { useAuthState } from "react-firebase-hooks/auth";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import HelpFeedbackDialog from "../../components/appbar/HelpFeedbackDialog";
 
 import {
   IconButton,
-  Skeleton,
   Tooltip,
   Typography,
   Grid,
@@ -32,178 +21,64 @@ import {
   MenuItem,
 } from "@mui/material";
 import Layout from "../../components/Layout";
-// import NpcUgly from "../../components/npc/Ugly";
 import {
   ContentCopy,
   Delete,
-  Share,
   Edit,
   HistoryEdu,
   Badge,
   Star,
   BugReport,
 } from "@mui/icons-material";
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useTranslate } from "../../translation/translate";
 import PlayerCard from "../../components/player/playerSheet/PlayerCard";
-import { testUsers, moderators } from "../../libs/userGroups";
 import SearchIcon from "@mui/icons-material/Search";
 
-export default function PlayerGallery() {
-  const { t } = useTranslate();
-  //const [user, loading] = useAuthState(auth);
-  const user = null;
-  const loading = false;
+import { addPc, getPcs, deletePc } from "../../utility/db";
 
+export default function PlayerGallery() {
   return (
     <Layout>
-      {loading && <Skeleton />}
-
-      {!loading && !user && (
-        <>
-          <Typography sx={{ my: 1 }}>
-            {t("You have to be logged in to access this feature")}
-          </Typography>
-          
-        </>
-      )}
-
-      {user && <Personal user={user} />}
+      <Personal />
     </Layout>
   );
 }
 
-function Personal({ user }) {
+function Personal() {
   const { t } = useTranslate();
   const [name, setName] = useState("");
   const [direction, setDirection] = useState("ascending");
   const [open, setOpen] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBugDialogOpen, setIsBugDialogOpen] = useState(false);
-  const [hasApplied, setHasApplied] = useState(false);
+  const [pcs, setPcs] = useState([]);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const canAccessTest =
-    testUsers.includes(user.uid) || moderators.includes(user.uid);
+  useEffect(() => {
+    const fetchPcs = async () => {
+      try {
+        const pcsData = await getPcs();
+        setPcs(pcsData);
+      } catch (error) {
+        console.error("Failed to fetch PCs", error);
+      }
+    };
 
-  /*const personalRef = collection(firestore, "player-personal");
-  const personalQuery = query(personalRef, where("uid", "==", user.uid));
-  const [personalList, err] = useCollectionData(personalQuery, {
-    idField: "id",
-  });*/
-  const personalList = [];
-  const err = null;
+    fetchPcs();
+  }, []);
 
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-  };
-
-  const handleApplicationSuccess = () => {
-    setHasApplied(true);
-  };
-
-  if (!canAccessTest) {
-    return (
-      <>
-        <Paper
-          elevation={3}
-          sx={{ marginBottom: 5, padding: 4, textAlign: "center" }}
-        >
-          <Grid container direction="column" alignItems="center" spacing={3}>
-            <Grid item>
-              <Typography variant="h2" gutterBottom>
-                Join the Alpha Test!
-              </Typography>
-              <Typography variant="body1">
-                Be among the first to experience our Character Designer.
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography variant="body2" color="textSecondary">
-                Sign up now for exclusive early access.
-              </Typography>
-            </Grid>
-            {!hasApplied && (
-              <Grid item>
-                <Box mt={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    onClick={() => setIsDialogOpen(true)}
-                  >
-                    Apply for Test
-                  </Button>
-                </Box>
-              </Grid>
-            )}
-            {hasApplied && (
-              <Grid item>
-                <Box mt={2}>
-                  <Typography variant="h2">
-                    Thank you for applying. Please check out our Discord Server
-                    for news and updates.
-                  </Typography>
-                </Box>
-              </Grid>
-            )}
-            <Grid item>
-              <Box mt={2}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  sx={{
-                    backgroundColor: "#7289da",
-                    color: "#fff",
-                    ":hover": { backgroundColor: "#7289da" },
-                  }}
-                  href="https://discord.gg/9yYc6R93Cd"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Join our Discord
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Paper>
-        <HelpFeedbackDialog
-          open={isDialogOpen}
-          onClose={handleDialogClose}
-          userEmail={user.email}
-          userUUID={user.uid}
-          title={"Apply for Test"}
-          placeholder="We'd love to know your reasons for joining our alpha test. Please leave a message in english!"
-          onSuccess={handleApplicationSuccess}
-          webhookUrl={process.env.REACT_APP_DISCORD_APPLICATIONS_WEBHOOK_URL}
-        />
-      </>
-    );
-  }
-
-  if (err?.code === "resource-exhausted") {
-    return (
-      <Paper elevation={3} sx={{ marginBottom: 5, padding: 4 }}>
-        {t(
-          "Apologies, fultimator has reached its read quota at the moment, please try again tomorrow. (Around 12-24 hours)"
-        )}
-      </Paper>
-    );
-  }
-
-  const filteredList = personalList
-    ? personalList
+  const filteredList = pcs
+    ? pcs
         .filter((item) => {
-          // Filter based on name
           if (
             name !== "" &&
             !item.name.toLowerCase().includes(name.toLowerCase())
-          )
+          ) {
             return false;
-
+          }
           return true;
         })
         .sort((item1, item2) => {
-          // Sort based on selected sort and direction
           if (direction === "ascending") {
             return item1.name.localeCompare(item2.name);
           } else {
@@ -212,9 +87,9 @@ function Personal({ user }) {
         })
     : [];
 
-  const addPlayer = async function () {
+  const addPlayer = async () => {
     const data = {
-      uid: user.uid,
+      uid: "local",
       name: "-",
       lvl: 5,
       info: {
@@ -277,63 +152,67 @@ function Personal({ user }) {
         magicPrec: 0,
       },
     };
-    //const ref = collection(firestore, "player-personal");
-    const ref = null;
 
     try {
-      const res = await addDoc(ref, data);
-      console.debug(res);
-    } catch (e) {
-      console.debug(e);
+      await addPc(data);
+      // Fetch updated list
+      const pcsData = await getPcs();
+      setPcs(pcsData);
+    } catch (error) {
+      console.error("Error adding player:", error);
+      setSnackbarMessage("Failed to add player");
+      setSnackbarOpen(true);
     }
   };
 
-  const copyPlayer = function (player) {
-    return async function () {
-      const data = Object.assign({}, player);
-      data.uid = user.uid;
-      delete data.id;
-      data.published = false;
+  const copyPlayer = (player) => async () => {
+    const data = { ...player, uid: "local" };
+    delete data.id;
+    data.published = false;
 
-      //const ref = collection(firestore, "player-personal");
-      const ref = null;
-      if (window.confirm("Are you sure you want to copy?")) {
-        addDoc(ref, data)
-          .then(function (docRef) {
-            window.location.href = `/pc-gallery/${docRef.id}`;
-          })
-          .catch(function (error) {
-            console.error("Error adding document: ", error);
-          });
+    if (window.confirm("Are you sure you want to copy?")) {
+      try {
+        await addPc(data);
+        // Fetch updated list
+        const pcsData = await getPcs();
+        const newPc = pcsData[pcsData.length - 1];
+        if (newPc) {
+          window.location.href = `/#/pc-gallery/${newPc.id}`;
+        }
+      } catch (error) {
+        console.error("Error copying player:", error);
+        setSnackbarMessage("Failed to copy player");
+        setSnackbarOpen(true);
       }
-    };
+    }
   };
 
-  const deletePlayer = function (player) {
-    return function () {
-      if (window.confirm("Are you sure you want to delete?")) {
-        //deleteDoc(doc(firestore, "player-personal", player.id));
-        return;
+  const deletePlayer = (player) => async () => {
+    if (window.confirm("Are you sure you want to delete?")) {
+      try {
+        await deletePc(player.id);
+        // Fetch updated list
+        const pcsData = await getPcs();
+        setPcs(pcsData);
+      } catch (error) {
+        console.error("Error deleting player:", error);
+        setSnackbarMessage("Failed to delete player");
+        setSnackbarOpen(true);
       }
-    };
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  
   const handleBugDialogClose = () => {
-    setIsBugDialogOpen(false)
+    setIsBugDialogOpen(false);
   };
-
-  const sharePlayer = async (id) => {
-    const baseUrl = window.location.href.replace(/\/[^/]+$/, "");
-    const fullUrl = `${baseUrl}/pc-gallery/${id}`;
-    await navigator.clipboard.writeText(fullUrl);
-    setOpen(true);
-  };
-
 
   return (
     <>
@@ -493,11 +372,6 @@ function Personal({ user }) {
                   <Delete />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t("Share URL")}>
-                <IconButton onClick={() => sharePlayer(player.id)}>
-                  <Share />
-                </IconButton>
-              </Tooltip>
               <Tooltip title={t("Character Sheet")}>
                 <IconButton
                   component={RouterLink}
@@ -513,8 +387,8 @@ function Personal({ user }) {
           <Button
             variant="outlined"
             startIcon={<BugReport />}
-            sx={{ marginTop: "5rem"}}
-            onClick={( ) => setIsBugDialogOpen(true)}
+            sx={{ marginTop: "5rem" }}
+            onClick={() => setIsBugDialogOpen(true)}
           >
             {t("Report a Bug")}
           </Button>
@@ -522,15 +396,15 @@ function Personal({ user }) {
       </Grid>
       <Box sx={{ height: "10vh" }} />
       <HelpFeedbackDialog
-          open={isBugDialogOpen}
-          onClose={handleBugDialogClose}
-          userEmail={user.email}
-          userUUID={user.uid}
-          title={"Report a Bug"}
-          placeholder="Please describe the bug. Please leave a message in english!"
-          onSuccess={null}
-          webhookUrl={process.env.REACT_APP_DISCORD_REPORT_BUG_WEBHOOK_URL}
-        />
+        open={isBugDialogOpen}
+        onClose={handleBugDialogClose}
+        userEmail={"local"}
+        userUUID={"local"}
+        title={"Report a Bug"}
+        placeholder="Please describe the bug. Please leave a message in english!"
+        onSuccess={null}
+        webhookUrl={process.env.REACT_APP_DISCORD_REPORT_BUG_WEBHOOK_URL}
+      />
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={open}
@@ -538,6 +412,18 @@ function Personal({ user }) {
         onClose={handleClose}
         message={t("Copied to Clipboard!")}
       />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarMessage.includes("Failed") ? "error" : "success"}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

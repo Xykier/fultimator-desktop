@@ -23,8 +23,7 @@ import EditHeroicSkillModal from "./EditHeroicSkillModal";
 import SelectCompanionModal from "./SelectCompanionModal";
 import spellClasses from "../../../libs/spellClasses";
 import Export from "../../Export";
-//import { firestore } from "../../../firebase";
-//import { query, orderBy, collection, where, getDocs } from "firebase/firestore";
+import { getNpcs } from "../../../utility/db";
 
 export default function PlayerClassCard({
   allClasses,
@@ -41,7 +40,7 @@ export default function PlayerClassCard({
   isEditMode,
   editClassName,
   editHeroic,
-  userId,
+  isHomebrew
 }) {
   const { t } = useTranslate();
   const theme = useTheme();
@@ -308,27 +307,24 @@ export default function PlayerClassCard({
   const hasSingleFaithfulCompanionSkill =
     faithfulCompanionSkillsInClassItem.length === 1;
 
-  // Only query Firestore when the necessary conditions are met
-  /*useEffect(() => {
-    if (
-      !hasMultipleFaithfulCompanionSkills &&
-      hasSingleFaithfulCompanionSkill
-    ) {
+  // Only query when the necessary conditions are met
+  useEffect(() => {
+    if (!hasMultipleFaithfulCompanionSkills && hasSingleFaithfulCompanionSkill) {
       console.log("Fetching companions...");
       setLoading(true);
       setErr(null);
-      const companionsQuery = query(
-        collection(firestore, `npc-personal`),
-        where("uid", "==", userId),
-        where("rank", "==", "companion"),
-        orderBy("lvl", "asc"),
-        orderBy("name", "asc")
-      );
 
       const fetchCompanions = async () => {
         try {
-          const querySnapshot = await getDocs(companionsQuery);
-          const companions = querySnapshot.docs.map((doc) => doc.data());
+          const npcs = await getNpcs();
+          const companions = npcs.filter(
+            (npc) => npc.rank === 'companion'
+          );
+          companions.sort((a, b) => {
+            // Sort by level and name
+            if (a.lvl !== b.lvl) return a.lvl - b.lvl;
+            return a.name.localeCompare(b.name);
+          });
           setCompanionList(companions);
         } catch (error) {
           setErr(error.message);
@@ -342,8 +338,7 @@ export default function PlayerClassCard({
   }, [
     hasMultipleFaithfulCompanionSkills,
     hasSingleFaithfulCompanionSkill,
-    userId,
-  ]);*/
+  ]);
 
   return (
     <Paper
@@ -491,7 +486,7 @@ export default function PlayerClassCard({
           classItem.skills.map((skill, index) => (
             <Grid item xs={12} key={index}>
               <CustomHeader3
-                headerText={skill.skillName}
+                headerText={isHomebrew ? skill.skillName : t(skill.skillName)}
                 currentLvl={skill.currentLvl}
                 maxLvl={skill.maxLvl}
                 onIncrease={() => onIncreaseSkillLevel(index)}
@@ -509,7 +504,7 @@ export default function PlayerClassCard({
                   fontSize: "1rem",
                 }}
               >
-                {skill.description}
+                {isHomebrew ? skill.description : t(skill.description)}
               </StyledMarkdown>
             </Grid>
           ))}
