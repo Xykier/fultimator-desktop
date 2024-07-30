@@ -50,7 +50,6 @@ import PlayerCompanion from "../../components/player/playerSheet/PlayerCompanion
 import { useTranslate } from "../../translation/translate";
 import { styled } from "@mui/system";
 import { BugReport, Save, Info } from "@mui/icons-material";
-import { usePrompt } from "../../hooks/usePrompt";
 import deepEqual from "deep-equal";
 import PlayerRituals from "../../components/player/playerSheet/PlayerRituals";
 import PlayerQuirk from "../../components/player/playerSheet/PlayerQuirk";
@@ -94,24 +93,24 @@ export default function PlayerEdit() {
 
   const [isBugDialogOpen, setIsBugDialogOpen] = useState(false);
 
-    // Effect to fetch PC data from IndexedDB
-    useEffect(() => {
-      const fetchPc = async () => {
-        const pcs = await getPcs();
-        const currentPc = pcs.find((pc) => pc.id === pcId);
-        setPlayer(currentPc);
-        setPlayerTemp(currentPc ? { ...currentPc } : null);
-      };
-  
-      fetchPc();
-    }, [pcId]);
-  
-    useEffect(() => {
-      if (player) {
-        setPlayerTemp({ ...player });
-        setIsUpdated(false);
-      }
-    }, [player]);
+  // Effect to fetch PC data from IndexedDB
+  useEffect(() => {
+    const fetchPc = async () => {
+      const pcs = await getPcs();
+      const currentPc = pcs.find((pc) => pc.id === pcId);
+      setPlayer(currentPc);
+      setPlayerTemp(currentPc ? { ...currentPc } : null);
+    };
+
+    fetchPc();
+  }, [pcId]);
+
+  useEffect(() => {
+    if (player) {
+      setPlayerTemp({ ...player });
+      setIsUpdated(false);
+    }
+  }, [player]);
 
   // Effect to update temporary Player state and check for unsaved changes
   useEffect(() => {
@@ -146,11 +145,6 @@ export default function PlayerEdit() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isUpdated]);
-
-  usePrompt(
-    "You have unsaved changes. Are you sure you want to leave?",
-    isUpdated
-  );
 
   const isOwner = true;
 
@@ -281,7 +275,7 @@ export default function PlayerEdit() {
   }
 
   return (
-    <Layout>
+    <Layout unsavedChanges={isUpdated}>
       <Tabs value={openTab} onChange={handleTabChange}>
         {isSmallScreen ? (
           <>
@@ -389,7 +383,11 @@ export default function PlayerEdit() {
                 setClockState={setRitualClockState}
               />
               <PlayerCompanion player={playerTemp} isEditMode={isOwner} />
-              <PlayerNotes player={playerTemp} setPlayer={setPlayerTemp} isEditMode={isOwner} />
+              <PlayerNotes
+                player={playerTemp}
+                setPlayer={setPlayerTemp}
+                isEditMode={isOwner}
+              />
             </>
           )}
           {isOwner && battleMode ? (

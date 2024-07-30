@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Menu,
   MenuItem,
@@ -19,6 +19,7 @@ import {
   Help,
   FileDownload,
   FileUpload,
+  Info,
 } from "@mui/icons-material";
 import { useTranslate } from "../../translation/translate";
 
@@ -40,6 +41,19 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false); // State for import warning dialog
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [version, setVersion] = useState<string>("");
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+      if (window.electron) {
+        const appVersion = await window.electron.getVersion();
+        setVersion(appVersion);
+      }
+    };
+    
+    fetchVersion();
+  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -88,11 +102,13 @@ const MenuOption: React.FC<MenuOptionProps> = ({
       try {
         await importDatabase(event.target.files[0]);
         setMessage(t("Database imported successfully!"));
+        setIsSnackbarOpen(true);
+        window.location.reload(); // Reload the page to reflect changes
       } catch (error) {
         console.error(error);
         setMessage(t("Failed to import database."));
+        setIsSnackbarOpen(true);
       }
-      setIsSnackbarOpen(true);
     }
   };
 
@@ -131,7 +147,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           ref={fileInputRef}
           type="file"
           accept="application/json"
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
           onChange={handleImport}
         />
 
@@ -147,14 +163,26 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         <LanguageMenu key="language-menu" />
         <Divider key="language-menu-divider" />
 
-        <MenuItem onClick={handleDialogOpen}> {/* Open the dialog */}
+        <MenuItem onClick={handleDialogOpen}>
+          {" "}
+          {/* Open the dialog */}
           <ListItemIcon>
             <Help />
           </ListItemIcon>
           <ListItemText primary={t("Help & Feedback")} />
         </MenuItem>
+        {window.electron && (
+          <>
+            <Divider key="help-feedback-divider" />
+            <MenuItem>
+              <ListItemIcon>
+                <Info />
+              </ListItemIcon>
+              <ListItemText primary={t("Version") + ": " + version} />
+            </MenuItem>
+          </>
+        )}
       </Menu>
-
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         open={isSnackbarOpen}
@@ -162,26 +190,26 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         onClose={handleSnackbarClose}
         message={message}
       />
-
-      <HelpFeedbackDialog 
-        open={isDialogOpen} 
-        onClose={handleDialogClose} 
+      <HelpFeedbackDialog
+        open={isDialogOpen}
+        onClose={handleDialogClose}
         userEmail={"local"}
         userUUID={"local"}
         title={"Help & Feedback"}
-        placeholder={t("How can we help you today? Please leave a message in english!")}
+        placeholder={t(
+          "How can we help you today? Please leave a message in english!"
+        )}
         onSuccess={() => console.log("Successfully submitted feedback")}
         webhookUrl={process.env.REACT_APP_DISCORD_FEEDBACK_WEBHOOK_URL || ""}
-      /> {/* Render the dialog */}
-
-      <Dialog
-        open={isImportWarningOpen}
-        onClose={handleImportCancel}
-      >
+      />{" "}
+      {/* Render the dialog */}
+      <Dialog open={isImportWarningOpen} onClose={handleImportCancel}>
         <DialogTitle>{t("Import Database")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {t("Importing a database will delete all current saved NPCs. Do you want to continue?")}
+            {t(
+              "Importing a database will delete all current saved NPCs and PCs. Do you want to continue?"
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

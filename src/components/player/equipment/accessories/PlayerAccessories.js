@@ -83,9 +83,15 @@ export default function PlayerAccessories({
       updatedAcc[index].isEquipped = checked;
       onEquipAccessory(updatedAcc);
     } else {
-      alert(
-        t("You cannot equip this accessory as you have already equipped one.")
-      );
+      if (window.electron) {
+        window.electron.alert(
+          t("You cannot equip this accessory as you have already equipped one.")
+        );
+      } else {
+        alert(
+          "You cannot equip this accessory as you have already equipped one."
+        );
+      }
     }
   };
 

@@ -125,7 +125,14 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
             );
 
             if (hasTinkererAlchemy) {
-              alert("You already have a tinkerer-alchemy spell");
+              if (window.electron) {
+                window.electron.alert(
+                  "You already have a tinkerer-alchemy spell"
+                );
+              } else {
+                alert("You already have a tinkerer-alchemy spell");
+              }
+
               return cls;
             } else {
               // Add a new tinkerer-alchemy spell
@@ -149,7 +156,13 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
             );
 
             if (hasTinkererInfusion) {
-              alert("You already have a tinkerer-infusion spell");
+              if (window.electron) {
+                window.electron.alert(
+                  "You already have a tinkerer-infusion spell"
+                );
+              } else {
+                alert("You already have a tinkerer-infusion spell");
+              }
               return cls;
             } else {
               // Add a new tinkerer-infusion spell
@@ -167,7 +180,14 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
               };
             }
           } else {
-            alert(spell.toUpperCase() + " spell not implemented yet");
+            if (window.electron) {
+              window.electron.alert(
+                spell.toUpperCase() + " spell not implemented yet"
+              );
+            } else {
+              alert(spell.toUpperCase() + " spell not implemented yet");
+            }
+
             return cls;
           }
         }

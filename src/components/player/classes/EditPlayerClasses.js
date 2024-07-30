@@ -81,7 +81,14 @@ export default function EditPlayerClasses({
       );
 
       if (classExists) {
-        alert("This class type already exists for the character");
+        if (window.electron) {
+          window.electron.alert(
+            "This class type already exists for the character"
+          );
+        } else {
+          alert("This class type already exists for the character");
+        }
+
         fileInputRef.current.value = null;
         return;
       }
@@ -126,7 +133,14 @@ export default function EditPlayerClasses({
     );
 
     if (classExists) {
-      alert(t("This class type already exists for the character"));
+      if (window.electron) {
+        window.electron.alert(
+          t("This class type already exists for the character")
+        );
+      } else {
+        alert("This class type already exists for the character");
+      }
+
       return;
     }
 

@@ -73,12 +73,22 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
 
   const handleConfirm = () => {
     if (!clockName.trim()) {
-      alert(t("Clock name is required."));
+      if (window.electron) {
+        window.electron.alert(t("Clock name is required."));
+      } else {
+        alert(t("Clock name is required."));
+      }
+
       return;
     }
 
     if (clockSections < 2 || clockSections > 30) {
-      alert(t("Sections must be between 2 and 30."));
+      if (window.electron) {
+        window.electron.alert(t("Sections must be between 2 and 30."));
+      } else {
+        alert(t("Sections must be between 2 and 30."));
+      }
+
       return;
     }
 

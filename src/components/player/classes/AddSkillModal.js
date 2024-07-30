@@ -139,13 +139,21 @@ export default function AddSkillModal({
             <Typography>
               {t("Special Skill Effect")}
               <IconButton
-                onClick={() =>
-                  alert(
-                    t(
-                      "Skills from this list will automatically update the Character with the selected effect. Please select one if needed."
-                    )
-                  )
-                }
+                onClick={() => {
+                  if (window.electron) {
+                    window.electron.alert(
+                      t(
+                        "Skills from this list will automatically update the Character with the selected effect. Please select one if needed."
+                      )
+                    );
+                  } else {
+                    alert(
+                      t(
+                        "Skills from this list will automatically update the Character with the selected effect. Please select one if needed."
+                      )
+                    );
+                  }
+                }}
               >
                 <Info />
               </IconButton>

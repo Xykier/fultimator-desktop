@@ -132,7 +132,13 @@ export default function PlayerWeapons({
       updatedWeapons[index].isEquipped = checked;
       onEquipWeapon(updatedWeapons);
     } else {
-      alert(t("You cannot equip this weapon as no hands are free."));
+      if (window.electron) {
+        window.electron.alert(
+          t("You cannot equip this weapon as no hands are free.")
+        );
+      } else {
+        alert(t("You cannot equip this weapon as no hands are free."));
+      }
     }
   };
 

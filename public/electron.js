@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const url = require('url');
+const fs = require("fs");
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -14,7 +15,6 @@ function createWindow() {
     },
   });
 
-  // Load the index.html from the build directory
   mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, '..', 'build', 'index.html'),
@@ -23,8 +23,30 @@ function createWindow() {
     })
   );
 
-  // Open the DevTools for debugging
-  //mainWindow.webContents.openDevTools();
+  ipcMain.handle('dialog-confirm', async (event, message) => {
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      defaultId: 0,
+      message,
+    });
+    return result.response === 0; // Returns true for 'Yes', false for 'No'
+  });
+
+  ipcMain.handle('dialog-alert', async (event, message) => {
+    await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      buttons: ['OK'],
+      message,
+    });
+  });
+
+   // Handle version request
+   ipcMain.handle("get-version", async () => {
+    const packageJsonPath = path.join(__dirname, '..', 'package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    return packageJson.version;
+  });
 }
 
 app.whenReady().then(createWindow);

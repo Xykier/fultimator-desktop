@@ -1,7 +1,7 @@
+import React, { useState } from 'react';
 import { CardMedia, Typography, Link, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
-import React, { useState } from "react";
 import { useTranslate } from "../translation/translate";
 import adversary_designer from "./adversary_designer.webp";
 import combat_simulator from "./combat_simulator.webp";
@@ -12,6 +12,7 @@ function Home() {
   const navigate = useNavigate();
   const [hover, setHover] = useState("");
   const { t } = useTranslate();
+
 
   const mediaItems = [
     {

@@ -34,7 +34,8 @@ export default function PlayerShields({
   // Check if the player has a "Dual Shieldbearer" Skill in player.classes[].skills[].specialSkill
   const hasDualShieldBearer = player.classes.some((playerClass) =>
     playerClass.skills.some(
-      (skill) => skill.specialSkill === "Dual Shieldbearer" && skill.currentLvl === 1
+      (skill) =>
+        skill.specialSkill === "Dual Shieldbearer" && skill.currentLvl === 1
     )
   );
 
@@ -123,7 +124,13 @@ export default function PlayerShields({
       updatedShield[index].isEquipped = checked;
       onEquipShield(updatedShield);
     } else {
-      alert(t("You cannot equip this shield as no hands are free."));
+      if (window.electron) {
+        window.electron.alert(
+          t("You cannot equip this shield as no hands are free.")
+        );
+      } else {
+        alert(t("You cannot equip this shield as no hands are free."));
+      }
     }
   };
 

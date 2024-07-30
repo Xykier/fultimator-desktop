@@ -1,5 +1,5 @@
 import { Link as RouterLink } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import HelpFeedbackDialog from "../../components/appbar/HelpFeedbackDialog";
 
 import {
@@ -33,7 +33,7 @@ import {
 import { useTranslate } from "../../translation/translate";
 import PlayerCard from "../../components/player/playerSheet/PlayerCard";
 import SearchIcon from "@mui/icons-material/Search";
-
+import Export from "../../components/Export";
 import { addPc, getPcs, deletePc } from "../../utility/db";
 
 export default function PlayerGallery() {
@@ -54,18 +54,20 @@ function Personal() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchPcs = async () => {
-      try {
-        const pcsData = await getPcs();
-        setPcs(pcsData);
-      } catch (error) {
-        console.error("Failed to fetch PCs", error);
-      }
-    };
+  const fileInputRef = useRef(null);
 
+  useEffect(() => {
     fetchPcs();
   }, []);
+
+  const fetchPcs = async () => {
+    try {
+      const pcsData = await getPcs();
+      setPcs(pcsData);
+    } catch (error) {
+      console.error("Failed to fetch PCs", error);
+    }
+  };
 
   const filteredList = pcs
     ? pcs
@@ -162,6 +164,32 @@ function Personal() {
       console.error("Error adding player:", error);
       setSnackbarMessage("Failed to add player");
       setSnackbarOpen(true);
+    }
+  };
+
+  const getNextId = async () => {
+    const pcs = await getPcs();
+    if (pcs.length === 0) return 1;
+    const maxId = Math.max(...pcs.map((pc) => pc.id));
+    return maxId + 1;
+  };
+
+  const handleFileUpload = async (jsonData) => {
+    try {
+      if (
+        jsonData &&
+        typeof jsonData === "object" &&
+        !Array.isArray(jsonData)
+      ) {
+        jsonData.id = await getNextId();
+        jsonData.uid = "local";
+        await addPc(jsonData);
+        fetchPcs();
+      } else {
+        console.error("Invalid JSON format. Must be a single PC object.");
+      }
+    } catch (error) {
+      console.error("Error uploading PC from JSON:", error);
     }
   };
 
@@ -332,6 +360,36 @@ function Personal() {
                 {t("Create Player")}
               </Button>
             </Grid>
+            <Grid item xs={12} md={2}>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => fileInputRef.current.click()}
+              >
+                {t("Add PC from JSON")}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      try {
+                        const result = JSON.parse(reader.result);
+                        handleFileUpload(result);
+                      } catch (err) {
+                        console.error("Error parsing JSON:", err);
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                }}
+                style={{ display: "none" }}
+              />
+            </Grid>
           </Grid>
         </Paper>
       </div>
@@ -380,6 +438,7 @@ function Personal() {
                   <Badge />
                 </IconButton>
               </Tooltip>
+              <Export name={`${player.name}`} data={player} />
             </div>
           </Grid>
         ))}

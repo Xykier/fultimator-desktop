@@ -10,9 +10,10 @@ type ThemeValue = "Fabula" | "High" | "Techno" | "Natural" | "Midnight";
 interface LayoutProps {
   children: React.ReactNode;
   fullWidth?: boolean; // New prop for controlling Container width
+  unsavedChanges?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, fullWidth }) => {
+const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) => {
   const { setTheme } = useThemeContext();
   const [selectedTheme, setSelectedTheme] = useState<ThemeValue>(() => {
     return (localStorage.getItem("selectedTheme") as ThemeValue) || "Fabula";
@@ -31,8 +32,22 @@ const Layout: React.FC<LayoutProps> = ({ children, fullWidth }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleNavigation = () => {
-    navigate(-1);
+  const handleNavigation = async () => {
+    if (unsavedChanges) {
+      // Determine if Electron API is available
+      const confirm = window.electron 
+        ? window.electron.confirm 
+        : (message: string) => Promise.resolve(window.confirm(message));
+      
+      // Prompt for unsaved changes
+      const confirmation = await confirm("You have unsaved changes. Are you sure you want to leave?");
+      
+      if (!confirmation) {
+        return; // Do not navigate if the user cancels
+      }
+    }
+    
+    navigate(-1); // Proceed with navigation if the user confirms
   };
 
   const npcRoutes = ["/npc-gallery/:npcId"];

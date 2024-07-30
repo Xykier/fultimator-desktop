@@ -14,7 +14,6 @@ import {
 import {
   Download,
   Save,
-  Share,
   ArrowUpward,
 } from "@mui/icons-material";
 import Layout from "../../components/Layout";
@@ -39,6 +38,7 @@ import CustomHeader from "../../components/common/CustomHeader";
 import TagList from "../../components/TagList";
 import { NpcProvider } from "../../components/npc/NpcContext";
 import { getNpcs, updateNpc } from "../../utility/db";
+import deepEqual from "deep-equal";
 
 export default function NpcEdit() {
   const { t } = useTranslate(); // Translation hook
@@ -75,13 +75,19 @@ export default function NpcEdit() {
 
   useEffect(() => {
     if (npc) {
-      setNpcTemp({ ...npc });
+      // Perform a deep copy of the player object
+      const updatedNpcTemp = JSON.parse(JSON.stringify(npc));
+      setNpcTemp(updatedNpcTemp);
       setIsUpdated(false);
     }
   }, [npc]);
 
   useEffect(() => {
-    setIsUpdated(JSON.stringify(npcTemp) !== JSON.stringify(npc));
+    if (!deepEqual(npcTemp, npc)) {
+      setIsUpdated(true);
+    } else {
+      setIsUpdated(false);
+    }
   }, [npcTemp, npc]);
 
   // Handler for Ctrl+S to save NPC
@@ -145,11 +151,6 @@ export default function NpcEdit() {
     return null;
   }
 
-  // Function to share NPC link
-  const shareNpc = async (id) => {
-    await navigator.clipboard.writeText(window.location.href + "/");
-  };
-
   // Function to download NPC as image
   function DownloadImage() {
     setTimeout(downloadImage, 100);
@@ -163,7 +164,7 @@ export default function NpcEdit() {
 
   return (
     <NpcProvider npcData={npcTemp}>
-      <Layout>
+      <Layout unsavedChanges={isUpdated}>
         {/* Main Grid Container */}
         <Grid container spacing={2}>
           {/* NPC Pretty Display (Left-side Grid Item) */}
@@ -189,17 +190,8 @@ export default function NpcEdit() {
               </IconButton>
             </Tooltip>
 
-            {/* Share URL Button */}
-            <Tooltip title={t("Share URL")}>
-              <IconButton onClick={() => shareNpc(npc.id)}>
-                <Share />
-              </IconButton>
-            </Tooltip>
-
             {/* Export NPC Data */}
             <Export name={`${npc.name}`} data={npc} />
-
-            <Divider sx={{ my: 1 }} />
 
             {/* Tags Section */}
 
@@ -339,7 +331,6 @@ export default function NpcEdit() {
         </Paper>
         <Divider sx={{ my: 2, mb: 20 }} />
 
-        {/* <NpcUgly npc={npcTemp} /> */}
         {/* Save Button, shown if there are unsaved changes */}
         {isUpdated && (
           <Grid

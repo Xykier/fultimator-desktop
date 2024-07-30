@@ -94,7 +94,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
 
     // Check if player has enough IP
     if (player.stats.ip.current < ipCost && useIP) {
-      alert(t("You don't have enough IP to roll this alchemy!"));
+      window.electron.alert(t("You don't have enough IP to roll this alchemy!"));
       return;
     }
 
