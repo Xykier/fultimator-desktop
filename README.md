@@ -1,4 +1,4 @@
-![alt text](https://github.com/acinoroc/fultimator-desktop/blob/main/public/fultimatorlogo.webp)
+![alt text](https://github.com/fultimator/fultimator-desktop/blob/main/public/fultimatorlogo.webp)
 
 # Fultimator (Desktop Version)
 
@@ -7,17 +7,17 @@
 Fultimator is a desktop application designed to manage your Fabula Ultima games. 
 
 - **Fabula Ultima**: [Official Website](https://www.needgames.it/fabula-ultima-en/)
-- **Fultimator**: [Web Application](https://fabula-ultima-helper.web.app/)
+- **Fultimator**: [Web Application](https://fabula-ultima-helper.web.app/) - [Github](https://github.com/fultimator/fultimator)
 
 The application provides various tools to help you manage and enhance your Fabula Ultima gameplay experience.
 
 Fultimator is an independent production by the [Fultimator Dev Team](https://github.com/fultimator) and is not affiliated with Need Games or Rooster Games. The game rules in the system compendium are published under the [Fabula Ultima Third Party Tabletop License 1.0](https://need.games/wp-content/uploads/2024/06/Fabula-Ultima-Third-Party-Tabletop-License-1.0.pdf). To fully utilize this system, you will need the [Fabula Ultima Core Rulebook](https://www.needgames.it/fabula-ultima-en/).
 
-The source code of this project is licensed under the [MIT License](https://github.com/acinoroc/fultimator-desktop/blob/main/LICENSE.md). For more details, please refer to the [LICENSE](https://github.com/acinoroc/fultimator-desktop/blob/main/LICENSE.md) file in this repository.
+The source code of this project is licensed under the [MIT License](https://github.com/fultimator/fultimator-desktop/blob/main/LICENSE.md). For more details, please refer to the [LICENSE](https://github.com/fultimator/fultimator-desktop/blob/main/LICENSE.md) file in this repository.
 
 ## Download
 
-You can download the latest release of the Fultimator desktop application from our [Releases Page](https://github.com/acinoroc/fultimator-desktop/releases).
+You can download the latest release of the Fultimator desktop application from our [Releases Page](https://github.com/fultimator/fultimator-desktop/releases).
 
 
 ## Communication Channels
@@ -29,7 +29,7 @@ For questions or concerns, you can reach out through the following channels:
 
 ## Submitting Issues
 
-Please report issues on [GitHub](https://github.com/acinoroc/fultimator-desktop/issues). Ensure that you follow these guidelines:
+Please report issues on [GitHub](https://github.com/fultimator/fultimator-desktop/issues). Ensure that you follow these guidelines:
 
 ### Bugs
 
@@ -100,4 +100,4 @@ Major thanks to the following contributors:
 - [spyrella](https://github.com/spyrella) - For ongoing updates to the system and maintainence of the project.
 - [acinoroc](https://github.com/acinoroc) - Another active maintainer, lead developer of the Character Designer and main developer of the Desktop Version.
 
-Special thanks to the following contributors found here: [Contributors Link](https://github.com/acinoroc/fultimator-desktop/graphs/contributors)
+Special thanks to the following contributors found here: [Contributors Link](https://github.com/fultimator/fultimator-desktop/graphs/contributors)
