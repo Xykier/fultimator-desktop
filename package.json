@@ -1,6 +1,6 @@
 {
   "name": "fultimator",
-  "version": "0.1.1",
+  "version": "0.1.2-prerelease",
   "private": true,
   "main": "build/electron.js",
   "homepage": "./",
@@ -95,7 +95,6 @@
         "deb",
         "rpm",
         "snap",
-        "flatpak",
         "tar.gz"
       ],
       "icon": "public/icons/app.png",
