@@ -13,6 +13,8 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -26,7 +28,12 @@ import { useTranslate } from "../../translation/translate";
 import ThemeSwitcher, { ThemeSwitcherProps } from "./ThemeSwitcher";
 import LanguageMenu from "./LanguageMenu";
 import HelpFeedbackDialog from "./HelpFeedbackDialog"; // Import the dialog component
-import { exportDatabase, importDatabase } from "../../utility/dbExportImport"; // Import the new functions
+import {
+  exportDatabase,
+  importDatabase,
+  handleExport,
+  handleImport,
+} from "../../utility/dbExportImport"; // Import the new functions
 
 interface MenuOptionProps extends ThemeSwitcherProps {}
 
@@ -42,6 +49,9 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false); // State for import warning dialog
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [version, setVersion] = useState<string>("");
 
   useEffect(() => {
@@ -51,8 +61,21 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         setVersion(appVersion);
       }
     };
-    
+
     fetchVersion();
+  }, []);
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      try {
+        const authenticated = await window.electron.checkAuthentication();
+        setIsAuthenticated(authenticated);
+      } catch (error) {
+        console.error("Error checking authentication status", error);
+      }
+    };
+
+    checkAuthentication();
   }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -76,7 +99,68 @@ const MenuOption: React.FC<MenuOptionProps> = ({
     setIsSnackbarOpen(false);
   };
 
-  const handleExport = async () => {
+  const handleGoogleAuth = async () => {
+    setIsLoading(true);
+    try {
+      await window.electron.authenticateGoogle();
+      setIsAuthenticated(true);
+      setMessage("Authenticated with Google successfully!");
+    } catch (error) {
+      setMessage("Failed to authenticate with Google.");
+    } finally {
+      setIsLoading(false);
+      setIsSnackbarOpen(true);
+    }
+  };
+
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await window.electron.logoutGoogle();
+      setIsAuthenticated(false);
+      setMessage("Logged out successfully!");
+    } catch (error) {
+      setMessage("Failed to log out.");
+    } finally {
+      setIsLoading(false);
+      setIsSnackbarOpen(true);
+    }
+  };
+
+  const handleGoogleExport = async () => {
+    setIsLoading(true);
+    try {
+      await handleExport();
+      setMessage("Database exported and uploaded successfully!");
+    } catch (error) {
+      setMessage("Failed to export and upload database.");
+    } finally {
+      setIsLoading(false);
+      setIsSnackbarOpen(true);
+    }
+  };
+
+  const handleGoogleImport = async () => {
+    setIsLoading(true);
+    try {
+      const files = await window.electron.listFiles();
+
+      if (files.length > 0) {
+        const fileId = files[0].id;
+        await handleImport(fileId);
+        setMessage("Database downloaded and imported successfully!");
+      } else {
+        setMessage("No files found in Google Drive.");
+      }
+    } catch (error) {
+      setMessage("Failed to import database.");
+    } finally {
+      setIsLoading(false);
+      setIsSnackbarOpen(true);
+    }
+  };
+
+  const handleLocalExport = async () => {
     await exportDatabase();
     setMessage(t("Database exported successfully!"));
     setIsSnackbarOpen(true);
@@ -97,7 +181,9 @@ const MenuOption: React.FC<MenuOptionProps> = ({
     setIsImportWarningOpen(false);
   };
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLocalImport = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files && event.target.files[0]) {
       try {
         await importDatabase(event.target.files[0]);
@@ -130,7 +216,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           horizontal: "right",
         }}
       >
-        <MenuItem onClick={handleExport}>
+        <MenuItem onClick={handleLocalExport}>
           <ListItemIcon>
             <FileDownload />
           </ListItemIcon>
@@ -148,8 +234,38 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           type="file"
           accept="application/json"
           style={{ display: "none" }}
-          onChange={handleImport}
+          onChange={handleLocalImport}
         />
+
+        {isAuthenticated ? (
+          <>
+            <MenuItem onClick={handleGoogleExport}>
+              <ListItemIcon>
+                <FileDownload />
+              </ListItemIcon>
+              <ListItemText primary={t("Export to Google Drive")} />
+            </MenuItem>
+            <MenuItem onClick={handleGoogleImport}>
+              <ListItemIcon>
+                <FileUpload />
+              </ListItemIcon>
+              <ListItemText primary={t("Import from Google Drive")} />
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <Help />
+              </ListItemIcon>
+              <ListItemText primary={t("Logout")} />
+            </MenuItem>
+          </>
+        ) : (
+          <MenuItem onClick={handleGoogleAuth}>
+            <ListItemIcon>
+              <Help />
+            </ListItemIcon>
+            <ListItemText primary={t("Authenticate with Google")} />
+          </MenuItem>
+        )}
 
         <Divider key="sign-in-out-divider" />
 

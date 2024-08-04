@@ -20,6 +20,7 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import DesktopMacIcon from "@mui/icons-material/DesktopMac";
 import DiscordIcon from "../components/svgs/discord.svg"; // Import your SVG
 import CopyrightIcon from "@mui/icons-material/Copyright";
+import LoginExample from "./LoginExample";
 
 function Home() {
   const navigate = useNavigate();
@@ -60,6 +61,7 @@ function Home() {
           margin: "1em",
         }}
       >
+        <LoginExample />
         {mediaItems.map((item, index) => (
           <CardMedia
             key={index}

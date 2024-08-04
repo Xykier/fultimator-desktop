@@ -26,3 +26,5 @@ Instructions.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+/src/utility/credentials.json
