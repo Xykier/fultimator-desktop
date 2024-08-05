@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AppBar from "./appbar/AppBar";
 import CompactAppBar from "./appbar/CompactAppBar";
 import { useThemeContext } from "../ThemeContext";
+import { globalConfirm } from "../utility/globalConfirm";
 
 type ThemeValue = "Fabula" | "High" | "Techno" | "Natural" | "Midnight";
 
@@ -34,14 +35,9 @@ const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) 
 
   const handleNavigation = async () => {
     if (unsavedChanges) {
-      // Determine if Electron API is available
-      const confirm = window.electron 
-        ? window.electron.confirm 
-        : (message: string) => Promise.resolve(window.confirm(message));
-      
       // Prompt for unsaved changes
-      const confirmation = await confirm("You have unsaved changes. Are you sure you want to leave?");
-      
+      const confirmation = await globalConfirm("You have unsaved changes. Are you sure you want to leave?");
+  
       if (!confirmation) {
         return; // Do not navigate if the user cancels
       }

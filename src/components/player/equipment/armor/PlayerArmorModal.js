@@ -26,6 +26,7 @@ import ChangeModifiers from "../ChangeModifiers";
 import PrettyArmor from "./PrettyArmor";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
+import { globalConfirm } from "../../../../utility/globalConfirm";
 
 export default function PlayerArmorModal({
   open,
@@ -238,8 +239,8 @@ export default function PlayerArmorModal({
     onAddArmor(updatedArmor);
   };
 
-  const handleDelete = (armorIndex) => {
-    const confirmDelete = window.confirm(
+  const handleDelete = async (armorIndex) => {
+    const confirmDelete = await globalConfirm(
       "Are you sure you want to delete this armor?"
     );
     if (confirmDelete) {

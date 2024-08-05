@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { UNSAFE_NavigationContext as NavigationContext } from "react-router-dom";
-import { useContext } from "react";
+import { globalConfirm } from "../utility/globalConfirm";
 
 export const usePrompt = (message, when) => {
   const { navigator } = useContext(NavigationContext);
@@ -8,13 +8,21 @@ export const usePrompt = (message, when) => {
   useEffect(() => {
     if (!when) return;
 
-    const unblock = navigator.block((tx) => {
-      if (window.confirm(message)) {
+    // Function to handle navigation block
+    const handleNavigation = async (tx) => {
+      // Show confirmation dialog
+      const confirmed = await globalConfirm(message);
+      if (confirmed) {
+        // Unblock navigation and retry the transition if confirmed
         unblock();
         tx.retry();
       }
-    });
+    };
 
+    // Set up the navigation blocker
+    const unblock = navigator.block((tx) => handleNavigation(tx));
+
+    // Clean up the navigation blocker on component unmount
     return unblock;
   }, [navigator, message, when]);
 };

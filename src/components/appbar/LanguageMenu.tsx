@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import { languageOptions, useTranslate } from "../../translation/translate";
+import { globalConfirm } from "../../utility/globalConfirm";
 
 const LanguageMenu = () => {
   const { t } = useTranslate();
@@ -18,21 +19,23 @@ const LanguageMenu = () => {
   const selectedLanguage =
     useRef(localStorage.getItem("selectedLanguage")).current ?? "en";
 
-  const handleLanguageChange = async (languageCode: string) => {
-    await localStorage.setItem("selectedLanguage", languageCode);
 
+  const handleLanguageChange = async (languageCode) => {
+    // Save the selected language
+    await localStorage.setItem("selectedLanguage", languageCode);
+  
+    // Check if the current URL includes "npc-gallery"
     if (window.location.href.includes("npc-gallery")) {
-      if (
-        window.confirm(
-          t(
-            "Switching language will clear out all your unsaved progress, would you like to continue?"
-          )
-        )
-      ) {
-        window.location.reload();
-      } else return;
+      // Confirm with the user about unsaved progress
+      const userConfirmed = await globalConfirm(
+        "Switching language will clear out all your unsaved progress, would you like to continue?"
+      );
+  
+      if (userConfirmed) {
+        window.location.reload(); // Reload the page if confirmed
+      }
     } else {
-      window.location.reload();
+      window.location.reload(); // Simply reload if not in "npc-gallery"
     }
   };
 

@@ -35,6 +35,7 @@ import PlayerCard from "../../components/player/playerSheet/PlayerCard";
 import SearchIcon from "@mui/icons-material/Search";
 import Export from "../../components/Export";
 import { addPc, getPcs, deletePc } from "../../utility/db";
+import { globalConfirm } from "../../utility/globalConfirm";
 
 export default function PlayerGallery() {
   return (
@@ -198,10 +199,11 @@ function Personal() {
     delete data.id;
     data.published = false;
 
-    if (window.confirm("Are you sure you want to copy?")) {
+    const confirmed = await globalConfirm("Are you sure you want to copy?");
+
+    if (confirmed) {
       try {
         await addPc(data);
-        // Fetch updated list
         const pcsData = await getPcs();
         const newPc = pcsData[pcsData.length - 1];
         if (newPc) {
@@ -216,10 +218,11 @@ function Personal() {
   };
 
   const deletePlayer = (player) => async () => {
-    if (window.confirm("Are you sure you want to delete?")) {
+    const confirmed = await globalConfirm("Are you sure you want to delete?");
+
+    if (confirmed) {
       try {
         await deletePc(player.id);
-        // Fetch updated list
         const pcsData = await getPcs();
         setPcs(pcsData);
       } catch (error) {

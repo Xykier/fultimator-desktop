@@ -24,6 +24,7 @@ import SelectCompanionModal from "./SelectCompanionModal";
 import spellClasses from "../../../libs/spellClasses";
 import Export from "../../Export";
 import { getNpcs } from "../../../utility/db";
+import { globalConfirm } from "../../../utility/globalConfirm";
 
 export default function PlayerClassCard({
   allClasses,
@@ -340,6 +341,14 @@ export default function PlayerClassCard({
     hasSingleFaithfulCompanionSkill,
   ]);
 
+  const handleRemoveClick = async () => {
+    // Use globalConfirm for confirmation
+    const confirmed = await globalConfirm(t("Are you sure you want to remove the class?"));
+    if (confirmed) {
+      onRemove(); // Call the remove function if confirmed
+    }
+  };
+
   return (
     <Paper
       elevation={3}
@@ -615,14 +624,7 @@ export default function PlayerClassCard({
               <Button
                 variant="contained"
                 color="error"
-                onClick={() => {
-                  const confirmed = window.confirm(
-                    t("Are you sure you want to remove the class?")
-                  );
-                  if (confirmed) {
-                    onRemove();
-                  }
-                }}
+                onClick={handleRemoveClick}
                 sx={{ marginTop: "30px", fontSize: "0.9em" }}
               >
                 {t("Remove Class")}

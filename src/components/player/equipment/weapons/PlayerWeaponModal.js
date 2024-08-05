@@ -31,7 +31,7 @@ import ChangeModifiers from "../ChangeModifiers";
 import ChangeCategory from "./ChangeCategory";
 import { Close } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import { globalConfirm } from "../../../../utility/globalConfirm";
 import PrettyWeapon from "./PrettyWeapon";
 
 export default function PlayerWeaponModal({
@@ -313,8 +313,8 @@ export default function PlayerWeaponModal({
     onAddWeapon(updatedWeapon);
   };
 
-  const handleDelete = () => {
-    const confirmDelete = window.confirm(
+  const handleDelete = async () => {
+    const confirmDelete = await globalConfirm(
       "Are you sure you want to delete this weapon?"
     );
     if (confirmDelete) {

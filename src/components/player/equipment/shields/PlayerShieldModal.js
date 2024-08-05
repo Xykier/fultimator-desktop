@@ -26,6 +26,7 @@ import PrettyArmor from "../armor/PrettyArmor";
 import ChangeModifiers from "../ChangeModifiers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
+import { globalConfirm } from "../../../../utility/globalConfirm";
 
 export default function PlayerShieldModal({
   open,
@@ -219,8 +220,8 @@ export default function PlayerShieldModal({
     onAddShield(updatedShield);
   };
 
-  const handleDelete = (shieldIndex) => {
-    const confirmDelete = window.confirm(
+  const handleDelete = async (shieldIndex) => {
+    const confirmDelete = await globalConfirm(
       "Are you sure you want to delete this shield?"
     );
     if (confirmDelete) {

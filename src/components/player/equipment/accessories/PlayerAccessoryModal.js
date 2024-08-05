@@ -23,6 +23,7 @@ import ChangeModifiers from "../ChangeModifiers";
 import PrettyAccessory from "./PrettyAccessory";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
+import { globalConfirm } from "../../../../utility/globalConfirm";
 
 export default function PlayerAccessoryModal({
   open,
@@ -192,15 +193,15 @@ export default function PlayerAccessoryModal({
     onAddAccessory(updatedAccessory);
   };
 
-  const handleDelete = (accIndex) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this accessory?"
-    );
-    if (confirmDelete) {
+  const handleDelete = async (accIndex) => {
+    // Use globalConfirm for confirmation
+    const confirmed = await globalConfirm("Are you sure you want to delete this accessory?");
+    
+    if (confirmed) {
       if (accIndex !== null) {
-        onDeleteAccessory(accIndex);
+        onDeleteAccessory(accIndex); // Call the delete function if confirmed
       }
-      onClose();
+      onClose(); // Close the dialog or perform any necessary cleanup
     }
   };
 

@@ -19,6 +19,7 @@ import CustomTextarea from "../../common/CustomTextarea";
 import CustomHeader from "../../common/CustomHeader";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import { Add } from "@mui/icons-material";
+import { globalConfirm } from "../../../utility/globalConfirm";
 
 export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -46,8 +47,8 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
     });
   };
 
-  const removeItem = (key) => () => {
-    const confirmDelete = window.confirm(
+  const removeItem = (key) => async () => {
+    const confirmDelete = await globalConfirm(
       t("Are you sure you want to delete this note?")
     );
     if (confirmDelete) {

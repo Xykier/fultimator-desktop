@@ -29,6 +29,7 @@ import useDownloadImage from "../../hooks/useDownloadImage";
 import Export from "../../components/Export";
 import { useTranslate } from "../../translation/translate";
 import { addNpc, getNpcs, deleteNpc } from "../../utility/db";
+import { globalConfirm } from "../../utility/globalConfirm";
 
 export default function NpcGallery() {
   return (
@@ -121,9 +122,10 @@ function Personal() {
       console.error("Error copying NPC:", error);
     }
   };
-
   const handleDeleteNpc = (npc) => async () => {
-    if (window.confirm("Are you sure you want to delete?")) {
+    const confirmed = await globalConfirm("Are you sure you want to delete?");
+
+    if (confirmed) {
       await deleteNpc(npc.id);
       fetchNpcs();
     }
