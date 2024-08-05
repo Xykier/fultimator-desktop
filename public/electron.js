@@ -3,11 +3,12 @@ const { google } = require("googleapis");
 const path = require("path");
 const url = require("url");
 const fs = require("fs");
+require('dotenv').config();
 const { OAuth2 } = google.auth;
 
 const OAuth2Client = new OAuth2(
-  "GOOGLE_CLIENT_ID",
-  "GOOGLE_CLIENT_SECRET",
+  process.env.REACT_APP_CLIENT_ID,
+  process.env.REACT_APP_CLIENT_SECRET,
   "http://localhost" // Redirect URI
 );
 

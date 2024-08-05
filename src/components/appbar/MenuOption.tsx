@@ -13,8 +13,6 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
-  CircularProgress,
-  Alert,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -216,18 +214,18 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           horizontal: "right",
         }}
       >
-        <MenuItem onClick={handleLocalExport}>
+        <MenuItem onClick={handleLocalExport} disabled={isLoading}>
           <ListItemIcon>
             <FileDownload />
           </ListItemIcon>
-          <ListItemText primary={t("Export Database")} />
+          <ListItemText primary={t("Export Local Database")} />
         </MenuItem>
 
-        <MenuItem onClick={handleImportClick}>
+        <MenuItem onClick={handleImportClick} disabled={isLoading}>
           <ListItemIcon>
             <FileUpload />
           </ListItemIcon>
-          <ListItemText primary={t("Import Database")} />
+          <ListItemText primary={t("Import Local Database")} />
         </MenuItem>
         <input
           ref={fileInputRef}
@@ -236,30 +234,31 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           style={{ display: "none" }}
           onChange={handleLocalImport}
         />
+        <Divider />
 
         {isAuthenticated ? (
           <>
-            <MenuItem onClick={handleGoogleExport}>
-              <ListItemIcon>
-                <FileDownload />
-              </ListItemIcon>
-              <ListItemText primary={t("Export to Google Drive")} />
-            </MenuItem>
-            <MenuItem onClick={handleGoogleImport}>
-              <ListItemIcon>
-                <FileUpload />
-              </ListItemIcon>
-              <ListItemText primary={t("Import from Google Drive")} />
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
+            <MenuItem onClick={handleLogout} disabled={isLoading}>
               <ListItemIcon>
                 <Help />
               </ListItemIcon>
               <ListItemText primary={t("Logout")} />
             </MenuItem>
+            <MenuItem onClick={handleGoogleExport} disabled={isLoading}>
+              <ListItemIcon>
+                <FileDownload />
+              </ListItemIcon>
+              <ListItemText primary={t("Export to Google Drive")} />
+            </MenuItem>
+            <MenuItem onClick={handleGoogleImport} disabled={isLoading}>
+              <ListItemIcon>
+                <FileUpload />
+              </ListItemIcon>
+              <ListItemText primary={t("Import from Google Drive")} />
+            </MenuItem>
           </>
         ) : (
-          <MenuItem onClick={handleGoogleAuth}>
+          <MenuItem onClick={handleGoogleAuth} disabled={isLoading}>
             <ListItemIcon>
               <Help />
             </ListItemIcon>
