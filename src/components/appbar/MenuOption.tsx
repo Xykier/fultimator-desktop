@@ -20,6 +20,10 @@ import {
   FileDownload,
   FileUpload,
   Info,
+  Login,
+  Logout,
+  CloudUpload,
+  CloudDownload,
 } from "@mui/icons-material";
 import { useTranslate } from "../../translation/translate";
 
@@ -45,6 +49,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false); // State for dialog visibility
   const [isImportWarningOpen, setIsImportWarningOpen] = useState(false); // State for import warning dialog
+  const [importType, setImportType] = useState<"local" | "google" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -138,11 +143,59 @@ const MenuOption: React.FC<MenuOptionProps> = ({
     }
   };
 
-  const handleGoogleImport = async () => {
+  const handleLocalExport = async () => {
+    await exportDatabase();
+    setMessage(t("Database exported successfully!"));
+    setIsSnackbarOpen(true);
+  };
+
+  const handleGoogleImport = () => {
+    setImportType("google"); // Set the import type to Google
+    setIsImportWarningOpen(true); // Open the warning dialog
+  };
+
+  const handleLocalImport = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event.target.files && event.target.files[0]) {
+      try {
+        await importDatabase(event.target.files[0]);
+        setMessage(t("Database imported successfully!"));
+        setIsSnackbarOpen(true);
+      } catch (error) {
+        console.error(error);
+        setMessage(t("Failed to import database."));
+        setIsSnackbarOpen(true);
+      }
+    }
+  };
+
+  const handleImportClick = () => {
+    setImportType("local"); // Set the import type to Local
+    setIsImportWarningOpen(true); // Open the warning dialog
+  };
+
+  const handleImportConfirm = async () => {
+    if (importType === "google") {
+      setIsImportWarningOpen(false);
+      // Start Google import process
+      await handleGoogleImportProcess();
+    } else if (importType === "local") {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+      setIsImportWarningOpen(false);
+    }
+  };
+
+  const handleImportCancel = () => {
+    setIsImportWarningOpen(false);
+  };
+
+  const handleGoogleImportProcess = async () => {
     setIsLoading(true);
     try {
       const files = await window.electron.listFiles();
-
       if (files.length > 0) {
         const fileId = files[0].id;
         await handleImport(fileId);
@@ -155,44 +208,6 @@ const MenuOption: React.FC<MenuOptionProps> = ({
     } finally {
       setIsLoading(false);
       setIsSnackbarOpen(true);
-    }
-  };
-
-  const handleLocalExport = async () => {
-    await exportDatabase();
-    setMessage(t("Database exported successfully!"));
-    setIsSnackbarOpen(true);
-  };
-
-  const handleImportClick = () => {
-    setIsImportWarningOpen(true);
-  };
-
-  const handleImportConfirm = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-    setIsImportWarningOpen(false);
-  };
-
-  const handleImportCancel = () => {
-    setIsImportWarningOpen(false);
-  };
-
-  const handleLocalImport = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.files && event.target.files[0]) {
-      try {
-        await importDatabase(event.target.files[0]);
-        setMessage(t("Database imported successfully!"));
-        setIsSnackbarOpen(true);
-        window.location.reload(); // Reload the page to reflect changes
-      } catch (error) {
-        console.error(error);
-        setMessage(t("Failed to import database."));
-        setIsSnackbarOpen(true);
-      }
     }
   };
 
@@ -220,39 +235,30 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           </ListItemIcon>
           <ListItemText primary={t("Export Local Database")} />
         </MenuItem>
-
         <MenuItem onClick={handleImportClick} disabled={isLoading}>
           <ListItemIcon>
             <FileUpload />
           </ListItemIcon>
           <ListItemText primary={t("Import Local Database")} />
         </MenuItem>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/json"
-          style={{ display: "none" }}
-          onChange={handleLocalImport}
-        />
-        <Divider />
-
+        <Divider key="local-import-divider" />
         {isAuthenticated ? (
           <>
             <MenuItem onClick={handleLogout} disabled={isLoading}>
               <ListItemIcon>
-                <Help />
+                <Logout />
               </ListItemIcon>
-              <ListItemText primary={t("Logout")} />
+              <ListItemText primary={t("Sign Out")} />
             </MenuItem>
             <MenuItem onClick={handleGoogleExport} disabled={isLoading}>
               <ListItemIcon>
-                <FileDownload />
+                <CloudUpload />
               </ListItemIcon>
               <ListItemText primary={t("Export to Google Drive")} />
             </MenuItem>
             <MenuItem onClick={handleGoogleImport} disabled={isLoading}>
               <ListItemIcon>
-                <FileUpload />
+                <CloudDownload />
               </ListItemIcon>
               <ListItemText primary={t("Import from Google Drive")} />
             </MenuItem>
@@ -260,26 +266,21 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         ) : (
           <MenuItem onClick={handleGoogleAuth} disabled={isLoading}>
             <ListItemIcon>
-              <Help />
+              <Login />
             </ListItemIcon>
-            <ListItemText primary={t("Authenticate with Google")} />
+            <ListItemText primary={t("Sign In")} />
           </MenuItem>
         )}
-
-        <Divider key="sign-in-out-divider" />
-
+        <Divider key="google-auth-divider" />
         <ThemeSwitcher
           key="theme-switcher"
           selectedTheme={selectedTheme}
           onSelectTheme={onSelectTheme}
         />
         <Divider key="theme-switcher-divider" />
-
         <LanguageMenu key="language-menu" />
         <Divider key="language-menu-divider" />
-
         <MenuItem onClick={handleDialogOpen}>
-          {" "}
           {/* Open the dialog */}
           <ListItemIcon>
             <Help />
@@ -298,6 +299,13 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           </>
         )}
       </Menu>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json"
+        style={{ display: "none" }}
+        onChange={handleLocalImport}
+      />
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         open={isSnackbarOpen}
@@ -319,20 +327,24 @@ const MenuOption: React.FC<MenuOptionProps> = ({
       />{" "}
       {/* Render the dialog */}
       <Dialog open={isImportWarningOpen} onClose={handleImportCancel}>
-        <DialogTitle>{t("Import Database")}</DialogTitle>
+        <DialogTitle>{t("Confirm Import")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {t(
-              "Importing a database will delete all current saved NPCs and PCs. Do you want to continue?"
-            )}
+            {importType === "google"
+              ? t(
+                  "Are you sure you want to import from Google Drive? This action will replace the current database."
+                )
+              : t(
+                  "Are you sure you want to import the local database? This action will replace the current database."
+                )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleImportCancel} color="primary">
             {t("Cancel")}
           </Button>
-          <Button onClick={handleImportConfirm} color="primary" autoFocus>
-            {t("Yes, Import")}
+          <Button onClick={handleImportConfirm} color="primary">
+            {t("Confirm")}
           </Button>
         </DialogActions>
       </Dialog>
