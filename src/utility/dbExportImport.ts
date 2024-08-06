@@ -78,11 +78,16 @@ export const handleExport = async (): Promise<string> => {
     const buffer = new Uint8Array(arrayBuffer);
 
     // Save the file and get the file path
-    const filePath = await window.electron.saveFile('fultimatordb.json', buffer);
+    const filePath = await window.electron.saveFile(
+      "fultimatordb.json",
+      buffer
+    );
+
+    console.log("File saved at path:", filePath); // Log the file path
 
     // Upload the file using its path
     await window.electron.uploadToGoogleDrive(filePath);
-    
+
     return "Database successfully exported and uploaded to Google Drive!";
   } catch (error) {
     console.error("Failed to export and upload database", error);
@@ -92,18 +97,18 @@ export const handleExport = async (): Promise<string> => {
 
 export const handleImport = async (fileId: string): Promise<string> => {
   try {
-    console.log('Downloading file with ID:', fileId); // Log file ID
+    console.log("Downloading file with ID:", fileId); // Log file ID
     // Download the file from Google Drive and get the file path
     const filePath = await window.electron.downloadFromGoogleDrive(fileId);
-    console.log('File downloaded to path:', filePath);
+    console.log("File downloaded to path:", filePath);
 
     // Fetch the file using the file path
     const response = await fetch(filePath);
     if (!response.ok) {
-      throw new Error('Failed to fetch the downloaded file');
+      throw new Error("Failed to fetch the downloaded file");
     }
     const text = await response.text();
-    console.log('File content fetched successfully');
+    console.log("File content fetched successfully");
 
     // Create a File object from the file content
     const file = new File([text], "fultimatordb.json", {
@@ -112,7 +117,7 @@ export const handleImport = async (fileId: string): Promise<string> => {
 
     // Import the downloaded file into IndexedDB
     await importDatabase(file);
-    
+
     return "Database successfully imported from Google Drive!";
   } catch (error) {
     console.error("Failed to download and import database", error);

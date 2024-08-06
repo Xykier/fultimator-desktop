@@ -3,8 +3,8 @@ declare global {
     electron: {
       confirm(message: string): Promise<boolean>;
       alert(message: string): Promise<void>;
-      getVersion(): string;
-      authenticateGoogle(): Promise<void>;
+      getVersion(): Promise<string>;
+      authenticateGoogle(): Promise<string>; // Updated to return a string message
       uploadToGoogleDrive(filePath: string): Promise<void>;
       downloadFromGoogleDrive(fileId: string): Promise<string>;
       saveFile(fileName: string, buffer: Uint8Array): Promise<string>;

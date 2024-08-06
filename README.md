@@ -54,7 +54,7 @@ When submitting pull requests (PRs), ensure they target the appropriate branch.
 - Code editor (recommended: [Visual Studio Code](https://code.visualstudio.com/))
 - [Electron](https://www.electronjs.org/) (for building and running the desktop app)
 
-## Setup
+## Setup for Developement
 
 Clone the repository using:
 
@@ -67,29 +67,32 @@ Navigate to the project folder and install dependencies:
 ```bash
 npm ci
 ```
+
+Change the **.envInfo** and **public/configInfo.json** files into **.env** and **public/config.json** and add your personal keys.
+
 ## Building and Running
-To start the application locally, use:
+To start the application locally (browser mode), use:
 
 ```bash
 npm run start
 ```
 
+Bare in mind that only offline features work in browser mode.
+
 To start the application locally with electron, use:
 
 ```bash
-npm run build
-npm run electron
+npm run electron-test
 ```
-This command creates an optimized production build.
+This command creates an optimized production build and runs the app locally inside electron.
 
 ## Deployment
 To package and distribute the desktop application, ensure you have Electron and the necessary permissions. For more information, refer to Electron Documentation.
 
 ```bash
-npm run build
-npm run dist
+npm run package
 ```
-This command packages the app for distribution.
+This command packages the app for distribution for the current OS.
 
 ## Project Contributors
 

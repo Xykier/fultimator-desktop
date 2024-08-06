@@ -105,11 +105,16 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
-      await window.electron.authenticateGoogle();
+      const result: string = await window.electron.authenticateGoogle();
       setIsAuthenticated(true);
-      setMessage("Authenticated with Google successfully!");
+      setMessage(result);
     } catch (error) {
-      setMessage("Failed to authenticate with Google.");
+      setIsAuthenticated(false);
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : (error as Error).message || "An unknown error occurred.";
+      setMessage(errorMessage);
     } finally {
       setIsLoading(false);
       setIsSnackbarOpen(true);
@@ -136,6 +141,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
       await handleExport();
       setMessage("Database exported and uploaded successfully!");
     } catch (error) {
+      console.error("Export to Google Drive failed:", error);
       setMessage("Failed to export and upload database.");
     } finally {
       setIsLoading(false);

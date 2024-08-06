@@ -3,12 +3,12 @@ const { google } = require("googleapis");
 const path = require("path");
 const url = require("url");
 const fs = require("fs");
-require('dotenv').config();
+const config = require("./config.json");
 const { OAuth2 } = google.auth;
 
 const OAuth2Client = new OAuth2(
-  process.env.REACT_APP_CLIENT_ID,
-  process.env.REACT_APP_CLIENT_SECRET,
+  config.client_id,
+  config.client_secret,
   "http://localhost" // Redirect URI
 );
 
@@ -59,7 +59,6 @@ function createWindow() {
       scope: SCOPES,
     });
 
-    // Open a new window for authentication
     const authWindow = new BrowserWindow({
       width: 500,
       height: 600,
@@ -72,40 +71,57 @@ function createWindow() {
     });
 
     authWindow.loadURL(authUrl);
-    authWindow.webContents.on("will-redirect", (event, url) => {
-      const query = new URL(url).searchParams;
-      const code = query.get("code");
 
-      if (code) {
-        OAuth2Client.getToken(code, (err, tokens) => {
-          if (err) {
-            console.error("Error while exchanging code for tokens", err);
-            return;
-          }
+    return new Promise((resolve, reject) => {
+      const handleRedirect = (event, url) => {
+        const query = new URL(url).searchParams;
+        const code = query.get("code");
 
-          OAuth2Client.setCredentials(tokens);
-          fs.writeFileSync("tokens.json", JSON.stringify(tokens));
-          authWindow.close();
-        });
-      }
+        if (code) {
+          OAuth2Client.getToken(code, (err, tokens) => {
+            if (err) {
+              console.error("Error while exchanging code for tokens", err);
+              reject("Failed to authenticate with Google.");
+              return;
+            }
+
+            OAuth2Client.setCredentials(tokens);
+            fs.writeFileSync("tokens.json", JSON.stringify(tokens));
+            authWindow.close();
+            resolve("Authenticated with Google successfully!");
+          });
+        }
+      };
+
+      authWindow.webContents.on("will-redirect", handleRedirect);
+
+      authWindow.on("closed", () => {
+        reject("Authentication window closed before completing the process.");
+      });
+
+      authWindow.on("page-title-updated", (event, title) => {
+        if (title.includes("Error")) {
+          reject("Authentication failed.");
+        }
+      });
     });
   });
 
   // Check authentication status
-  ipcMain.handle('checkAuthentication', async () => {
+  ipcMain.handle("checkAuthentication", async () => {
     try {
-      const tokens = fs.existsSync('tokens.json');
+      const tokens = fs.existsSync("tokens.json");
       return tokens; // Returns true if tokens exist, meaning user is authenticated
     } catch (error) {
       console.error("Error checking authentication status", error);
       return false;
     }
   });
-  
+
   // Handle logout
-  ipcMain.handle('logoutGoogle', async () => {
+  ipcMain.handle("logoutGoogle", async () => {
     try {
-      fs.unlinkSync('tokens.json'); // Remove tokens to log out
+      fs.unlinkSync("tokens.json"); // Remove tokens to log out
       return true;
     } catch (error) {
       console.error("Error during logout", error);
@@ -116,7 +132,6 @@ function createWindow() {
   // Handle upload to Google Drive
   ipcMain.handle("upload-to-google-drive", async (event, filePath) => {
     try {
-      // Verify if the file exists
       if (!fs.existsSync(filePath)) {
         throw new Error(`File not found: ${filePath}`);
       }
@@ -126,7 +141,6 @@ function createWindow() {
 
       const drive = google.drive({ version: "v3", auth: OAuth2Client });
 
-      // Check if the file already exists
       const response = await drive.files.list({
         q: "name='fultimatordb.json'",
         fields: "files(id, name)",
@@ -138,7 +152,6 @@ function createWindow() {
 
       let res;
       if (existingFile) {
-        // Update the existing file
         res = await drive.files.update({
           fileId: existingFile.id,
           media: {
@@ -147,7 +160,6 @@ function createWindow() {
           fields: "id",
         });
       } else {
-        // Upload as a new file
         const fileMetadata = {
           name: "fultimatordb.json",
           mimeType: "application/json",
@@ -162,9 +174,10 @@ function createWindow() {
         });
       }
 
+      console.log("File uploaded with ID:", res.data.id); // Log the file ID
       return res.data.id;
     } catch (error) {
-      console.error("Error uploading file", error);
+      console.error("Error uploading file:", error);
       throw error;
     }
   });
