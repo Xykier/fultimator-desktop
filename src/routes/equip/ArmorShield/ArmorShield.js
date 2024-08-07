@@ -152,12 +152,12 @@ function ArmorShield() {
               <Grid container spacing={2} alignItems="center">
                 <Grid item>
                   <Button variant="outlined" onClick={() => fileInputRef.current.click()}>
-                    Upload JSON
+                    {t("Upload JSON")}
                   </Button>
                 </Grid>
                 <Grid item>
                   <Button variant="outlined" onClick={handleClearFields}>
-                    Clear All Fields
+                    {t("Clear All Fields")}
                   </Button>
                 </Grid>
                 {/* Rework */}

@@ -113,7 +113,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
       const errorMessage =
         typeof error === "string"
           ? error
-          : (error as Error).message || "An unknown error occurred.";
+          : (error as Error).message || t("An unknown error occurred") || ".";
       setMessage(errorMessage);
     } finally {
       setIsLoading(false);
@@ -151,7 +151,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
 
   const handleLocalExport = async () => {
     await exportDatabase();
-    setMessage(t("Database exported successfully!"));
+    setMessage("Database exported successfully!");
     setIsSnackbarOpen(true);
   };
 
@@ -166,11 +166,11 @@ const MenuOption: React.FC<MenuOptionProps> = ({
     if (event.target.files && event.target.files[0]) {
       try {
         await importDatabase(event.target.files[0]);
-        setMessage(t("Database imported successfully!"));
+        setMessage("Database imported successfully!");
         setIsSnackbarOpen(true);
       } catch (error) {
         console.error(error);
-        setMessage(t("Failed to import database."));
+        setMessage("Failed to import database.");
         setIsSnackbarOpen(true);
       }
     }
@@ -317,7 +317,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         open={isSnackbarOpen}
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
-        message={message}
+        message={t(message)}
       />
       <HelpFeedbackDialog
         open={isDialogOpen}

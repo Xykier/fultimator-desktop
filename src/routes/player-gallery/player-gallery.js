@@ -261,12 +261,10 @@ function Personal() {
       >
         <Box>
           <AlertTitle sx={{ fontSize: "1.1rem", fontWeight: "bold", mb: 1 }}>
-            Help us improve the Character Designer!
+            {t("Help us improve the Character Designer!")}
           </AlertTitle>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            We value your input on this new feature. Please take a moment to
-            complete our quick survey and share your thoughts. Your feedback
-            will directly influence future updates and enhancements.
+            {t("We value your input on this new feature. Please take a moment to complete our quick survey and share your thoughts. Your feedback will directly influence future updates and enhancements.")}
           </Typography>
           <Button
             href="https://forms.gle/4kfWcrZYRcoAErew5"
@@ -282,7 +280,7 @@ function Personal() {
               },
             }}
           >
-            TAKE QUICK SURVEY
+            {t("TAKE QUICK SURVEY")}
           </Button>
         </Box>
       </Alert>
@@ -331,7 +329,7 @@ function Personal() {
               sx={{ display: "flex" }}
             >
               <FormControl fullWidth size="small">
-                <InputLabel id="direction">Direction:</InputLabel>
+                <InputLabel id="direction">{t("Direction:")}</InputLabel>
                 <Select
                   labelId="direction"
                   id="select-direction"
@@ -341,8 +339,8 @@ function Personal() {
                     setDirection(evt.target.value);
                   }}
                 >
-                  <MenuItem value={"ascending"}>Ascending</MenuItem>
-                  <MenuItem value={"descending"}>Descending</MenuItem>
+                  <MenuItem value={"ascending"}>{t("Ascending")}</MenuItem>
+                  <MenuItem value={"descending"}>{t("Descending")}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -433,7 +431,7 @@ function Personal() {
                   <Delete />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={t("Character Sheet")}>
+              <Tooltip title={t("Player Sheet")}>
                 <IconButton
                   component={RouterLink}
                   to={`/character-sheet/${player.id}`}

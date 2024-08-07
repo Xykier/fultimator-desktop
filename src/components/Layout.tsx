@@ -5,6 +5,7 @@ import AppBar from "./appbar/AppBar";
 import CompactAppBar from "./appbar/CompactAppBar";
 import { useThemeContext } from "../ThemeContext";
 import { globalConfirm } from "../utility/globalConfirm";
+import { useTranslate } from "../translation/translate";
 
 type ThemeValue = "Fabula" | "High" | "Techno" | "Natural" | "Midnight";
 
@@ -15,6 +16,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) => {
+  const { t } = useTranslate();
   const { setTheme } = useThemeContext();
   const [selectedTheme, setSelectedTheme] = useState<ThemeValue>(() => {
     return (localStorage.getItem("selectedTheme") as ThemeValue) || "Fabula";
@@ -35,8 +37,10 @@ const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) 
 
   const handleNavigation = async () => {
     if (unsavedChanges) {
+
+      const message = t("You have unsaved changes. Are you sure you want to leave?")
       // Prompt for unsaved changes
-      const confirmation = await globalConfirm("You have unsaved changes. Are you sure you want to leave?");
+      const confirmation = await globalConfirm(message);
   
       if (!confirmation) {
         return; // Do not navigate if the user cancels
