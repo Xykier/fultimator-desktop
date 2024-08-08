@@ -3,7 +3,6 @@ import {
   Button,
   ButtonGroup,
   Checkbox,
-  Divider,
   FormControlLabel,
   Grid,
   TextField,
@@ -11,7 +10,11 @@ import {
   MenuItem,
   Select,
   Tooltip,
+  Stack,
 } from "@mui/material";
+import {
+  AddCircle,
+} from "@mui/icons-material";
 import { Download } from "@mui/icons-material";
 import { useRef, useState } from "react";
 import Layout from "../../components/Layout";
@@ -39,7 +42,6 @@ function AuthCombat() {
   const { t } = useTranslate();
 
   const [personalList, setPersonalList] = useState<TypeNpc[]>([]);
-
   const [npcs, setNpcs] = useState<TypeNpc[]>([]);
 
   useEffect(() => {
@@ -56,42 +58,90 @@ function AuthCombat() {
   }, []);
 
   const addNpc = (e: any, newValue: any) => {
-    setNpcs((prevState) => {
-      return newValue ? [...prevState, newValue as TypeNpc] : prevState;
-    });
+    if (newValue) {
+      setNpcs((prevState) => [...prevState, newValue as TypeNpc]);
+    }
   };
 
+  const addDuplicateNpc = (npc: TypeNpc) => {
+    setNpcs((prevState) => [...prevState, npc]);
+  };
+
+  const getNpcCounts = () => {
+    const counts: { [key: string]: number } = {};
+    npcs.forEach((npc) => {
+      counts[npc.id] = (counts[npc.id] || 0) + 1;
+    });
+    return counts;
+  };
+
+  const npcCounts = getNpcCounts();
+
   // Add label
-  personalList?.forEach((npc) => {
+  personalList.forEach((npc) => {
     npc.label = npc.name;
   });
 
-  console.debug(npcs);
-
   return (
-    <Grid container sx={{ mt: 2 }}>
-      {npcs?.map((npc, index) => {
-        if (!npc) {
-          return null;
-        }
-        return (
-          <Grid item xs={12} key={index}>
-            <NpcCombatant npc={npc}></NpcCombatant>
-          </Grid>
-        );
-      })}
+    <Grid container direction="column" sx={{ mt: 2 }}>
       <Grid item xs={12}>
         <Autocomplete
           size="small"
           disablePortal
           id="combo-box-demo"
           options={personalList || []}
-          sx={{ width: 300, mb: 10 }}
+          sx={{ width: 300, mb: 2 }}
           onChange={addNpc}
           renderInput={(params) => (
             <TextField {...params} label={t("Adversary")} />
           )}
         />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Stack direction="row" spacing={1} mb={2}>
+          {personalList.map((npc) => {
+            // Only show buttons for NPCs that have been selected at least once
+            if (npcCounts[npc.id]) {
+              return (
+                <Button
+                  key={npc.id}
+                  variant="contained"
+                  onClick={() => addDuplicateNpc(npc)}
+                  startIcon={<AddCircle />}
+                >
+                  {npc.name} ({npcCounts[npc.id]})
+                </Button>
+              );
+            }
+            return null;
+          })}
+        </Stack>
+      </Grid>
+
+      <Grid item xs={12}>
+        {npcs.map((npc, index) => (
+          <Grid
+            container
+            item
+            xs={12}
+            key={index} // Use index as key for duplicate handling
+            sx={{
+              mb: 1,
+              p: 1,
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              alignItems: "center",
+            }}
+          >
+            <Grid item xs={9}>
+              <Typography variant="h3">{index + 1}</Typography>
+            </Grid>            
+            <Grid item xs={12}>
+              <NpcCombatant npc={npc} />
+            </Grid>
+          </Grid>
+        ))}
       </Grid>
     </Grid>
   );
@@ -238,6 +288,9 @@ function NpcCombatant({ npc }: NpcProps) {
   const rollAttackDice = (attack, attackType) => {
     let attribute1, attribute2, extraDamage, extraPrecision, type;
 
+    // Get +1 accuracy every 10 levels
+    let accuracyLevelBonus = Math.floor(npc.lvl / 10);
+
     if (attackType === "weapon") {
       // For weapon attacks
       const { att1, att2 } = attack.weapon;
@@ -245,12 +298,13 @@ function NpcCombatant({ npc }: NpcProps) {
       attribute2 = attributes[att2];
       extraDamage =
         attack.weapon.damage +
-        parseInt(attack.flatdmg) +
+        (attack.flatdmg ? parseInt(attack.flatdmg) : 0) +
         (attack.extraDamage ? 5 : 0);
       extraPrecision =
         (npc.extra?.precision ? 3 : 0) +
         attack.weapon.prec +
-        parseInt(attack.flathit);
+        (attack.flathit ? parseInt(attack.flathit) : 0) +
+        accuracyLevelBonus;
       type = attack.weapon.type;
     } else if (attackType === "spell") {
       // For spells
@@ -258,7 +312,7 @@ function NpcCombatant({ npc }: NpcProps) {
       attribute1 = attributes[attr1];
       attribute2 = attributes[attr2];
       extraDamage = 0;
-      extraPrecision = npc.extra?.magic ? 3 : 0;
+      extraPrecision = (npc.extra?.magic ? 3 : 0) + accuracyLevelBonus;
       type = "spell";
     } else {
       // For base attacks
@@ -266,8 +320,21 @@ function NpcCombatant({ npc }: NpcProps) {
       attribute1 = attributes[attr1];
       attribute2 = attributes[attr2];
       extraDamage = attack.extraDamage ? 10 : 5;
-      extraPrecision = npc.extra?.precision ? 3 : 0;
+      extraPrecision = (npc.extra?.precision ? 3 : 0) + accuracyLevelBonus;
       type = attack.type;
+    }
+
+    // Get +5 damage after lvl 20 and another +5 after lvl 40 and another +5 after lvl 60
+    if (npc.lvl >= 20) {
+      if (npc.lvl >= 40) {
+        if (npc.lvl >= 60) {
+          extraDamage += 10;
+        } else {
+          extraDamage += 5;
+        }
+      } else {
+        extraDamage += 5;
+      }
     }
 
     if (attribute1 === undefined || attribute2 === undefined) {
@@ -700,7 +767,6 @@ function NpcCombatant({ npc }: NpcProps) {
           </Grid>
         </Grid>
       </Grid>
-      <Divider flexItem sx={{ p: 1, my: 2, width: "100%" }} />
     </Grid>
   );
 }
