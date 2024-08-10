@@ -38,6 +38,19 @@ const HelpFeedbackDialog: React.FC<HelpFeedbackDialogProps> = ({
   const [cooldown, setCooldown] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [version, setVersion] = useState<string>("");
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+      if (window.electron) {
+        const appVersion = await window.electron.getVersion();
+        setVersion(appVersion);
+      }
+    };
+
+    fetchVersion();
+  }, []);
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (cooldown > 0) {
@@ -69,11 +82,9 @@ const HelpFeedbackDialog: React.FC<HelpFeedbackDialogProps> = ({
       embeds: [
         {
           title: `New Support Request! (${title})`,
-          description: `Discord: ${discordAccount}\nEmail: ${
-            userEmail ? userEmail : "User Not Logged-In"
-          }\nUUID: ${
-            userUUID ? userUUID : "User Not Logged-In"
-          }\n\nMessage: ${message}`,
+          description: `Discord: ${discordAccount}
+          \nFultimator Desktop Version: ${version}
+          \n\nMessage: ${message}`,
           color: 16248815,
         },
       ],
