@@ -36,6 +36,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import Export from "../../components/Export";
 import { addPc, getPcs, deletePc } from "../../utility/db";
 import { globalConfirm } from "../../utility/globalConfirm";
+import { validateCharacter } from "../../utility/validateJson";
 
 export default function PlayerGallery() {
   return (
@@ -177,18 +178,27 @@ function Personal() {
 
   const handleFileUpload = async (jsonData) => {
     try {
-      if (
-        jsonData &&
-        typeof jsonData === "object" &&
-        !Array.isArray(jsonData)
-      ) {
-        jsonData.id = await getNextId();
-        jsonData.uid = "local";
-        await addPc(jsonData);
-        fetchPcs();
-      } else {
-        console.error("Invalid JSON format. Must be a single PC object.");
+      // Validate the JSON data
+      if (!validateCharacter(jsonData)) {
+        console.error("Invalid character data.");
+        const alertMessage = "Invalid character JSON data.";
+        if (window.electron) {
+          window.electron.alert(alertMessage);
+        } else {
+          alert(alertMessage);
+        }
+        return;
       }
+
+      // Add additional properties before uploading
+      jsonData.id = await getNextId();
+      jsonData.uid = "local";
+
+      // Upload the character data
+      await addPc(jsonData);
+
+      // Fetch and update the list of PCs
+      fetchPcs();
     } catch (error) {
       console.error("Error uploading PC from JSON:", error);
     }
@@ -264,7 +274,9 @@ function Personal() {
             {t("Help us improve the Character Designer!")}
           </AlertTitle>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            {t("We value your input on this new feature. Please take a moment to complete our quick survey and share your thoughts. Your feedback will directly influence future updates and enhancements.")}
+            {t(
+              "We value your input on this new feature. Please take a moment to complete our quick survey and share your thoughts. Your feedback will directly influence future updates and enhancements."
+            )}
           </Typography>
           <Button
             href="https://forms.gle/4kfWcrZYRcoAErew5"

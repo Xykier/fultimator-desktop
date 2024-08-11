@@ -30,6 +30,7 @@ import Export from "../../components/Export";
 import { useTranslate } from "../../translation/translate";
 import { addNpc, getNpcs, deleteNpc } from "../../utility/db";
 import { globalConfirm } from "../../utility/globalConfirm";
+import { validateNpc } from "../../utility/validateJson";
 
 export default function NpcGallery() {
   return (
@@ -140,18 +141,27 @@ function Personal() {
 
   const handleFileUpload = async (jsonData) => {
     try {
-      if (
-        jsonData &&
-        typeof jsonData === "object" &&
-        !Array.isArray(jsonData)
-      ) {
-        jsonData.id = await getNextId();
-        jsonData.uid = "local";
-        await addNpc(jsonData);
-        fetchNpcs();
-      } else {
-        console.error("Invalid JSON format. Must be a single NPC object.");
+      // Validate the JSON data
+      if (!validateNpc(jsonData)) {
+        console.error("Invalid NPC data.");
+        const alertMessage = "Invalid NPC JSON data.";
+        if (window.electron) {
+          window.electron.alert(alertMessage);
+        } else {
+          alert(alertMessage);
+        }
+        return;
       }
+
+      // Add additional properties before uploading
+      jsonData.id = await getNextId();
+      jsonData.uid = "local";
+
+      // Upload the NPC data
+      await addNpc(jsonData);
+
+      // Fetch and update the list of NPCs
+      fetchNpcs();
     } catch (error) {
       console.error("Error uploading NPC from JSON:", error);
     }
@@ -397,7 +407,9 @@ function Personal() {
                 >
                   <MenuItem value={"name"}>{t("Name")}</MenuItem>
                   <MenuItem value={"level"}>{t("Level")}</MenuItem>
-                  <MenuItem value={"publishedAt"}>{t("Published Date")}</MenuItem>
+                  <MenuItem value={"publishedAt"}>
+                    {t("Published Date")}
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
