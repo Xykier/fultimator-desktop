@@ -191,7 +191,7 @@ export default function NpcEdit() {
             </Tooltip>
 
             {/* Export NPC Data */}
-            <Export name={`${npc.name}`} data={npc} />
+            <Export name={`${npc.name}`} dataType="npc" data={npc} />
 
             {/* Tags Section */}
 
