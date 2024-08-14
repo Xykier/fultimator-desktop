@@ -105,26 +105,32 @@ function Personal() {
   };
 
   const handleCopyNpc = (npc) => async () => {
-    try {
-      const data = { ...npc, uid: "local" };
-      delete data.id;
+    const message = t("Are you sure you want to copy?");
+    const confirmed = await globalConfirm(message);
 
-      // Add the NPC to the database
-      await addNpc(data);
+    if (confirmed) {
+      try {
+        const data = { ...npc, uid: "local" };
+        delete data.id;
 
-      // After adding, fetch the updated list and find the newly added NPC
-      const npcs = await getNpcs();
-      const newNpc = npcs[npcs.length - 1]; // Assuming the new NPC is the last one in the list
+        // Add the NPC to the database
+        await addNpc(data);
 
-      if (newNpc) {
-        window.location.href = `/#/npc-gallery/${newNpc.id}`;
+        // After adding, fetch the updated list and find the newly added NPC
+        const npcs = await getNpcs();
+        const newNpc = npcs[npcs.length - 1]; // Assuming the new NPC is the last one in the list
+
+        if (newNpc) {
+          window.location.hash = `/npc-gallery/${newNpc.id}`;
+        }
+      } catch (error) {
+        console.error("Error copying NPC:", error);
       }
-    } catch (error) {
-      console.error("Error copying NPC:", error);
     }
   };
   const handleDeleteNpc = (npc) => async () => {
-    const confirmed = await globalConfirm("Are you sure you want to delete?");
+    const message = t("Are you sure you want to delete?");
+    const confirmed = await globalConfirm(message);
 
     if (confirmed) {
       await deleteNpc(npc.id);
@@ -144,7 +150,7 @@ function Personal() {
       // Validate the JSON data
       if (!validateNpc(jsonData)) {
         console.error("Invalid NPC data.");
-        const alertMessage = "Invalid NPC JSON data.";
+        const alertMessage = t("Invalid NPC JSON data") + ".";
         if (window.electron) {
           window.electron.alert(alertMessage);
         } else {

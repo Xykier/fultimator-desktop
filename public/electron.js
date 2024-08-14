@@ -40,6 +40,7 @@ function createWindow() {
       buttons: ["Yes", "No"],
       defaultId: 0,
       message,
+      title: "Fultimator",
     });
     return result.response === 0; // Returns true for 'Yes', false for 'No'
   });
@@ -49,6 +50,7 @@ function createWindow() {
       type: "info",
       buttons: ["OK"],
       message,
+      title: "Fultimator",
     });
   });
 

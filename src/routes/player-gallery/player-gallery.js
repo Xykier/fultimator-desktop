@@ -181,7 +181,7 @@ function Personal() {
       // Validate the JSON data
       if (!validateCharacter(jsonData)) {
         console.error("Invalid character data.");
-        const alertMessage = "Invalid character JSON data.";
+        const alertMessage = t("Invalid character JSON data") + ".";
         if (window.electron) {
           window.electron.alert(alertMessage);
         } else {
@@ -209,7 +209,8 @@ function Personal() {
     delete data.id;
     data.published = false;
 
-    const confirmed = await globalConfirm("Are you sure you want to copy?");
+    const message = t("Are you sure you want to copy?");
+    const confirmed = await globalConfirm(message);
 
     if (confirmed) {
       try {
@@ -217,7 +218,7 @@ function Personal() {
         const pcsData = await getPcs();
         const newPc = pcsData[pcsData.length - 1];
         if (newPc) {
-          window.location.href = `/#/pc-gallery/${newPc.id}`;
+          window.location.hash = `/pc-gallery/${newPc.id}`;
         }
       } catch (error) {
         console.error("Error copying player:", error);
@@ -228,7 +229,8 @@ function Personal() {
   };
 
   const deletePlayer = (player) => async () => {
-    const confirmed = await globalConfirm("Are you sure you want to delete?");
+    const message = t("Are you sure you want to delete?");
+    const confirmed = await globalConfirm(message);
 
     if (confirmed) {
       try {
