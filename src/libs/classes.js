@@ -1635,7 +1635,7 @@ export const tinkererInfusion = {
   ],
 };
 
-export const defaultSpellList = [
+export const spellList = [
   {
     class: "Elementalist",
     name: "Elemental Shroud",
@@ -1647,6 +1647,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1659,6 +1660,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1671,6 +1673,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1683,6 +1686,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1695,6 +1699,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1707,6 +1712,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1719,6 +1725,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1731,6 +1738,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1743,6 +1751,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1755,6 +1764,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1767,6 +1777,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Elementalist",
@@ -1779,6 +1790,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1791,6 +1803,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1803,6 +1816,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1815,6 +1829,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1827,6 +1842,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1839,6 +1855,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1851,6 +1868,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1863,6 +1881,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1875,6 +1894,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1887,6 +1907,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1899,6 +1920,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Entropist",
@@ -1911,6 +1933,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1923,6 +1946,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1935,6 +1959,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1947,6 +1972,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1959,6 +1985,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1971,6 +1998,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1983,6 +2011,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -1995,6 +2024,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -2007,6 +2037,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -2019,6 +2050,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -2031,6 +2063,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -2043,6 +2076,7 @@ export const defaultSpellList = [
     duration: "Scene",
     attr1: "dexterity",
     attr2: "dexterity",
+    spellType: "default",
   },
   {
     class: "Spiritist",
@@ -2055,6 +2089,7 @@ export const defaultSpellList = [
     duration: "Instantaneous",
     attr1: "insight",
     attr2: "will",
+    spellType: "default",
   },
 ];
 

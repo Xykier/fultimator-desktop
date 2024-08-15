@@ -16,6 +16,7 @@ import SpellTinkererAlchemyEffectsModal from "./SpellTinkererAlchemyEffectsModal
 import { tinkererAlchemy, tinkererInfusion } from "../../../libs/classes";
 import SpellTinkererInfusion from "./SpellTinkererInfusion";
 import SpellTinkererInfusionModal from "./SpellTinkererInfusionModal";
+import SpellCompendiumModal from "./SpellCompendiumModal";
 
 export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -34,6 +35,8 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const [spellBeingEdited, setSpellBeingEdited] = useState(null);
   const [editingSpellClass, setEditingSpellClass] = useState(null);
   const [editingSpellIndex, setEditingSpellIndex] = useState(null);
+
+  const [openCompendiumModal, setOpenCompendiumModal] = useState(false);
 
   const handleClassChange = (event, newValue) => {
     setSelectedClass(
@@ -199,6 +202,38 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setSelectedSpell(null);
   };
 
+  const addSpellFromCompendium = (spell) => {
+    setPlayer((prev) => ({
+      ...prev,
+      classes: prev.classes.map((cls) => {
+        if (cls.name === selectedClass) {
+          return {
+            ...cls,
+            spells: [
+              ...cls.spells,
+              {
+                spellType: spell.spellType,
+                name: t(spell.name),
+                mp: spell.mp,
+                maxTargets: spell.maxTargets,
+                targetDesc: t(spell.targetDesc),
+                duration: t(spell.duration),
+                description: t(spell.description),
+                isOffensive: spell.isOffensive,
+                attr1: spell.attr1,
+                attr2: spell.attr2,
+                showInPlayerSheet: true,
+              },
+            ],
+          };
+        }
+        return cls;
+      }),
+    }));
+    setSelectedClass(null);
+    setSelectedSpell(null);
+  };
+
   const handleEditDefaultSpell = (spell, spellClass, spellIndex) => {
     setSpellBeingEdited(spell);
     setEditingSpellClass(spellClass);
@@ -318,7 +353,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                 />
               </Grid>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={5}>
+                <Grid item xs={12} sm={4}>
                   <Autocomplete
                     options={player.classes
                       .filter(
@@ -347,7 +382,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                     )}
                   />
                 </Grid>
-                <Grid item xs={12} sm={5}>
+                <Grid item xs={12} sm={4}>
                   <Autocomplete
                     options={filteredSpells}
                     value={selectedSpell}
@@ -363,14 +398,24 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                     disabled={!selectedClass}
                   />
                 </Grid>
-                <Grid item xs={12} sm={2}>
+                <Grid item xs={6} sm={2}>
                   <Button
                     variant="contained"
                     sx={{ width: "100%", height: "100%" }}
                     disabled={!selectedSpell}
                     onClick={() => addNewSpell(selectedSpell)}
                   >
-                    {t("Add Spell")}
+                    {t("Add Blank Spell")}
+                  </Button>
+                </Grid>
+                <Grid item xs={6} sm={2}>
+                  <Button
+                    variant="outlined"
+                    sx={{ width: "100%", height: "100%" }}
+                    disabled={!selectedClass}
+                    onClick={() => setOpenCompendiumModal(true)}
+                  >
+                    {t("Add from Compendium")}
                   </Button>
                 </Grid>
               </Grid>
@@ -418,7 +463,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                       .sort((a, b) => a.spellType.localeCompare(b.spellType))
                       .map((spell, index) => (
                         <React.Fragment key={index}>
-                          <div style={{ marginTop: index === 0 ? 0 : 50 }}>
+                          <div style={{ marginTop: (index === 0 || spell.spellType === "default") ? 0 : 50 }}>
                             {spell.spellType === "default" &&
                               !spellTypeHeaders.default && (
                                 <>
@@ -608,6 +653,12 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
         onSave={handleSaveEditedSpell}
         onDelete={handleDeleteSpell}
         infusion={{ ...spellBeingEdited, index: editingSpellIndex }}
+      />
+      <SpellCompendiumModal
+        open={openCompendiumModal}
+        onClose={() => setOpenCompendiumModal(false)}
+        typeName={selectedClass}
+        onSave={(spell) => addSpellFromCompendium(spell)}
       />
     </>
   );
