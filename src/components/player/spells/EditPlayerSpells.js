@@ -17,6 +17,8 @@ import { tinkererAlchemy, tinkererInfusion } from "../../../libs/classes";
 import SpellTinkererInfusion from "./SpellTinkererInfusion";
 import SpellTinkererInfusionModal from "./SpellTinkererInfusionModal";
 import SpellCompendiumModal from "./SpellCompendiumModal";
+import SpellTinkererMagitech from "./SpellTinkererMagitech";
+import SpellTinkererMagitechRankModal from "./SpellTinkererMagitechRankModal";
 
 export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -32,6 +34,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const [openAlchemyTargetModal, setOpenAlchemyTargetModal] = useState(false);
   const [openAlchemyEffectsModal, setOpenAlchemyEffectsModal] = useState(false);
   const [openInfusionModal, setOpenInfusionModal] = useState(false);
+  const [openMagitechRankModal, setOpenMagitechRankModal] = useState(false);
   const [spellBeingEdited, setSpellBeingEdited] = useState(null);
   const [editingSpellClass, setEditingSpellClass] = useState(null);
   const [editingSpellIndex, setEditingSpellIndex] = useState(null);
@@ -182,6 +185,36 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                 ],
               };
             }
+          } else if (spell === "tinkerer-magitech") {
+            // Check if there's already a tinkerer-magitech spell
+            const hasTinkererMagitech = cls.spells.some(
+              (sp) => sp.spellType === "tinkerer-magitech"
+            );
+
+            if (hasTinkererMagitech) {
+              if (window.electron) {
+                window.electron.alert(
+                  "You already have a tinkerer-magitech spell"
+                );
+              } else {
+                alert("You already have a tinkerer-magitech spell");
+              }
+              return cls;
+            } else {
+              // Add a new tinkerer-magitech spell
+              return {
+                ...cls,
+                spells: [
+                  ...cls.spells,
+                  {
+                    spellType: spell,
+                    showInPlayerSheet: true,
+                    rank: 1,
+                    magispheres: [],
+                  },
+                ],
+              };
+            }
           } else {
             if (window.electron) {
               window.electron.alert(
@@ -276,6 +309,13 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setOpenInfusionModal(true);
   };
 
+  const handleEditMagitechRank = (spell, spellClass, spellIndex) => {
+    setSpellBeingEdited(spell);
+    setEditingSpellClass(spellClass);
+    setEditingSpellIndex(spellIndex);
+    setOpenMagitechRankModal(true);
+  }
+
   const handleSaveEditedSpell = (spellIndex, editedSpell) => {
     setPlayer((prev) => ({
       ...prev,
@@ -328,6 +368,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setOpenAlchemyEffectsModal(false);
     setOpenInfusionModal(false);
     setSpellBeingEdited(null);
+    setOpenMagitechRankModal(false);
     setEditingSpellClass(null);
   };
 
@@ -437,6 +478,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
             arcanistRework: false,
             tinkererAlchemy: false,
             tinkererInfusion: false,
+            tinkererMagitech: false,
           };
 
           return (
@@ -463,7 +505,14 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                       .sort((a, b) => a.spellType.localeCompare(b.spellType))
                       .map((spell, index) => (
                         <React.Fragment key={index}>
-                          <div style={{ marginTop: (index === 0 || spell.spellType === "default") ? 0 : 50 }}>
+                          <div
+                            style={{
+                              marginTop:
+                                index === 0 || spell.spellType === "default"
+                                  ? 0
+                                  : 50,
+                            }}
+                          >
                             {spell.spellType === "default" &&
                               !spellTypeHeaders.default && (
                                 <>
@@ -501,6 +550,13 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                                 <>
                                   <CustomHeader2 headerText={t("Infusions")} />
                                   {(spellTypeHeaders.tinkererInfusion = true)}
+                                </>
+                              )}
+                            {spell.spellType === "tinkerer-magitech" &&
+                              !spellTypeHeaders.tinkererMagitech && (
+                                <>
+                                  <CustomHeader2 headerText={t("Magitech")} />
+                                  {(spellTypeHeaders.tinkererMagitech = true)}
                                 </>
                               )}
                           </div>
@@ -579,6 +635,16 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                               isEditMode={isEditMode}
                             />
                           )}
+                          {spell.spellType === "tinkerer-magitech" && (
+                            <SpellTinkererMagitech
+                              magitech={spell}
+                              key={index}
+                              onEdit={() =>
+                                handleEditMagitechRank(spell, cls.name, index)
+                              }
+                              isEditMode={isEditMode}
+                            />
+                          )}
                         </React.Fragment>
                       ))}
                   </Grid>
@@ -653,6 +719,17 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
         onSave={handleSaveEditedSpell}
         onDelete={handleDeleteSpell}
         infusion={{ ...spellBeingEdited, index: editingSpellIndex }}
+      />
+      <SpellTinkererMagitechRankModal
+        open={openMagitechRankModal}
+        onClose={() => {
+          setOpenMagitechRankModal(false);
+          setEditingSpellClass(null);
+          setSpellBeingEdited(null);
+        }}
+        onSave={handleSaveEditedSpell}
+        onDelete={handleDeleteSpell}
+        magitech={{ ...spellBeingEdited, index: editingSpellIndex }}
       />
       <SpellCompendiumModal
         open={openCompendiumModal}
