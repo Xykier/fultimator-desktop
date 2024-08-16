@@ -246,44 +246,44 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
       player.stats.ip.current -= 3;
       setPlayer({ ...player });
     }
-
-    // Check if player already has a magicannon
-    const hasMagicannon = player.weapons.some(
-      (weapon) => weapon.magicannon === true
-    );
-
+  
+    // Check if player already has a Magicannon
+    const weapons = player.weapons || [];
+    const hasMagicannon = weapons.some(weapon => weapon.magicannon === true);
+  
     if (hasMagicannon) {
-      // Delete the existing magicannon
-      setPlayer((prevPlayer) => ({
+      // Delete the existing Magicannon
+      setPlayer(prevPlayer => ({
         ...prevPlayer,
-        weapons: prevPlayer.weapons.filter((weapon) => !weapon.magicannon),
+        weapons: prevPlayer.weapons ? prevPlayer.weapons.filter(weapon => !weapon.magicannon) : []
       }));
     }
-
+  
     if (equipMagicannon) {
       // Unequip any currently equipped weapons or shields
-      setPlayer((prevPlayer) => ({
+      setPlayer(prevPlayer => ({
         ...prevPlayer,
-        weapons: prevPlayer.weapons.map((weapon) => ({
+        weapons: prevPlayer.weapons ? prevPlayer.weapons.map(weapon => ({
           ...weapon,
-          isEquipped: false,
-        })),
-        shields: prevPlayer.shields.map((shield) => ({
+          isEquipped: false
+        })) : [],
+        shields: prevPlayer.shields ? prevPlayer.shields.map(shield => ({
           ...shield,
-          isEquipped: false,
-        })),
+          isEquipped: false
+        })) : []
       }));
     }
-
+  
     // Add Magicannon weapon to the player weapons
-    setPlayer((prevPlayer) => ({
+    setPlayer(prevPlayer => ({
       ...prevPlayer,
-      weapons: [...prevPlayer.weapons, magicannonItem],
+      weapons: [...(prevPlayer.weapons || []), magicannonItem]
     }));
-
+  
     // Close modal
     handleCloseModal();
   };
+  
 
   /* All alchemy spells from all classes */
   const alchemySpells = player.classes
