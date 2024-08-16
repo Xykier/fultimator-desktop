@@ -821,12 +821,12 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
                 >
                   <ReactMarkdown>
                     {t(
-                      "You may perform the Inventory action and spend 3 Inventory Points to create a **firearm** weapon known as a **magicannon**. The magicannon will crumble to pieces as soon as you use create a new magicannon. When you create a magicannon, choose the type of damage it deals (**air, bolt, earth, fire, ice,** or **physical**)."
+                      "Magicannon_desc1"
                     )}
                   </ReactMarkdown>
                   <ReactMarkdown>
                     {t(
-                      "*Magicannon | Accuracy: 【DEX + INS】 +1 | Damage: 【HR + 10】| Two-handed | Ranged | No Quality*"
+                      "Magicannon_desc2"
                     )}
                   </ReactMarkdown>
                 </div>
