@@ -67,7 +67,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
             style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
           >
             {!showInPlayerSheet && (
-              <Tooltip title={t("Infusion not shown in player sheet")}>
+              <Tooltip title={t("Magitech not shown in player sheet")}>
                 <Icon>
                   <VisibilityOff style={{ color: "black" }} />
                 </Icon>

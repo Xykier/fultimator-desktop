@@ -614,7 +614,7 @@ export default function PlayerWeaponModal({
             {t("Delete")}
           </Button>
         )}
-        <Button onClick={handleSave} color="primary">
+        <Button onClick={handleSave} color="primary" disabled={/* disable if the weapon has a value "magitech" === true */ weapon?.magicannon }>
           {t("Save Changes")}
         </Button>
       </DialogActions>
