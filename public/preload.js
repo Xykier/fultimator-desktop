@@ -25,4 +25,5 @@ contextBridge.exposeInMainWorld("electron", {
   listFiles: () => ipcRenderer.invoke("list-files"),
   checkAuthentication: () => ipcRenderer.invoke("checkAuthentication"),
   logoutGoogle: () => ipcRenderer.invoke("logoutGoogle"),
+  navigateHome: () => ipcRenderer.send("navigate-home"),
 });

@@ -21,6 +21,7 @@ import {
 } from "./ThemeContext";
 import PlayerGallery from "./routes/player-gallery/player-gallery";
 import PlayerEdit from "./routes/player-edit/player-edit";
+import ErrorBoundary from "./ErrorBoundary";
 
 const themes = {
   Fabula,
@@ -38,16 +39,21 @@ const App = () => {
       <ThemeProvider theme={themes[selectedTheme]}>
         <CssBaseline />
         <HashRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/pc-gallery/:playerId" element={<PlayerEdit />} />
-            <Route path="/pc-gallery" element={<PlayerGallery />} />
-            <Route path="/npc-gallery/:npcId" element={<NpcEdit />} />
-            <Route path="/npc-gallery" element={<NpcGallery />} />
-            <Route path="/generate" element={<Generator />} />
-            <Route path="/combat" element={<Combat />} />
-            <Route path="/character-sheet/:playerId" element={<CharacterSheet />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/pc-gallery/:playerId" element={<PlayerEdit />} />
+              <Route path="/pc-gallery" element={<PlayerGallery />} />
+              <Route path="/npc-gallery/:npcId" element={<NpcEdit />} />
+              <Route path="/npc-gallery" element={<NpcGallery />} />
+              <Route path="/generate" element={<Generator />} />
+              <Route path="/combat" element={<Combat />} />
+              <Route
+                path="/character-sheet/:playerId"
+                element={<CharacterSheet />}
+              />
+            </Routes>
+          </ErrorBoundary>
         </HashRouter>
       </ThemeProvider>
     </React.StrictMode>

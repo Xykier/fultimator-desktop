@@ -34,6 +34,21 @@ function createWindow() {
     })
   );
 
+  ipcMain.on('navigate-home', () => {
+    if (mainWindow) {
+      mainWindow.loadURL(
+        url.format({
+          pathname: path.join(__dirname, "..", "build", "index.html"),
+          protocol: "file:",
+          slashes: true,
+        })
+      );
+      console.log('Navigating to home page');
+    } else {
+      console.error('Main window not found');
+    }
+  });
+
   ipcMain.handle("dialog-confirm", async (event, message) => {
     const result = await dialog.showMessageBox(mainWindow, {
       type: "question",
