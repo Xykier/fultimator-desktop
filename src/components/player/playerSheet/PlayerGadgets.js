@@ -601,7 +601,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
                       }}
                       className="spell-right-controls"
                     >
-                      <Tooltip title={t("Info")}>
+                      <Tooltip title={t("Activate")}>
                         <IconButton
                           sx={{ padding: "0px" }}
                           onClick={() => setOpenMagicannonModal(true)}
@@ -842,7 +842,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
                 >
                   {elements.map((element) => (
                     <MenuItem key={element} value={element}>
-                      {element}
+                      {t(element)}
                     </MenuItem>
                   ))}
                 </Select>
