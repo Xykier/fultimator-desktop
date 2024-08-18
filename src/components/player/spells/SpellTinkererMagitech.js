@@ -79,7 +79,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
           </Grid>
         )}
       </div>
-      {/* Row 1 */}
+      {/* Row 1 Magitech Override */}
       {magitech.rank >= 1 && (
         <div
           style={{
@@ -128,10 +128,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
           )}
         </div>
       )}
-
-      {/* Row 2 */}
-
-      {/* Row 3 */}
+      {/* Row 2 Magitech Override */}
       {magitech.rank >= 1 && (
         <Accordion sx={{ marginY: 1 }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
@@ -149,7 +146,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
           </AccordionDetails>
         </Accordion>
       )}
-      {/* Row 2 */}
+      {/* Row 1 Magicannon */}
       {magitech.rank >= 2 && (
         <div
           style={{
@@ -199,7 +196,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
         </div>
       )}
 
-      {/* Row 3 */}
+      {/* Row 2 Magicannon */}
       {magitech.rank >= 2 && (
         <Accordion sx={{ marginY: 1 }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
@@ -222,7 +219,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
           </AccordionDetails>
         </Accordion>
       )}
-      {/* Row 2 */}
+      {/* Row 1 Magispheres */}
       {magitech.rank >= 3 && (
         <div
           style={{
@@ -272,7 +269,7 @@ function ThemedSpellTinkererMagitech({ magitech, onEdit, isEditMode }) {
         </div>
       )}
 
-      {/* Row 3 */}
+      {/* Row 2 Magispheres */}
       {magitech.rank >= 3 && (
         <Accordion sx={{ marginY: 1 }}>
           <AccordionSummary expandIcon={<ExpandMore />}>

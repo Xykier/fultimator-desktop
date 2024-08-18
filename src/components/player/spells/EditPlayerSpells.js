@@ -255,6 +255,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                 isOffensive: spell.isOffensive,
                 attr1: spell.attr1,
                 attr2: spell.attr2,
+                isMagisphere: spell.isMagisphere || false,
                 showInPlayerSheet: true,
               },
             ],
@@ -575,6 +576,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                               isOffensive={spell.isOffensive}
                               attr1={spell.attr1}
                               attr2={spell.attr2}
+                              isMagisphere={spell.isMagisphere || false}
                               showInPlayerSheet={
                                 spell.showInPlayerSheet ||
                                 spell.showInPlayerSheet === undefined
