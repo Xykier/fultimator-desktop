@@ -706,7 +706,7 @@ const classList = [
         "tinkerer-alchemy",
         "tinkerer-infusion",
         "tinkerer-magitech",
-        "default"
+        "default",
       ],
     },
     skills: [
@@ -2093,5 +2093,86 @@ export const spellList = [
     spellType: "default",
   },
 ];
+
+export const entropistGamble = {
+  spellType: "gamble",
+  mp: 10,
+  maxTargets: 2,
+  targetDesc: "Special",
+  duration: "Instantaneous",
+  attr: "will",
+  targets: [
+    {
+      rangeFrom: 1,
+      rangeTo: 1,
+      effect: t(
+        "You lose half of your current Hit Points and half of your current Mind Points."
+      ),
+      secondRoll: false,
+      secondEffects: [],
+    },
+    {
+      rangeFrom: 2,
+      rangeTo: 3,
+      effect: t(
+        "Each creature present on the scene, including yourself, suffers poisoned."
+      ),
+      secondRoll: false,
+      secondEffects: [],
+    },
+    {
+      rangeFrom: 4,
+      rangeTo: 6,
+      effect: t(
+        "Each creature present on the scene, including yourself, suffers slow."
+      ),
+      secondRoll: false,
+      secondEffects: [],
+    },
+    {
+      rangeFrom: 7,
+      rangeTo: 8,
+      effect: t(
+        "Choose up to three creatures you can see: each of them recovers 50 Hit Points and also recovers from all status effects."
+      ),
+      secondRoll: false,
+      secondEffects: [],
+    },
+    {
+      rangeFrom: 9,
+      rangeTo: 12,
+      effect: t(
+        "Choose any number of creatures you can see: each of them suffers 30 damage. The damage type is determined randomly by rolling a d6:"
+      ),
+      secondRoll: true,
+      secondEffects: [
+        {
+          dieValue: 1,
+          effect: t("wind"),
+        },
+        {
+          dieValue: 2,
+          effect: t("bolt"),
+        },
+        {
+          dieValue: 3,
+          effect: t("dark"),
+        },
+        {
+          dieValue: 4,
+          effect: t("earth"),
+        },
+        {
+          dieValue: 5,
+          effect: t("fire"),
+        },
+        {
+          dieValue: 6,
+          effect: t("poison"),
+        },
+      ],
+    },
+  ],
+};
 
 export default classList;

@@ -13,12 +13,13 @@ import SpellTinkererAlchemy from "./SpellTinkererAlchemy";
 import SpellTinkererAlchemyRankModal from "./SpellTinkererAlchemyRankModal";
 import SpellTinkererAlchemyTargetModal from "./SpellTinkererAlchemyTargetModal";
 import SpellTinkererAlchemyEffectsModal from "./SpellTinkererAlchemyEffectsModal";
-import { tinkererAlchemy, tinkererInfusion } from "../../../libs/classes";
+import { tinkererAlchemy, tinkererInfusion, entropistGamble } from "../../../libs/classes";
 import SpellTinkererInfusion from "./SpellTinkererInfusion";
 import SpellTinkererInfusionModal from "./SpellTinkererInfusionModal";
 import SpellCompendiumModal from "./SpellCompendiumModal";
 import SpellTinkererMagitech from "./SpellTinkererMagitech";
 import SpellTinkererMagitechRankModal from "./SpellTinkererMagitechRankModal";
+import SpellEntropistGambleModal from "./SpellEntropistGambleModal";
 
 export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -35,6 +36,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const [openAlchemyEffectsModal, setOpenAlchemyEffectsModal] = useState(false);
   const [openInfusionModal, setOpenInfusionModal] = useState(false);
   const [openMagitechRankModal, setOpenMagitechRankModal] = useState(false);
+  const [openGambleModal, setOpenGambleModal] = useState(false);
   const [spellBeingEdited, setSpellBeingEdited] = useState(null);
   const [editingSpellClass, setEditingSpellClass] = useState(null);
   const [editingSpellIndex, setEditingSpellIndex] = useState(null);
@@ -463,6 +465,17 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
               </Grid>
             </Grid>
           </Paper>
+          {/* Gamble test button */}
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ mt: 2 }}
+            onClick={() => {
+              setSpellBeingEdited(entropistGamble);
+              setOpenGambleModal(true)}}
+          >
+            {t("Gamble Test")}
+          </Button>
           <Divider sx={{ my: 2 }} />
         </>
       ) : null}
@@ -732,6 +745,16 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
         onSave={handleSaveEditedSpell}
         onDelete={handleDeleteSpell}
         magitech={{ ...spellBeingEdited, index: editingSpellIndex }}
+      />
+      <SpellEntropistGambleModal
+        open={openGambleModal}
+        onClose={() => {
+          setOpenGambleModal(false);
+          setEditingSpellClass(null);
+          setSpellBeingEdited(null);
+        }}
+        onSave={(spellindex, spell) => console.log(spell)}
+        gamble={{ ...spellBeingEdited, index: editingSpellIndex }}
       />
       <SpellCompendiumModal
         open={openCompendiumModal}
