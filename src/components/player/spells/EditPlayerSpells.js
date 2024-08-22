@@ -13,13 +13,19 @@ import SpellTinkererAlchemy from "./SpellTinkererAlchemy";
 import SpellTinkererAlchemyRankModal from "./SpellTinkererAlchemyRankModal";
 import SpellTinkererAlchemyTargetModal from "./SpellTinkererAlchemyTargetModal";
 import SpellTinkererAlchemyEffectsModal from "./SpellTinkererAlchemyEffectsModal";
-import { tinkererAlchemy, tinkererInfusion, entropistGamble } from "../../../libs/classes";
+import {
+  tinkererAlchemy,
+  tinkererInfusion,
+  entropistGamble,
+} from "../../../libs/classes";
 import SpellTinkererInfusion from "./SpellTinkererInfusion";
 import SpellTinkererInfusionModal from "./SpellTinkererInfusionModal";
 import SpellCompendiumModal from "./SpellCompendiumModal";
 import SpellTinkererMagitech from "./SpellTinkererMagitech";
 import SpellTinkererMagitechRankModal from "./SpellTinkererMagitechRankModal";
 import SpellEntropistGambleModal from "./SpellEntropistGambleModal";
+import SpellEntropistGamble from "./SpellEntropistGamble";
+import GambleExplain from "./GambleExplain";
 
 export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -217,6 +223,19 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                 ],
               };
             }
+          } else if (spell === "gamble") {
+            // Add a new gamble spell
+            return {
+              ...cls,
+              spells: [
+                ...cls.spells,
+                {
+                  spellType: spell,
+                  showInPlayerSheet: true,
+                  ...entropistGamble,
+                },
+              ],
+            };
           } else {
             if (window.electron) {
               window.electron.alert(
@@ -242,26 +261,47 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
       ...prev,
       classes: prev.classes.map((cls) => {
         if (cls.name === selectedClass) {
-          return {
-            ...cls,
-            spells: [
-              ...cls.spells,
-              {
-                spellType: spell.spellType,
-                name: t(spell.name),
-                mp: spell.mp,
-                maxTargets: spell.maxTargets,
-                targetDesc: t(spell.targetDesc),
-                duration: t(spell.duration),
-                description: t(spell.description),
-                isOffensive: spell.isOffensive,
-                attr1: spell.attr1,
-                attr2: spell.attr2,
-                isMagisphere: spell.isMagisphere || false,
-                showInPlayerSheet: true,
-              },
-            ],
-          };
+          if (spell.spellType === "default") {
+            return {
+              ...cls,
+              spells: [
+                ...cls.spells,
+                {
+                  spellType: spell.spellType,
+                  name: t(spell.name),
+                  mp: spell.mp,
+                  maxTargets: spell.maxTargets,
+                  targetDesc: t(spell.targetDesc),
+                  duration: t(spell.duration),
+                  description: t(spell.description),
+                  isOffensive: spell.isOffensive,
+                  attr1: spell.attr1,
+                  attr2: spell.attr2,
+                  isMagisphere: spell.isMagisphere || false,
+                  showInPlayerSheet: true,
+                },
+              ],
+            };
+          } else if (spell.spellType === "gamble") {
+            return {
+              ...cls,
+              spells: [
+                ...cls.spells,
+                {
+                  spellType: spell.spellType,
+                  spellName: t(spell.name),
+                  mp: spell.mp,
+                  maxTargets: spell.maxTargets,
+                  targetDesc: t(spell.targetDesc),
+                  duration: t(spell.duration),
+                  attr: spell.attr,
+                  targets: spell.targets,
+                  isMagisphere: spell.isMagisphere || false,
+                  showInPlayerSheet: true,
+                },
+              ],
+            };
+          }
         }
         return cls;
       }),
@@ -317,7 +357,14 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setEditingSpellClass(spellClass);
     setEditingSpellIndex(spellIndex);
     setOpenMagitechRankModal(true);
-  }
+  };
+
+  const handleEditGambleSpell = (spell, spellClass, spellIndex) => {
+    setSpellBeingEdited(spell);
+    setEditingSpellClass(spellClass);
+    setEditingSpellIndex(spellIndex);
+    setOpenGambleModal(true);
+  };
 
   const handleSaveEditedSpell = (spellIndex, editedSpell) => {
     setPlayer((prev) => ({
@@ -370,6 +417,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setOpenAlchemyTargetModal(false);
     setOpenAlchemyEffectsModal(false);
     setOpenInfusionModal(false);
+    setOpenGambleModal(false);
     setSpellBeingEdited(null);
     setOpenMagitechRankModal(false);
     setEditingSpellClass(null);
@@ -465,17 +513,6 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
               </Grid>
             </Grid>
           </Paper>
-          {/* Gamble test button */}
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{ mt: 2 }}
-            onClick={() => {
-              setSpellBeingEdited(entropistGamble);
-              setOpenGambleModal(true)}}
-          >
-            {t("Gamble Test")}
-          </Button>
           <Divider sx={{ my: 2 }} />
         </>
       ) : null}
@@ -493,6 +530,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
             tinkererAlchemy: false,
             tinkererInfusion: false,
             tinkererMagitech: false,
+            gamble: false,
           };
 
           return (
@@ -522,7 +560,9 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                           <div
                             style={{
                               marginTop:
-                                index === 0 || spell.spellType === "default"
+                                index === 0 ||
+                                spell.spellType === "default" ||
+                                spell.spellType === "gamble"
                                   ? 0
                                   : 50,
                             }}
@@ -571,6 +611,14 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                                 <>
                                   <CustomHeader2 headerText={t("Magitech")} />
                                   {(spellTypeHeaders.tinkererMagitech = true)}
+                                </>
+                              )}
+                            {spell.spellType === "gamble" &&
+                              !spellTypeHeaders.gamble && (
+                                <>
+                                  <CustomHeader2 headerText={t("Gamble")} />
+                                  {(spellTypeHeaders.gamble = true)}
+                                  <GambleExplain />
                                 </>
                               )}
                           </div>
@@ -656,6 +704,16 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                               key={index}
                               onEdit={() =>
                                 handleEditMagitechRank(spell, cls.name, index)
+                              }
+                              isEditMode={isEditMode}
+                            />
+                          )}
+                          {spell.spellType === "gamble" && (
+                            <SpellEntropistGamble
+                              gamble={spell}
+                              key={index}
+                              onEdit={() =>
+                                handleEditGambleSpell(spell, cls.name, index)
                               }
                               isEditMode={isEditMode}
                             />
@@ -753,7 +811,8 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
           setEditingSpellClass(null);
           setSpellBeingEdited(null);
         }}
-        onSave={(spellindex, spell) => console.log(spell)}
+        onSave={handleSaveEditedSpell}
+        onDelete={handleDeleteSpell}
         gamble={{ ...spellBeingEdited, index: editingSpellIndex }}
       />
       <SpellCompendiumModal

@@ -21,7 +21,6 @@ import { Close, Delete } from "@mui/icons-material"; // Import Delete icon
 import { useTranslate } from "../../../translation/translate";
 import attributes from "../../../libs/attributes";
 
-
 const secondEffectsOptions = [
   { dieValue: 1, effect: "Wind" },
   { dieValue: 2, effect: "Bolt" },
@@ -35,6 +34,7 @@ export default function SpellEntropistGambleModal({
   open,
   onClose,
   onSave,
+  onDelete,
   gamble,
 }) {
   const { t } = useTranslate();
@@ -52,10 +52,11 @@ export default function SpellEntropistGambleModal({
   const validateTargets = useCallback(() => {
     let error = "";
 
+    // Ensure at least two targets
     if (targets.length < 2) {
       error = t("At least two targets are required.");
     } else {
-      const ranges = targets.map(target => ({
+      const ranges = targets.map((target) => ({
         from: target.rangeFrom,
         to: target.rangeTo,
       }));
@@ -69,28 +70,61 @@ export default function SpellEntropistGambleModal({
         }
       }
 
-      // Check coverage of all die faces
-      const allDieFaces = new Set(Array.from({ length: ranges[ranges.length - 1].to }, (_, i) => i + 1));
+      // Ensure all 12 die faces are covered
+      const requiredDieFaces = new Set(
+        Array.from({ length: 12 }, (_, i) => i + 1)
+      );
       const coveredDieFaces = new Set();
       for (const range of ranges) {
         for (let i = range.from; i <= range.to; i++) {
           coveredDieFaces.add(i);
         }
       }
-      if (allDieFaces.size !== coveredDieFaces.size) {
-        error = t("All die faces must be covered without overlap.");
+      if (
+        coveredDieFaces.size !== 12 ||
+        !Array.from(requiredDieFaces).every((face) => coveredDieFaces.has(face))
+      ) {
+        error = t("All 12 die faces must be covered without overlap.");
       }
-    }
 
-    const targetsWithSecondEffects = targets.filter(target => target.secondRoll && target.secondEffects?.length > 0);
+      // Ensure no target effect is blank
+      if (!error) {
+        for (const target of targets) {
+          if (!target.effect.trim()) {
+            error = t("All target effect fields must be filled out.");
+            break;
+          }
+        }
+      }
 
-    for (const target of targetsWithSecondEffects) {
-      const effects = target.secondEffects.map(effect => effect.effect);
-      const uniqueEffects = new Set(effects);
-
-      if (uniqueEffects.size < 2) {
-        error = t("If second effects are selected, at least two different dice effects are required.");
-        break;
+      // Check second effects if enabled
+      const targetsWithSecondEffects = targets.filter(
+        (target) => target.secondRoll
+      );
+      if (!error) {
+        for (const target of targetsWithSecondEffects) {
+          if (!target.secondEffects?.length) {
+            error = t("All 6 die values for second effects must be covered.");
+            break;
+          }
+          const secondEffectDieFaces = new Set();
+          for (const effect of target.secondEffects) {
+            secondEffectDieFaces.add(effect.dieValue);
+            if (!effect.effect.trim()) {
+              error = t("All second effect fields must be filled out.");
+              break;
+            }
+          }
+          if (
+            secondEffectDieFaces.size !== 6 ||
+            !Array.from(requiredDieFaces)
+              .slice(0, 6)
+              .every((face) => secondEffectDieFaces.has(face))
+          ) {
+            error = t("All 6 die values for second effects must be covered.");
+            break;
+          }
+        }
       }
     }
 
@@ -103,11 +137,11 @@ export default function SpellEntropistGambleModal({
   }, [targets, validateTargets]);
 
   const handleChange = (field, value) => {
-    setEditedGamble(prev => ({ ...prev, [field]: value }));
+    setEditedGamble((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleTargetChange = (index, field, value) => {
-    setTargets(prev => {
+    setTargets((prev) => {
       const newTargets = [...prev];
       if (field === "secondRoll") {
         newTargets[index] = {
@@ -126,12 +160,13 @@ export default function SpellEntropistGambleModal({
   };
 
   const handleSecondEffectChange = (targetIndex, effectIndex, field, value) => {
-    setTargets(prev => {
+    setTargets((prev) => {
       const newTargets = [...prev];
       newTargets[targetIndex] = {
         ...newTargets[targetIndex],
-        secondEffects: newTargets[targetIndex].secondEffects.map((effect, idx) =>
-          idx === effectIndex ? { ...effect, [field]: value } : effect
+        secondEffects: newTargets[targetIndex].secondEffects.map(
+          (effect, idx) =>
+            idx === effectIndex ? { ...effect, [field]: value } : effect
         ),
       };
       return newTargets;
@@ -139,21 +174,30 @@ export default function SpellEntropistGambleModal({
   };
 
   const handleAddTarget = () => {
-    setTargets(prev => [...prev, { rangeFrom: "", rangeTo: "", effect: "", secondRoll: false, secondEffects: [] }]);
+    setTargets((prev) => [
+      ...prev,
+      {
+        rangeFrom: "",
+        rangeTo: "",
+        effect: "",
+        secondRoll: false,
+        secondEffects: [],
+      },
+    ]);
   };
 
   const handleRemoveTarget = (index) => {
-    setTargets(prev => prev.filter((_, i) => i !== index));
+    setTargets((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleAddSecondEffect = (index) => {
-    setTargets(prev => {
+    setTargets((prev) => {
       const newTargets = [...prev];
       newTargets[index] = {
         ...newTargets[index],
         secondEffects: [
           ...newTargets[index].secondEffects,
-          { dieValue: 1, effect: "" } // default values
+          { dieValue: 1, effect: "" }, // default values
         ],
       };
       return newTargets;
@@ -161,11 +205,13 @@ export default function SpellEntropistGambleModal({
   };
 
   const handleRemoveSecondEffect = (targetIndex, effectIndex) => {
-    setTargets(prev => {
+    setTargets((prev) => {
       const newTargets = [...prev];
       newTargets[targetIndex] = {
         ...newTargets[targetIndex],
-        secondEffects: newTargets[targetIndex].secondEffects.filter((_, i) => i !== effectIndex),
+        secondEffects: newTargets[targetIndex].secondEffects.filter(
+          (_, i) => i !== effectIndex
+        ),
       };
       return newTargets;
     });
@@ -173,9 +219,15 @@ export default function SpellEntropistGambleModal({
 
   const handleSave = () => {
     if (validateTargets()) {
-      const sortedTargets = [...targets].sort((a, b) => a.rangeFrom - b.rangeFrom);
+      const sortedTargets = [...targets].sort(
+        (a, b) => a.rangeFrom - b.rangeFrom
+      );
       onSave(editedGamble.index, { ...editedGamble, targets: sortedTargets });
     }
+  };
+
+  const handleDelete = () => {
+    onDelete(editedGamble.index);
   };
 
   return (
@@ -190,7 +242,7 @@ export default function SpellEntropistGambleModal({
       }}
     >
       <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-        {t("Edit Entropist's Gamble")}
+        {t("Edit Gamble Spell")}
       </DialogTitle>
       <IconButton
         aria-label="close"
@@ -206,8 +258,17 @@ export default function SpellEntropistGambleModal({
       </IconButton>
       <DialogContent>
         <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              label={t("Spell Name")}
+              variant="outlined"
+              fullWidth
+              value={editedGamble.spellName}
+              onChange={(e) => handleChange("spellName", e.target.value)}
+            />
+          </Grid>
           <Grid item xs={12} md={4}>
-          <TextField
+            <TextField
               type="number"
               label={t("MP x Dice")}
               variant="outlined"
@@ -239,11 +300,37 @@ export default function SpellEntropistGambleModal({
           </Grid>
           <Grid item xs={12} md={4}>
             <TextField
-              label={t("Max Throwable Dices")}
               type="number"
-              value={editedGamble.maxTargets || ""}
-              onChange={(e) => handleChange("maxTargets", e.target.value)}
+              label={t("Max Throwable Dices")}
+              variant="outlined"
               fullWidth
+              value={
+                editedGamble.maxTargets === null ||
+                editedGamble.maxTargets === undefined
+                  ? ""
+                  : editedGamble.maxTargets.toString()
+              }
+              onChange={(e) => {
+                const value = e.target.value;
+                if (
+                  value === "" ||
+                  (/^\d+$/.test(value) && +value >= 0 && +value <= 100)
+                ) {
+                  handleChange(
+                    "maxTargets",
+                    value === "" ? 0 : parseInt(value, 10)
+                  );
+                }
+              }}
+              onBlur={(e) => {
+                let value = parseInt(e.target.value, 10);
+                if (isNaN(value) || value < 0) {
+                  value = 0;
+                } else if (value > 100) {
+                  value = 100;
+                }
+                handleChange("maxTargets", value);
+              }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -264,10 +351,19 @@ export default function SpellEntropistGambleModal({
             </FormControl>
           </Grid>
           {targets.map((target, index) => (
-            <Grid item xs={12} key={index} container spacing={2} sx={{ mt: 2, pt: 2, borderTop: "1px solid #e0e0e0" }}>
+            <Grid
+              item
+              xs={12}
+              key={index}
+              container
+              spacing={2}
+              sx={{ mt: 2, pt: 2, borderTop: "1px solid #e0e0e0" }}
+            >
               <Grid item xs={12} sm={2}>
                 <FormControl fullWidth>
-                  <InputLabel id={`range-from-label-${index}`}>{t("Range From")}</InputLabel>
+                  <InputLabel id={`range-from-label-${index}`}>
+                    {t("Range From")}
+                  </InputLabel>
                   <Select
                     labelId={`range-from-label-${index}`}
                     id={`range-from-select-${index}`}
@@ -277,17 +373,21 @@ export default function SpellEntropistGambleModal({
                       handleTargetChange(index, "rangeFrom", e.target.value)
                     }
                   >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((value) => (
-                      <MenuItem key={value} value={value}>
-                        {value}
-                      </MenuItem>
-                    ))}
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                      (value) => (
+                        <MenuItem key={value} value={value}>
+                          {value}
+                        </MenuItem>
+                      )
+                    )}
                   </Select>
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={2}>
                 <FormControl fullWidth>
-                  <InputLabel id={`range-to-label-${index}`}>{t("Range To")}</InputLabel>
+                  <InputLabel id={`range-to-label-${index}`}>
+                    {t("Range To")}
+                  </InputLabel>
                   <Select
                     labelId={`range-to-label-${index}`}
                     id={`range-to-select-${index}`}
@@ -297,11 +397,13 @@ export default function SpellEntropistGambleModal({
                       handleTargetChange(index, "rangeTo", e.target.value)
                     }
                   >
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((value) => (
-                      <MenuItem key={value} value={value}>
-                        {value}
-                      </MenuItem>
-                    ))}
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                      (value) => (
+                        <MenuItem key={value} value={value}>
+                          {value}
+                        </MenuItem>
+                      )
+                    )}
                   </Select>
                 </FormControl>
               </Grid>
@@ -321,7 +423,11 @@ export default function SpellEntropistGambleModal({
                     <Switch
                       checked={target.secondRoll}
                       onChange={(e) =>
-                        handleTargetChange(index, "secondRoll", e.target.checked)
+                        handleTargetChange(
+                          index,
+                          "secondRoll",
+                          e.target.checked
+                        )
                       }
                       color="primary"
                     />
@@ -343,14 +449,23 @@ export default function SpellEntropistGambleModal({
                   {target.secondEffects.map((effect, effectIndex) => (
                     <Grid container spacing={2} key={effectIndex}>
                       <Grid item xs={5} sm={3}>
-                        <FormControl fullWidth sx={{mb: 2}}>
-                          <InputLabel id={`die-value-label-${index}-${effectIndex}`}>{t("Die Value")}</InputLabel>
+                        <FormControl fullWidth sx={{ mb: 2 }}>
+                          <InputLabel
+                            id={`die-value-label-${index}-${effectIndex}`}
+                          >
+                            {t("Die Value")}
+                          </InputLabel>
                           <Select
                             labelId={`die-value-label-${index}-${effectIndex}`}
                             label={t("Die Value")}
                             value={effect.dieValue}
                             onChange={(e) =>
-                              handleSecondEffectChange(index, effectIndex, "dieValue", e.target.value)
+                              handleSecondEffectChange(
+                                index,
+                                effectIndex,
+                                "dieValue",
+                                e.target.value
+                              )
                             }
                           >
                             {secondEffectsOptions.map(({ dieValue }) => (
@@ -366,7 +481,12 @@ export default function SpellEntropistGambleModal({
                           label={t("Effect")}
                           value={effect.effect}
                           onChange={(e) =>
-                            handleSecondEffectChange(index, effectIndex, "effect", e.target.value)
+                            handleSecondEffectChange(
+                              index,
+                              effectIndex,
+                              "effect",
+                              e.target.value
+                            )
                           }
                           fullWidth
                         />
@@ -375,7 +495,9 @@ export default function SpellEntropistGambleModal({
                         <Button
                           variant="contained"
                           color="error"
-                          onClick={() => handleRemoveSecondEffect(index, effectIndex)}
+                          onClick={() =>
+                            handleRemoveSecondEffect(index, effectIndex)
+                          }
                         >
                           {t("Remove")}
                         </Button>
@@ -391,12 +513,10 @@ export default function SpellEntropistGambleModal({
                   </Button>
                 </Grid>
               )}
-              
             </Grid>
           ))}
           <Grid item xs={12}>
-
-          <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2 }} />
           </Grid>
           <Grid item xs={12} sx={{ mt: 2 }}>
             <Button variant="contained" onClick={handleAddTarget}>
@@ -409,8 +529,38 @@ export default function SpellEntropistGambleModal({
             </Grid>
           )}
         </Grid>
+        <Grid item xs={12} sm={12}>
+          <FormControlLabel
+            sx={{ mt: 4 }}
+            control={
+              <Switch
+                checked={editedGamble.showInPlayerSheet || false}
+                onChange={(e) =>
+                  handleChange("showInPlayerSheet", e.target.checked)
+                }
+              />
+            }
+            label={t("Show in Character Sheet")}
+          />
+        </Grid>
+        <Grid item xs={12} sm={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={editedGamble.isMagisphere || false}
+                  onChange={(e) =>
+                    handleChange("isMagisphere", e.target.checked)
+                  }
+                />
+              }
+              label={t("Is a Magisphere?")}
+            />
+          </Grid>
       </DialogContent>
       <DialogActions>
+        <Button variant="contained" color="error" onClick={handleDelete}>
+          {t("Delete Spell")}
+        </Button>
         <Button
           variant="contained"
           color="secondary"
