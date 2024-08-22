@@ -16,7 +16,6 @@ import SpellTinkererAlchemyEffectsModal from "./SpellTinkererAlchemyEffectsModal
 import {
   tinkererAlchemy,
   tinkererInfusion,
-  entropistGamble,
 } from "../../../libs/classes";
 import SpellTinkererInfusion from "./SpellTinkererInfusion";
 import SpellTinkererInfusionModal from "./SpellTinkererInfusionModal";
@@ -232,7 +231,29 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                 {
                   spellType: spell,
                   showInPlayerSheet: true,
-                  ...entropistGamble,
+
+                  spellName: "New Gamble",
+                  mp: 10,
+                  maxTargets: 2,
+                  targetDesc: "Special",
+                  duration: "Instantaneous",
+                  attr: "will",
+                  targets: [
+                    {
+                      rangeFrom: 1,
+                      rangeTo: 6,
+                      effect: "First Effect",
+                      secondRoll: false,
+                      secondEffects: [],
+                    },
+                    {
+                      rangeFrom: 7,
+                      rangeTo: 12,
+                      effect: "Second Effect",
+                      secondRoll: false,
+                      secondEffects: [],
+                    },
+                  ],
                 },
               ],
             };

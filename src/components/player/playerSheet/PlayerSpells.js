@@ -4,7 +4,6 @@ import {
   Typography,
   Paper,
   IconButton,
-  Modal,
   Button,
   Dialog,
   DialogTitle,
@@ -24,6 +23,7 @@ import ReactMarkdown from "react-markdown";
 import { OffensiveSpellIcon } from "../../icons";
 import attributes from "../../../libs/attributes";
 import { OpenBracket, CloseBracket } from "../../Bracket";
+import SpellEntropistGamble from "../spells/SpellEntropistGamble";
 
 export default function PlayerSpells({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -131,6 +131,16 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
         (spell.showInPlayerSheet || spell.showInPlayerSheet === undefined)
     )
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  const gambleSpells = player.classes
+    .flatMap((c) => c.spells.map((spell) => ({ ...spell, className: c.name })))
+    .filter(
+      (spell) =>
+        spell !== undefined &&
+        spell.spellType === "gamble" &&
+        (spell.showInPlayerSheet || spell.showInPlayerSheet === undefined)
+    )
+    .sort((a, b) => a.spellName.localeCompare(b.spellName));
 
   const handleOpenModal = (spell) => {
     setSelectedSpell(spell);
@@ -300,7 +310,7 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
 
   return (
     <>
-      {defaultSpells.length > 0 && (
+      {(defaultSpells.length > 0 || gambleSpells.length > 0) && (
         <>
           <Divider sx={{ my: 1 }} />
           <Paper
@@ -411,6 +421,83 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
                   </Grid>
                 </Grid>
               ))}
+              {gambleSpells.map((gamble, index) => (
+                <Grid
+                  item
+                  container
+                  xs={12}
+                  md={6}
+                  key={index}
+                  sx={{ display: "flex", alignItems: "stretch" }}
+                >
+                  <Grid item xs={10} sx={{ display: "flex" }}>
+                    <Typography
+                      id="spell-left-name"
+                      variant="h2"
+                      sx={{
+                        fontWeight: "bold",
+                        textTransform: "uppercase",
+                        backgroundColor: primary,
+                        padding: "5px",
+                        paddingLeft: "10px",
+                        color: "#fff",
+                        borderRadius: "8px 0 0 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      {gamble.isMagisphere && (
+                        <Tooltip title={t("Magisphere")}>
+                          <SettingsSuggest />
+                        </Tooltip>
+                      )}
+                      {gamble.spellName}
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={2}
+                    sx={{ display: "flex", alignItems: "stretch" }}
+                  >
+                    <div
+                      id="spell-right-controls"
+                      style={{
+                        padding: "10px",
+                        backgroundColor: ternary,
+                        borderRadius: "0 8px 8px 0",
+                        marginRight: "15px",
+                        display: "flex",
+                        alignItems: "center",
+                        flexDirection: "row",
+                      }}
+                      className="spell-right-controls"
+                    >
+                      <Tooltip title={t("Info")}>
+                        <IconButton
+                          sx={{ padding: "0px" }}
+                          onClick={() => handleOpenModal(gamble)}
+                        >
+                          <Info />
+                        </IconButton>
+                      </Tooltip>
+                      {isEditMode && (
+                        <Tooltip title={t("Roll")}>
+                          <IconButton
+                            sx={{ padding: "0px", marginLeft: "5px" }}
+                          >
+                            <Casino
+                            /*onClick={() => {
+                                handleRollSetup(spell);
+                              }}*/
+                            />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </Grid>
+                </Grid>
+              ))}
               {magicModifier !== 0 && (
                 <Grid item xs={12} sx={{ marginTop: "20px" }}>
                   <Typography variant="h3" sx={{ fontWeight: "bold" }}>
@@ -424,86 +511,103 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
                 </Grid>
               )}
             </Grid>
-            <Modal
+            <Dialog
               open={openModal}
               onClose={handleCloseModal}
               aria-labelledby="spell-description"
               aria-describedby="spell-description"
+              PaperProps={{ sx: { width: { xs: "90%", md: "80%" } } }}
             >
-              <Paper
-                sx={{
-                  position: "absolute",
-                  width: { xs: "90%", md: 400 },
-                  bgcolor: "#fff",
-                  border: "2px solid",
-                  borderColor: secondary,
-                  borderRadius: "8px",
-                  boxShadow: 24,
-                  padding: 2,
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                <Typography
-                  variant="h4"
-                  sx={{ textTransform: "uppercase" }}
-                  fontWeight={"bold"}
-                >
-                  {selectedSpell && selectedSpell.name}
-                  {selectedSpell && selectedSpell.isMagisphere && (
-                    <>
-                      {" - " + t("Magisphere")}{" "}
-                      <SettingsSuggest sx={{ fontSize: "1rem" }} />
-                    </>
-                  )}
-                  {" - "}
-                  {selectedSpell && t(selectedSpell.className)}
-                </Typography>
-                <ReactMarkdown>
-                  {selectedSpell && selectedSpell.description}
-                </ReactMarkdown>
-                <Typography variant="h5">
-                  {t("MP Cost")}: {selectedSpell && selectedSpell.mp}{" "}
-                  {selectedSpell && selectedSpell.maxTargets !== 1
-                    ? "x " + t("Target")
-                    : ""}{" "}
-                  {selectedSpell &&
-                    selectedSpell.isMagisphere &&
-                    "+ 2 " + t("IP")}
-                </Typography>
-                <Typography variant="h5">
-                  {t("Max Targets")}:{" "}
-                  {selectedSpell && selectedSpell.maxTargets}
-                </Typography>
-                <Typography variant="h5">
-                  {t("Target Description")}:{" "}
-                  {selectedSpell && t(selectedSpell.targetDesc)}
-                </Typography>
-                <Typography variant="h5">
-                  {t("Duration")}: {selectedSpell && t(selectedSpell.duration)}
-                </Typography>
-                {selectedSpell && selectedSpell.isOffensive && (
-                  <Typography variant="h5">
-                    {t("Magic Check") + ": "}
-                    <strong>
-                      <OpenBracket />
-                      {t(attributes[selectedSpell.attr1].shortcaps)}
-                      {t(" + ")}
-                      {t(attributes[selectedSpell.attr2].shortcaps)}
-                      <CloseBracket />
-                    </strong>
+              <DialogContent sx={{ marginTop: "10px" }}>
+                
+                  <Typography
+                    variant="h4"
+                    sx={{ textTransform: "uppercase" }}
+                    fontWeight={"bold"}
+                  >
+                    {selectedSpell &&
+                      (selectedSpell.name || selectedSpell.spellName)}
+                    {selectedSpell && selectedSpell.isMagisphere && (
+                      <>
+                        {" - " + t("Magisphere")}{" "}
+                        <SettingsSuggest sx={{ fontSize: "1rem" }} />
+                      </>
+                    )}
+                    {" - "}
+                    {selectedSpell && t(selectedSpell.className)}
                   </Typography>
-                )}
-                <Button
-                  variant="contained"
-                  onClick={handleOK}
-                  sx={{ marginTop: 2, width: "100%" }}
-                >
-                  OK
-                </Button>
-              </Paper>
-            </Modal>
+                  <ReactMarkdown>
+                    {selectedSpell && selectedSpell.spellType === "default"
+                      ? selectedSpell.description
+                      : selectedSpell && selectedSpell.spellType === "gamble"
+                      ? t("GambleSpell_desc")
+                      : ""}
+                  </ReactMarkdown>
+                  {selectedSpell && selectedSpell.spellType === "gamble" && (
+                    <SpellEntropistGamble gamble={selectedSpell} />
+                  )}
+                  {selectedSpell && selectedSpell.spellType === "default" && (
+                    <Typography variant="h5">
+                      {t("MP Cost")}: {selectedSpell && selectedSpell.mp}{" "}
+                      {selectedSpell && selectedSpell.maxTargets !== 1
+                        ? "x " + t("Target")
+                        : ""}{" "}
+                      {selectedSpell &&
+                        selectedSpell.isMagisphere &&
+                        "+ 2 " + t("IP")}
+                    </Typography>
+                  )}
+                  {selectedSpell && selectedSpell.spellType === "gamble" && (
+                    <Typography variant="h5">
+                      {t("MP Cost x Dice")}:{selectedSpell && selectedSpell.mp}{" "}
+                      {selectedSpell &&
+                        selectedSpell.isMagisphere &&
+                        "+ 2 " + t("IP")}
+                    </Typography>
+                  )}
+                  <Typography variant="h5">
+                    {t("Max Targets")}:{" "}
+                    {selectedSpell && selectedSpell.maxTargets}
+                  </Typography>
+                  <Typography variant="h5">
+                    {t("Target Description")}:{" "}
+                    {selectedSpell && t(selectedSpell.targetDesc)}
+                  </Typography>
+                  <Typography variant="h5">
+                    {t("Duration")}:{" "}
+                    {selectedSpell && t(selectedSpell.duration)}
+                  </Typography>
+                  {selectedSpell &&
+                    selectedSpell.spellType === "default" &&
+                    selectedSpell.isOffensive && (
+                      <Typography variant="h5">
+                        {t("Magic Check") + ": "}
+                        <strong>
+                          <OpenBracket />
+                          {t(attributes[selectedSpell.attr1].shortcaps)}
+                          {t(" + ")}
+                          {t(attributes[selectedSpell.attr2].shortcaps)}
+                          <CloseBracket />
+                        </strong>
+                      </Typography>
+                    )}
+                  {selectedSpell && selectedSpell.spellType === "gamble" && (
+                    <Typography variant="h5">
+                      {t("Attribute")}:{" "}
+                      {selectedSpell &&
+                        t(attributes[selectedSpell.attr].shortcaps)}
+                    </Typography>
+                  )}
+                  <Button
+                    variant="contained"
+                    onClick={handleOK}
+                    sx={{ marginTop: 2, width: "100%" }}
+                  >
+                    OK
+                  </Button>
+                
+              </DialogContent>
+            </Dialog>
             <Dialog
               open={dialogOpen}
               onClose={handleDialogClose}
