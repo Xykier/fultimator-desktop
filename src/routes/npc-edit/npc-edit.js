@@ -160,6 +160,7 @@ export default function NpcEdit() {
   const saveNpc = () => {
     updateNpc(npcTemp);
     setIsUpdated(false);
+    setNpc(npcTemp);
   };
 
   return (
