@@ -265,6 +265,7 @@ export default function SpellEntropistGambleModal({
               fullWidth
               value={editedGamble.spellName}
               onChange={(e) => handleChange("spellName", e.target.value)}
+              inputProps={{ maxLength: 50 }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -415,6 +416,7 @@ export default function SpellEntropistGambleModal({
                     handleTargetChange(index, "effect", e.target.value)
                   }
                   fullWidth
+                  inputProps={{ maxLength: 200 }}
                 />
               </Grid>
               <Grid item xs={12} sm={3}>
@@ -489,6 +491,7 @@ export default function SpellEntropistGambleModal({
                             )
                           }
                           fullWidth
+                          inputProps={{ maxLength: 200 }}
                         />
                       </Grid>
                       <Grid item xs={2} sm={3}>
