@@ -268,6 +268,7 @@ export default function PlayerEdit() {
   const savePlayer = () => {
     setIsUpdated(false);
     updatePc(playerTemp);
+    setPlayer(playerTemp);
   };
 
   if (!playerTemp) {
