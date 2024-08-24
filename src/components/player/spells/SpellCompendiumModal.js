@@ -140,7 +140,7 @@ const SpellCompendiumModal = ({ open, onClose, typeName, onSave }) => {
                   <ListItemText
                     primary={
                       <>
-                        {item.name || item.spellName}
+                        {t(item.name) || t(item.spellName)}
                         {item.isOffensive && <OffensiveSpellIcon />}
                       </>
                     }

@@ -1950,7 +1950,7 @@ export const spellList = [
         rangeFrom: 1,
         rangeTo: 1,
         effect: t(
-          "You lose half of your current Hit Points and half of your current Mind Points."
+          "GambleEffect1"
         ),
         secondRoll: false,
         secondEffects: [],
@@ -1959,7 +1959,7 @@ export const spellList = [
         rangeFrom: 2,
         rangeTo: 3,
         effect: t(
-          "Each creature present on the scene, including yourself, suffers poisoned."
+          "GambleEffect2"
         ),
         secondRoll: false,
         secondEffects: [],
@@ -1968,7 +1968,7 @@ export const spellList = [
         rangeFrom: 4,
         rangeTo: 6,
         effect: t(
-          "Each creature present on the scene, including yourself, suffers slow."
+          "GambleEffect3"
         ),
         secondRoll: false,
         secondEffects: [],
@@ -1977,7 +1977,7 @@ export const spellList = [
         rangeFrom: 7,
         rangeTo: 8,
         effect: t(
-          "Choose up to three creatures you can see: each of them recovers 50 Hit Points and also recovers from all status effects."
+          "GambleEffect4"
         ),
         secondRoll: false,
         secondEffects: [],
@@ -1986,7 +1986,7 @@ export const spellList = [
         rangeFrom: 9,
         rangeTo: 12,
         effect: t(
-          "Choose any number of creatures you can see: each of them suffers 30 damage. The damage type is determined randomly by rolling a d6:"
+          "GambleEffect5"
         ),
         secondRoll: true,
         secondEffects: [
@@ -2189,7 +2189,7 @@ export const entropistGamble = {
       rangeFrom: 1,
       rangeTo: 1,
       effect: t(
-        "You lose half of your current Hit Points and half of your current Mind Points."
+        "GambleEffect1"
       ),
       secondRoll: false,
       secondEffects: [],
@@ -2198,7 +2198,7 @@ export const entropistGamble = {
       rangeFrom: 2,
       rangeTo: 3,
       effect: t(
-        "Each creature present on the scene, including yourself, suffers poisoned."
+        "GambleEffect2"
       ),
       secondRoll: false,
       secondEffects: [],
@@ -2207,7 +2207,7 @@ export const entropistGamble = {
       rangeFrom: 4,
       rangeTo: 6,
       effect: t(
-        "Each creature present on the scene, including yourself, suffers slow."
+        "GambleEffect3"
       ),
       secondRoll: false,
       secondEffects: [],
@@ -2216,7 +2216,7 @@ export const entropistGamble = {
       rangeFrom: 7,
       rangeTo: 8,
       effect: t(
-        "Choose up to three creatures you can see: each of them recovers 50 Hit Points and also recovers from all status effects."
+        "GambleEffect4"
       ),
       secondRoll: false,
       secondEffects: [],
@@ -2225,7 +2225,7 @@ export const entropistGamble = {
       rangeFrom: 9,
       rangeTo: 12,
       effect: t(
-        "Choose any number of creatures you can see: each of them suffers 30 damage. The damage type is determined randomly by rolling a d6:"
+        "GambleEffect5"
       ),
       secondRoll: true,
       secondEffects: [

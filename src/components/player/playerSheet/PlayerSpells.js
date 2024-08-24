@@ -344,21 +344,18 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
       setDialogMessage(
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h3" sx={{ fontWeight: "bold", textTransform: "uppercase", textAlign: "left" }}>
-              {t("Gamble Results")}
-            </Typography>
             <Typography variant="body1">
               {t("Choose one of the following effects") + ": "}
             </Typography>
             {dices.map((dice, index) => (
               <Typography key={index} variant="h4" sx={{ margin: "10px 0" }}>
-                <strong>{t(`Dice ${index + 1}:`)}</strong>
+                <strong>{t(`Result`) + " " + (index + 1) + ": "}</strong>
                 <br />
-                <strong>{t("First Dice:")}</strong> ({dice.firstThrow}) - {t(`${dice.effect}`)}
+                <strong>{t("First Dice") + " (d" + attValue + "):"}</strong> ({dice.firstThrow}) - {t(`${dice.effect}`)}
                 {dice.secondRoll && (
                   <>
                     <br />
-                    <strong>{t("Second Dice (d6):")}</strong> ({dice.secondThrow}) - {t(`${dice.secondEffect}`)}
+                    <strong>{t("Second Dice") + " (d6):"}</strong> ({dice.secondThrow}) - {t(`${dice.secondEffect}`)}
                   </>
                 )}
               </Typography>
@@ -663,14 +660,16 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
                 )}
                 {selectedSpell && selectedSpell.spellType === "gamble" && (
                   <Typography variant="h5">
-                    {t("MP Cost x Dice")}:{selectedSpell && selectedSpell.mp}{" "}
+                    {t("MP x Dice")}:{selectedSpell && selectedSpell.mp}{" "}
                     {selectedSpell &&
                       selectedSpell.isMagisphere &&
                       "+ 2 " + t("IP")}
                   </Typography>
                 )}
                 <Typography variant="h5">
-                  {t("Max Targets")}:{" "}
+                  {(selectedSpell && selectedSpell.spellType === "default") && t("Max Targets")}
+                  {(selectedSpell && selectedSpell.spellType === "gamble") && t("Max Throwable Dices")}
+                  :{" "}
                   {selectedSpell && selectedSpell.maxTargets}
                 </Typography>
                 <Typography variant="h5">

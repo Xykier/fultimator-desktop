@@ -453,11 +453,11 @@ export default function SpellEntropistGambleModal({
                           <InputLabel
                             id={`die-value-label-${index}-${effectIndex}`}
                           >
-                            {t("Die Value")}
+                            {t("Die")}
                           </InputLabel>
                           <Select
                             labelId={`die-value-label-${index}-${effectIndex}`}
-                            label={t("Die Value")}
+                            label={t("Die")}
                             value={effect.dieValue}
                             onChange={(e) =>
                               handleSecondEffectChange(
@@ -504,13 +504,15 @@ export default function SpellEntropistGambleModal({
                       </Grid>
                     </Grid>
                   ))}
-                  <Button
-                    variant="contained"
-                    onClick={() => handleAddSecondEffect(index)}
-                    sx={{ mt: 2 }}
-                  >
-                    {t("Add Second Effect")}
-                  </Button>
+                  {target.secondEffects.length < 6 && (
+                    <Button
+                      variant="contained"
+                      onClick={() => handleAddSecondEffect(index)}
+                      sx={{ mt: 2 }}
+                    >
+                      {t("Add Second Effect")}
+                    </Button>
+                  )}
                 </Grid>
               )}
             </Grid>
@@ -544,18 +546,16 @@ export default function SpellEntropistGambleModal({
           />
         </Grid>
         <Grid item xs={12} sm={12}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={editedGamble.isMagisphere || false}
-                  onChange={(e) =>
-                    handleChange("isMagisphere", e.target.checked)
-                  }
-                />
-              }
-              label={t("Is a Magisphere?")}
-            />
-          </Grid>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={editedGamble.isMagisphere || false}
+                onChange={(e) => handleChange("isMagisphere", e.target.checked)}
+              />
+            }
+            label={t("Is a Magisphere?")}
+          />
+        </Grid>
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="error" onClick={handleDelete}>
