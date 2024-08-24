@@ -298,6 +298,111 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
     }
   };
 
+  const handleGambleRoll = () => {
+    if (!isRolling) {
+      const usedMp = selectedSpell.mp * targets;
+  
+      // Check if the player has enough MP to cast the spell
+      if (useMp && player.stats.mp.current < usedMp) {
+        return;
+      }
+  
+      const attr = selectedSpell.attr;
+      let attValue = attributeMap[attr];
+  
+      let dices = [];
+  
+      for (let i = 0; i < targets; i++) {
+        // Roll the first dice
+        const firstThrow = Math.floor(Math.random() * attValue) + 1;
+  
+        // Find the matching effect based on the first roll
+        const targetEffect = selectedSpell.targets.find(
+          (effect) => firstThrow >= effect.rangeFrom && firstThrow <= effect.rangeTo
+        );
+  
+        const dice = {
+          firstThrow: firstThrow,
+          effect: targetEffect ? targetEffect.effect : "No effect",
+        };
+  
+        // If there's a second roll, roll a d6 and find the corresponding second effect
+        if (targetEffect && targetEffect.secondRoll) {
+          dice.secondRoll = true;
+          dice.secondThrow = Math.floor(Math.random() * 6) + 1;
+  
+          const secondEffect = targetEffect.secondEffects.find(
+            (effect) => effect.dieValue === dice.secondThrow
+          );
+          dice.secondEffect = secondEffect ? secondEffect.effect : "No effect";
+        }
+  
+        dices.push(dice);
+      }
+  
+      // display of the gamble results
+      setDialogMessage(
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="h3" sx={{ fontWeight: "bold", textTransform: "uppercase", textAlign: "left" }}>
+              {t("Gamble Results")}
+            </Typography>
+            <Typography variant="body1">
+              {t("Choose one of the following effects") + ": "}
+            </Typography>
+            {dices.map((dice, index) => (
+              <Typography key={index} variant="h4" sx={{ margin: "10px 0" }}>
+                <strong>{t(`Dice ${index + 1}:`)}</strong>
+                <br />
+                <strong>{t("First Dice:")}</strong> ({dice.firstThrow}) - {t(`${dice.effect}`)}
+                {dice.secondRoll && (
+                  <>
+                    <br />
+                    <strong>{t("Second Dice (d6):")}</strong> ({dice.secondThrow}) - {t(`${dice.secondEffect}`)}
+                  </>
+                )}
+              </Typography>
+            ))}
+          </Grid>
+        </Grid>
+      );      
+  
+      // Deduct MP from the player
+      if (useMp) {
+        setPlayer((prevPlayer) => ({
+          ...prevPlayer,
+          stats: {
+            ...prevPlayer.stats,
+            mp: {
+              ...prevPlayer.stats.mp,
+              current: prevPlayer.stats.mp.current - usedMp,
+            },
+          },
+        }));
+      }
+  
+      // Deduct IP for MagiSphere
+      if (selectedSpell?.isMagisphere && useIp) {
+        setPlayer((prevPlayer) => ({
+          ...prevPlayer,
+          stats: {
+            ...prevPlayer.stats,
+            ip: {
+              ...prevPlayer.stats.ip,
+              current: prevPlayer.stats.ip.current - 2,
+            },
+          },
+        }));
+      }
+  
+      setIsRolling(true);
+    } else {
+      setIsRolling(false);
+      setDialogMessage("");
+    }
+  };
+  
+
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedSpell(null);
@@ -487,9 +592,9 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
                             sx={{ padding: "0px", marginLeft: "5px" }}
                           >
                             <Casino
-                            /*onClick={() => {
-                                handleRollSetup(spell);
-                              }}*/
+                              onClick={() => {
+                                handleRollSetup(gamble);
+                              }}
                             />
                           </IconButton>
                         </Tooltip>
@@ -519,93 +624,90 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
               PaperProps={{ sx: { width: { xs: "90%", md: "80%" } } }}
             >
               <DialogContent sx={{ marginTop: "10px" }}>
-                
-                  <Typography
-                    variant="h4"
-                    sx={{ textTransform: "uppercase" }}
-                    fontWeight={"bold"}
-                  >
-                    {selectedSpell &&
-                      (selectedSpell.name || selectedSpell.spellName)}
-                    {selectedSpell && selectedSpell.isMagisphere && (
-                      <>
-                        {" - " + t("Magisphere")}{" "}
-                        <SettingsSuggest sx={{ fontSize: "1rem" }} />
-                      </>
-                    )}
-                    {" - "}
-                    {selectedSpell && t(selectedSpell.className)}
-                  </Typography>
-                  <ReactMarkdown>
-                    {selectedSpell && selectedSpell.spellType === "default"
-                      ? selectedSpell.description
-                      : selectedSpell && selectedSpell.spellType === "gamble"
-                      ? t("GambleSpell_desc")
-                      : ""}
-                  </ReactMarkdown>
-                  {selectedSpell && selectedSpell.spellType === "gamble" && (
-                    <SpellEntropistGamble gamble={selectedSpell} />
-                  )}
-                  {selectedSpell && selectedSpell.spellType === "default" && (
-                    <Typography variant="h5">
-                      {t("MP Cost")}: {selectedSpell && selectedSpell.mp}{" "}
-                      {selectedSpell && selectedSpell.maxTargets !== 1
-                        ? "x " + t("Target")
-                        : ""}{" "}
-                      {selectedSpell &&
-                        selectedSpell.isMagisphere &&
-                        "+ 2 " + t("IP")}
-                    </Typography>
-                  )}
-                  {selectedSpell && selectedSpell.spellType === "gamble" && (
-                    <Typography variant="h5">
-                      {t("MP Cost x Dice")}:{selectedSpell && selectedSpell.mp}{" "}
-                      {selectedSpell &&
-                        selectedSpell.isMagisphere &&
-                        "+ 2 " + t("IP")}
-                    </Typography>
-                  )}
-                  <Typography variant="h5">
-                    {t("Max Targets")}:{" "}
-                    {selectedSpell && selectedSpell.maxTargets}
-                  </Typography>
-                  <Typography variant="h5">
-                    {t("Target Description")}:{" "}
-                    {selectedSpell && t(selectedSpell.targetDesc)}
-                  </Typography>
-                  <Typography variant="h5">
-                    {t("Duration")}:{" "}
-                    {selectedSpell && t(selectedSpell.duration)}
-                  </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{ textTransform: "uppercase" }}
+                  fontWeight={"bold"}
+                >
                   {selectedSpell &&
-                    selectedSpell.spellType === "default" &&
-                    selectedSpell.isOffensive && (
-                      <Typography variant="h5">
-                        {t("Magic Check") + ": "}
-                        <strong>
-                          <OpenBracket />
-                          {t(attributes[selectedSpell.attr1].shortcaps)}
-                          {t(" + ")}
-                          {t(attributes[selectedSpell.attr2].shortcaps)}
-                          <CloseBracket />
-                        </strong>
-                      </Typography>
-                    )}
-                  {selectedSpell && selectedSpell.spellType === "gamble" && (
+                    (selectedSpell.name || selectedSpell.spellName)}
+                  {selectedSpell && selectedSpell.isMagisphere && (
+                    <>
+                      {" - " + t("Magisphere")}{" "}
+                      <SettingsSuggest sx={{ fontSize: "1rem" }} />
+                    </>
+                  )}
+                  {" - "}
+                  {selectedSpell && t(selectedSpell.className)}
+                </Typography>
+                <ReactMarkdown>
+                  {selectedSpell && selectedSpell.spellType === "default"
+                    ? selectedSpell.description
+                    : selectedSpell && selectedSpell.spellType === "gamble"
+                    ? t("GambleSpell_desc")
+                    : ""}
+                </ReactMarkdown>
+                {selectedSpell && selectedSpell.spellType === "gamble" && (
+                  <SpellEntropistGamble gamble={selectedSpell} />
+                )}
+                {selectedSpell && selectedSpell.spellType === "default" && (
+                  <Typography variant="h5">
+                    {t("MP Cost")}: {selectedSpell && selectedSpell.mp}{" "}
+                    {selectedSpell && selectedSpell.maxTargets !== 1
+                      ? "x " + t("Target")
+                      : ""}{" "}
+                    {selectedSpell &&
+                      selectedSpell.isMagisphere &&
+                      "+ 2 " + t("IP")}
+                  </Typography>
+                )}
+                {selectedSpell && selectedSpell.spellType === "gamble" && (
+                  <Typography variant="h5">
+                    {t("MP Cost x Dice")}:{selectedSpell && selectedSpell.mp}{" "}
+                    {selectedSpell &&
+                      selectedSpell.isMagisphere &&
+                      "+ 2 " + t("IP")}
+                  </Typography>
+                )}
+                <Typography variant="h5">
+                  {t("Max Targets")}:{" "}
+                  {selectedSpell && selectedSpell.maxTargets}
+                </Typography>
+                <Typography variant="h5">
+                  {t("Target Description")}:{" "}
+                  {selectedSpell && t(selectedSpell.targetDesc)}
+                </Typography>
+                <Typography variant="h5">
+                  {t("Duration")}: {selectedSpell && t(selectedSpell.duration)}
+                </Typography>
+                {selectedSpell &&
+                  selectedSpell.spellType === "default" &&
+                  selectedSpell.isOffensive && (
                     <Typography variant="h5">
-                      {t("Attribute")}:{" "}
-                      {selectedSpell &&
-                        t(attributes[selectedSpell.attr].shortcaps)}
+                      {t("Magic Check") + ": "}
+                      <strong>
+                        <OpenBracket />
+                        {t(attributes[selectedSpell.attr1].shortcaps)}
+                        {t(" + ")}
+                        {t(attributes[selectedSpell.attr2].shortcaps)}
+                        <CloseBracket />
+                      </strong>
                     </Typography>
                   )}
-                  <Button
-                    variant="contained"
-                    onClick={handleOK}
-                    sx={{ marginTop: 2, width: "100%" }}
-                  >
-                    OK
-                  </Button>
-                
+                {selectedSpell && selectedSpell.spellType === "gamble" && (
+                  <Typography variant="h5">
+                    {t("Attribute")}:{" "}
+                    {selectedSpell &&
+                      t(attributes[selectedSpell.attr].shortcaps)}
+                  </Typography>
+                )}
+                <Button
+                  variant="contained"
+                  onClick={handleOK}
+                  sx={{ marginTop: 2, width: "100%" }}
+                >
+                  OK
+                </Button>
               </DialogContent>
             </Dialog>
             <Dialog
@@ -613,7 +715,7 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
               onClose={handleDialogClose}
               aria-labelledby="alert-dialog-title"
               aria-describedby="alert-dialog-description"
-              PaperProps={{ sx: { width: { xs: "90%", md: "30%" } } }}
+              PaperProps={{ sx: { width: { xs: "90%", md: "50%" } } }}
             >
               <DialogTitle
                 variant="h3"
@@ -635,7 +737,9 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
                     <Grid container alignItems="center" spacing={1}>
                       <Grid item xs={12}>
                         <Typography variant="body1">
-                          {t("Select number of targets from 1 to")}{" "}
+                          {selectedSpell?.spellType === "default" && t("Select number of targets from 1 to")}
+                          {selectedSpell?.spellType === "gamble" && t("Select number of dices you want to throw")}
+                          {" "}
                           {selectedSpell?.maxTargets || 1}:
                         </Typography>
                       </Grid>
@@ -719,7 +823,13 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleDialogClose}>{t("Close")}</Button>
-                <Button onClick={handleRoll}>
+                <Button
+                  onClick={
+                    selectedSpell && selectedSpell?.spellType === "default"
+                      ? handleRoll
+                      : handleGambleRoll
+                  }
+                >
                   {isRolling ? t("Re-Roll") : t("Roll")}
                 </Button>
               </DialogActions>
