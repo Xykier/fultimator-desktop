@@ -1,5 +1,5 @@
+import React, { useEffect } from "react";
 import { Container } from "@mui/material";
-import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AppBar from "./appbar/AppBar";
 import CompactAppBar from "./appbar/CompactAppBar";
@@ -7,7 +7,7 @@ import { useThemeContext } from "../ThemeContext";
 import { globalConfirm } from "../utility/globalConfirm";
 import { useTranslate } from "../translation/translate";
 
-type ThemeValue = "Fabula" | "High" | "Techno" | "Natural" | "Midnight";
+type ThemeValue = "Fabula" | "High" | "Techno" | "Natural" | "Bravely" | "Obscura";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,20 +17,17 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) => {
   const { t } = useTranslate();
-  const { setTheme } = useThemeContext();
-  const [selectedTheme, setSelectedTheme] = useState<ThemeValue>(() => {
-    return (localStorage.getItem("selectedTheme") as ThemeValue) || "Fabula";
-  });
+  const { selectedTheme, isDarkMode, setTheme, toggleDarkMode } = useThemeContext();
 
   const handleSelectTheme = (theme: ThemeValue) => {
-    setSelectedTheme(theme);
+    setTheme(theme);
   };
 
   useEffect(() => {
-    // Update the theme in localStorage and ThemeContext
+    // Ensure theme and mode are in sync with localStorage
     localStorage.setItem("selectedTheme", selectedTheme);
-    setTheme(selectedTheme);
-  }, [selectedTheme, setTheme]);
+    localStorage.setItem("isDarkMode", JSON.stringify(isDarkMode));
+  }, [selectedTheme, isDarkMode]);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -71,6 +68,8 @@ const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) 
           isPcEdit={isPcEdit}
           selectedTheme={selectedTheme}
           handleSelectTheme={handleSelectTheme}
+          isDarkMode={isDarkMode}
+          handleToggleDarkMode={toggleDarkMode}
           showGoBackButton={!isHomepage}
           handleNavigation={handleNavigation}
         />
@@ -79,6 +78,8 @@ const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) 
           isNpcEdit={isNpcEdit}
           selectedTheme={selectedTheme}
           handleSelectTheme={handleSelectTheme}
+          isDarkMode={isDarkMode}
+          handleToggleDarkMode={toggleDarkMode}
           showGoBackButton={!isHomepage}
           handleNavigation={handleNavigation}
         />

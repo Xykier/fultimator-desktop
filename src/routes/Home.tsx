@@ -15,13 +15,16 @@ import adversary_designer from "./adversary_designer.webp";
 import combat_simulator from "./combat_simulator.webp";
 import items_rituals_projects from "./items_rituals_projects.webp";
 import character_designer from "./character_designer_alpha_2_00.webp";
-import PublicIcon from "@mui/icons-material/Public";
-import FeedbackIcon from "@mui/icons-material/Feedback";
-import DesktopMacIcon from "@mui/icons-material/DesktopMac";
-import DiscordIcon from "../components/svgs/discord.svg"; // Import your SVG
-import CopyrightIcon from "@mui/icons-material/Copyright";
+import PublicIcon from '@mui/icons-material/Public';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+import DesktopMacIcon from '@mui/icons-material/DesktopMac';
+import DiscordIcon from '../components/svgs/discord.svg'; // Import your SVG
+import CopyrightIcon from '@mui/icons-material/Copyright';
+import { useCustomTheme } from '../hooks/useCustomTheme'
 
 function Home() {
+  const theme = useCustomTheme();
+  const isDarkMode = theme.mode === "dark";
   const navigate = useNavigate();
   const [hover, setHover] = useState("");
   const { t } = useTranslate();
@@ -92,7 +95,7 @@ function Home() {
           mt: 5,
           mb: 5,
           padding: "1em",
-          backgroundColor: "#f5f5f5",
+          backgroundColor: isDarkMode ? `#252525` : "#f5f5f5",
           borderRadius: "8px",
         }}
       >
