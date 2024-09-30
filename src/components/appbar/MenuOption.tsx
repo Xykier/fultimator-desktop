@@ -26,7 +26,7 @@ import {
   CloudDownload,
 } from "@mui/icons-material";
 import { useTranslate } from "../../translation/translate";
-
+import DarkModeToggle, { DarkModeToggleProps } from "./DarkModeToggle";
 import ThemeSwitcher, { ThemeSwitcherProps } from "./ThemeSwitcher";
 import LanguageMenu from "./LanguageMenu";
 import HelpFeedbackDialog from "./HelpFeedbackDialog"; // Import the dialog component
@@ -37,11 +37,13 @@ import {
   handleImport,
 } from "../../utility/dbExportImport"; // Import the new functions
 
-interface MenuOptionProps extends ThemeSwitcherProps {}
+interface MenuOptionProps extends ThemeSwitcherProps, DarkModeToggleProps {}
 
 const MenuOption: React.FC<MenuOptionProps> = ({
   selectedTheme,
   onSelectTheme,
+  isDarkMode,
+  onToggleDarkMode,
 }) => {
   const { t } = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -277,7 +279,16 @@ const MenuOption: React.FC<MenuOptionProps> = ({
             <ListItemText primary={t("Sign In")} />
           </MenuItem>
         )}
-        <Divider key="google-auth-divider" />
+        <Divider key="sign-in-out-divider" />
+
+        <MenuItem>
+          <DarkModeToggle
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={onToggleDarkMode}
+          />
+        </MenuItem>
+        <Divider key="darkmode-switcher-divider" />
+
         <ThemeSwitcher
           key="theme-switcher"
           selectedTheme={selectedTheme}
