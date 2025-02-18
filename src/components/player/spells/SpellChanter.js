@@ -1,0 +1,297 @@
+import React from "react";
+import {
+  Typography,
+  IconButton,
+  Grid,
+  ThemeProvider,
+  Tooltip,
+  Icon,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+} from "@mui/material";
+import { Edit, VisibilityOff, ExpandMore, Info } from "@mui/icons-material";
+import { useTranslate } from "../../../translation/translate";
+import ReactMarkdown from "react-markdown";
+import { useCustomTheme } from "../../../hooks/useCustomTheme";
+
+function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
+  const { t } = useTranslate();
+  const theme = useCustomTheme();
+  const isDarkMode = theme.mode === "dark";
+  const iconColor = isDarkMode ? "#ffffff" : "#000000";
+  const gradientColor = isDarkMode ? "#1f1f1f" : "#fff";
+
+  const showInPlayerSheet =
+    magichant.showInPlayerSheet || magichant.showInPlayerSheet === undefined;
+
+  const inlineStyles = {
+    margin: 0,
+    padding: 0,
+  };
+
+  const components = {
+    p: ({ node, ...props }) => <p style={inlineStyles} {...props} />,
+  };
+
+  return (
+    <>
+      <Accordion sx={{ marginY: 1 }}>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Icon sx={{ color: theme.primary, marginRight: 1 }}>
+            <Info />
+          </Icon>
+          <Typography variant="h4">{t("Magichant Details")}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ReactMarkdown>{t("test test")}</ReactMarkdown>
+          <ReactMarkdown>{t("asd asd")}</ReactMarkdown>
+        </AccordionDetails>
+      </Accordion>
+      {/* Row 1 */}
+      <div
+        style={{
+          backgroundColor: theme.primary,
+          fontFamily: "Antonio",
+          fontWeight: "normal",
+          fontSize: "1.1em",
+          padding: "2px 17px",
+          color: theme.white,
+          textTransform: "uppercase",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Grid container style={{ flexGrow: 1 }}>
+          <Grid
+            item
+            xs={3}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "left",
+            }}
+          >
+            <Typography
+              variant="h3"
+              style={{ flexGrow: 1, marginRight: "5px" }}
+            >
+              {t("Key")}
+            </Typography>
+          </Grid>
+          <Grid
+            item
+            xs={3}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography variant="h3">{t("Type")}</Typography>
+          </Grid>
+          <Grid
+            item
+            xs={2}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography variant="h3">{t("Status Effect")}</Typography>
+          </Grid>
+          <Grid
+            item
+            xs={2}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography variant="h3">{t("Attribute")}</Typography>
+          </Grid>
+          <Grid
+            item
+            xs={2}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography variant="h3">{t("Recovery")}</Typography>
+          </Grid>
+        </Grid>
+        {isEditMode && (
+          <Grid
+            item
+            xs
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            <div style={{ width: 40, height: 40 }} /> {/* Retain space */}
+          </Grid>
+        )}
+      </div>
+      <Button onClick={onEditKeys}>Edit Keys</Button>
+      {/* Row 2 */}
+      {magichant.rank >= 1 && (
+        <div
+          style={{
+            background: `linear-gradient(to right, ${theme.ternary}, ${gradientColor})`,
+            padding: "3px 17px",
+            display: "flex",
+            justifyContent: "space-between",
+            borderTop: `1px solid ${theme.secondary}`,
+            borderBottom: `1px solid ${theme.secondary}`,
+          }}
+        >
+          <Grid container style={{ flexGrow: 1 }}>
+            <Grid
+              item
+              xs
+              flexGrow
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "left",
+              }}
+            >
+              <Typography
+                fontWeight="bold"
+                style={{ flexGrow: 1, marginRight: "5px" }}
+              >
+                {t("Basic Infusions")}
+              </Typography>
+            </Grid>
+          </Grid>
+          {isEditMode && (
+            <Grid
+              item
+              xs
+              style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
+            >
+              {!showInPlayerSheet && (
+                <Tooltip title={t("Infusion not shown in player sheet")}>
+                  <Icon>
+                    <VisibilityOff style={{ color: "black" }} />
+                  </Icon>
+                </Tooltip>
+              )}
+              <IconButton size="small" onClick={onEditKeys}>
+                <Edit style={{ color: iconColor }} />
+              </IconButton>
+            </Grid>
+          )}
+        </div>
+      )}
+      {/* Row 3 */}
+      {magichant.keys.map((chantKey, i) => (
+        <Grid
+          container
+          justifyContent="flex-start"
+          sx={{
+            background: "transparent",
+            padding: "3px 17px",
+            marginBottom: "6px",
+            borderBottom: `1px solid ${theme.secondary}`,
+          }}
+          key={i}
+        >
+          <Grid container style={{ flexGrow: 1 }}>
+            <Grid
+              item
+              xs={3}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "left",
+              }}
+            >
+              <Typography
+                fontWeight="bold"
+                style={{ flexGrow: 1, marginRight: "5px" }}
+              >
+                {chantKey.name}
+              </Typography>
+            </Grid>
+            <Grid
+              item
+              xs={3}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ReactMarkdown components={components}>
+                {chantKey.type}
+              </ReactMarkdown>
+            </Grid>
+            <Grid
+              item
+              xs={2}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ReactMarkdown components={components}>
+                {chantKey.status}
+              </ReactMarkdown>
+            </Grid>
+            <Grid
+              item
+              xs={2}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ReactMarkdown components={components}>
+                {chantKey.attribute}
+              </ReactMarkdown>
+            </Grid>
+            <Grid
+              item
+              xs={2}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ReactMarkdown components={components}>
+                {chantKey.recovery}
+              </ReactMarkdown>
+            </Grid>
+          </Grid>
+        </Grid>
+      ))}
+      {/* Row 2 */}
+
+      {/* Row 3 */}
+
+      {/* Row 2 */}
+
+      {/* Row 3 */}
+    </>
+  );
+}
+
+export default function SpellChanter(props) {
+  const theme = useCustomTheme();
+  return (
+    <ThemeProvider theme={theme}>
+      <ThemedSpellChanter {...props} />
+    </ThemeProvider>
+  );
+}
