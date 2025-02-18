@@ -71,25 +71,74 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "left",
+              minHeight: "40px",
             }}
           >
             <Typography
               variant="h3"
               style={{ flexGrow: 1, marginRight: "5px" }}
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              }}
             >
               {t("Key")}
             </Typography>
           </Grid>
           <Grid
             item
+            xs={2}
+            sm={3}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography
+              variant="h3"
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              }}
+            >
+              {t("Type")}
+            </Typography>
+          </Grid>
+          <Grid
+            item
+            xs={2}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography
+              variant="h3"
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              }}
+            >
+              {t("Status Effect")}
+            </Typography>
+          </Grid>
+          <Grid
+            item
             xs={3}
+            sm={2}
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Typography variant="h3">{t("Type")}</Typography>
+            <Typography
+              variant="h3"
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              }}
+            >
+              {t("Attribute")}
+            </Typography>
           </Grid>
           <Grid
             item
@@ -100,132 +149,123 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
               justifyContent: "center",
             }}
           >
-            <Typography variant="h3">{t("Status Effect")}</Typography>
-          </Grid>
-          <Grid
-            item
-            xs={2}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="h3">{t("Attribute")}</Typography>
-          </Grid>
-          <Grid
-            item
-            xs={2}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="h3">{t("Recovery")}</Typography>
+            <Typography
+              variant="h3"
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              }}
+            >
+              {t("Recovery")}
+            </Typography>
           </Grid>
         </Grid>
-        {isEditMode && (
-          <Grid
-            item
-            xs
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
-            <div style={{ width: 40, height: 40 }} /> {/* Retain space */}
-          </Grid>
-        )}
       </div>
 
       {/* Row 3 */}
-      {magichant.keys.map((chantKey, i) => (
-        <Grid
-          container
-          justifyContent="flex-start"
+      {magichant.keys.length === 0 ? (
+        <Typography
           sx={{
-            background: "transparent",
             padding: "3px 17px",
-            marginBottom: "6px",
+            textAlign: "center",
+            color: theme.primary,
             borderBottom: `1px solid ${theme.secondary}`,
+            fontStyle: "italic",
           }}
-          key={i}
         >
-          <Grid container style={{ flexGrow: 1 }}>
-            <Grid
-              item
-              xs={3}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "left",
-              }}
-            >
-              <Typography
-                fontWeight="bold"
-                style={{ flexGrow: 1, marginRight: "5px" }}
+          {t("No keys added yet")}
+        </Typography>
+      ) : (
+        magichant.keys.map((chantKey, i) => (
+          <Grid
+            container
+            justifyContent="flex-start"
+            sx={{
+              background: "transparent",
+              padding: "3px 17px",
+              marginBottom: "6px",
+              borderBottom: `1px solid ${theme.secondary}`,
+            }}
+            key={i}
+          >
+            <Grid container style={{ flexGrow: 1 }}>
+              <Grid
+                item
+                xs={3}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "left",
+                }}
               >
-                {chantKey.name}
-              </Typography>
-            </Grid>
-            <Grid
-              item
-              xs={3}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ReactMarkdown components={components}>
-                {chantKey.type}
-              </ReactMarkdown>
-            </Grid>
-            <Grid
-              item
-              xs={2}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ReactMarkdown components={components}>
-                {chantKey.status}
-              </ReactMarkdown>
-            </Grid>
-            <Grid
-              item
-              xs={2}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ReactMarkdown components={components}>
-                {chantKey.attribute}
-              </ReactMarkdown>
-            </Grid>
-            <Grid
-              item
-              xs={2}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ReactMarkdown components={components}>
-                {chantKey.recovery}
-              </ReactMarkdown>
+                <Typography
+                  fontWeight="bold"
+                  style={{ flexGrow: 1, marginRight: "5px" }}
+                  sx={{
+                    fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+                  }}
+                >
+                  {chantKey.name}
+                </Typography>
+              </Grid>
+              <Grid
+                item
+                xs={2}
+                sm={3}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ReactMarkdown components={components}>
+                  {chantKey.type}
+                </ReactMarkdown>
+              </Grid>
+              <Grid
+                item
+                xs={2}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ReactMarkdown components={components}>
+                  {chantKey.status}
+                </ReactMarkdown>
+              </Grid>
+              <Grid
+                item
+                xs={3}
+                sm={2}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ReactMarkdown components={components}>
+                  {chantKey.attribute}
+                </ReactMarkdown>
+              </Grid>
+              <Grid
+                item
+                xs={2}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ReactMarkdown components={components}>
+                  {chantKey.recovery}
+                </ReactMarkdown>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-      ))}
-      <Button onClick={onEditKeys} variant="outlined">
+        ))
+      )}
+      <Button onClick={onEditKeys} variant="outlined" sx={{ marginTop: 2 }}>
         Edit Keys
       </Button>
     </>
