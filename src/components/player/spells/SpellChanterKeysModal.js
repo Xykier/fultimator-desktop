@@ -13,7 +13,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useTranslate } from "../../../translation/translate";
-import { Close } from "@mui/icons-material";
+import { Close, Delete } from "@mui/icons-material";
 
 const availableKeys = [
   {
@@ -72,7 +72,14 @@ const availableKeys = [
     attribute: "Insight",
     recovery: "Mind Points",
   },
-  { name: "Custom", type: "", status: "", attribute: "", recovery: "", customName: "" },
+  {
+    name: "Custom",
+    type: "",
+    status: "",
+    attribute: "",
+    recovery: "",
+    customName: "",
+  },
 ];
 
 export default function SpellChanterKeysModal({
@@ -97,26 +104,34 @@ export default function SpellChanterKeysModal({
   const handleAddKey = () => {
     setCurrentKeys([
       ...currentKeys,
-      { name: "Custom", type: "", status: "", attribute: "", recovery: "" , customName: "" },
+      {
+        name: "Custom",
+        type: "",
+        status: "",
+        attribute: "",
+        recovery: "",
+        customName: "",
+      },
     ]);
   };
 
   const handleKeyChange = (index, field, value) => {
     const updatedKeys = [...currentKeys];
-  
+
     if (field === "name") {
       const selectedKey = availableKeys.find((key) => key.name === value);
-      
+
       if (selectedKey) {
         updatedKeys[index] = {
           ...selectedKey,
-          customName: selectedKey.name === "Custom" ? updatedKeys[index].customName : "",
+          customName:
+            selectedKey.name === "Custom" ? updatedKeys[index].customName : "",
         };
       }
     } else {
       updatedKeys[index][field] = value;
     }
-  
+
     setCurrentKeys(updatedKeys);
   };
 
@@ -159,109 +174,200 @@ export default function SpellChanterKeysModal({
             <Grid
               item
               xs={12}
+              sm={12}
+              md={12}
+              lg={12}
               key={index}
               container
               spacing={1}
               alignItems="center"
+              sx={{
+                padding: { xs: "8px 0", sm: "12px 0" }, // More space for smaller screens
+                borderBottom: "1px solid rgba(0, 0, 0, 0.12)", // Adds separation between keys
+              }}
             >
-              <Grid item xs={2}>
+              <Grid item xs={12} sm={4} md={2}>
                 <FormControl fullWidth>
-                  <InputLabel>{t("Key")}</InputLabel>
+                  <InputLabel
+                    sx={{ fontSize: { xs: "0.75rem", sm: "0.9rem" } }}
+                  >
+                    {t("Key")}
+                  </InputLabel>
                   <Select
+                    label="Key"
                     value={key.name}
                     onChange={(e) =>
                       handleKeyChange(index, "name", e.target.value)
                     }
+                    sx={{
+                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Adjust font size
+                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjust height for smaller screens
+                      "& .MuiInputBase-input": {
+                        fontSize: { xs: "0.85rem", sm: "1rem" }, // Ensure input text scales properly
+                      },
+                    }}
                   >
                     {availableKeys.map((option) => (
-                      <MenuItem key={option.name} value={option.name}>
+                      <MenuItem
+                        key={option.name}
+                        value={option.name}
+                        sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
+                      >
                         {option.name}
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
-              
-                <>
-                  <Grid item xs={2}>
-                    <TextField
-                      label={t("Name")}
-                      value={key.name === "Custom" ? 
-                        key.customName : key.name}
-                      onChange={(e) =>
-                        handleKeyChange(index, "customName", e.target.value)
-                      }
-                      disabled={key.name !== "Custom"}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <TextField
-                      label={t("Type")}
-                      value={key.type}
-                      onChange={(e) =>
-                        handleKeyChange(index, "type", e.target.value)
-                      }
-                      disabled={key.name !== "Custom"}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <TextField
-                      label={t("Status Effect")}
-                      value={key.status}
-                      onChange={(e) =>
-                        handleKeyChange(index, "status", e.target.value)
-                      }
-                      disabled={key.name !== "Custom"}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <TextField
-                      label={t("Attribute")}
-                      value={key.attribute}
-                      onChange={(e) =>
-                        handleKeyChange(index, "attribute", e.target.value)
-                      }
-                      disabled={key.name !== "Custom"}
-                      fullWidth
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <TextField
-                      label={t("Recovery")}
-                      value={key.recovery}
-                      onChange={(e) =>
-                        handleKeyChange(index, "recovery", e.target.value)
-                      }
-                      disabled={key.name !== "Custom"}
-                      fullWidth
-                    />
-                  </Grid>
-                </>
-         
-              <Grid item xs={1}>
+
+              <Grid item xs={12} sm={4} md={2}>
+                <TextField
+                  label={t("Name")}
+                  value={key.name === "Custom" ? key.customName : key.name}
+                  onChange={(e) =>
+                    handleKeyChange(index, "customName", e.target.value)
+                  }
+                  disabled={key.name !== "Custom"}
+                  fullWidth
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font on mobile
+                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjusted height
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6} sm={4} md={1}>
+                <TextField
+                  label={t("Type")}
+                  value={key.type}
+                  onChange={(e) =>
+                    handleKeyChange(index, "type", e.target.value)
+                  }
+                  disabled={key.name !== "Custom"}
+                  fullWidth
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font on mobile
+                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjusted height
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6} sm={4} md={2}>
+                <TextField
+                  label={t("Status Effect")}
+                  value={key.status}
+                  onChange={(e) =>
+                    handleKeyChange(index, "status", e.target.value)
+                  }
+                  disabled={key.name !== "Custom"}
+                  fullWidth
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font on mobile
+                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjusted height
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6} sm={4} md={2}>
+                <TextField
+                  label={t("Attribute")}
+                  value={key.attribute}
+                  onChange={(e) =>
+                    handleKeyChange(index, "attribute", e.target.value)
+                  }
+                  disabled={key.name !== "Custom"}
+                  fullWidth
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font on mobile
+                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjusted height
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6} sm={4} md={2}>
+                <TextField
+                  label={t("Recovery")}
+                  value={key.recovery}
+                  onChange={(e) =>
+                    handleKeyChange(index, "recovery", e.target.value)
+                  }
+                  disabled={key.name !== "Custom"}
+                  fullWidth
+                  sx={{
+                    "& .MuiInputBase-root": {
+                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font on mobile
+                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjusted height
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
+                    },
+                  }}
+                />
+              </Grid>
+
+              {/* Adjusted Delete Button */}
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
                 <Button
-                  variant="outlined"
                   color="error"
+                  variant="contained"
                   onClick={() => handleDeleteKey(index)}
+                  aria-label={t("Delete")}
+                  sx={{
+                    width: "100%",
+                    height: { xs: "44px", sm: "48px", md: "56px" }, // Responsive height
+                    minHeight: "unset", // Allow natural resizing
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "0", // Remove extra padding inside
+                  }}
                 >
-                  {t("Delete")}
+                  <Delete />
                 </Button>
               </Grid>
             </Grid>
           ))}
         </Grid>
+
+        {/* Add Key Button */}
         <Button
           variant="contained"
           color="primary"
           onClick={handleAddKey}
-          sx={{ mt: 2 }}
+          sx={{
+            width: "100%",
+            mt: 2,
+            padding: { xs: "12px", sm: "16px" }, // Adjust button padding for mobile
+          }}
         >
           {t("Add Key")}
         </Button>
       </DialogContent>
+
       <DialogActions>
         <Button variant="contained" color="secondary" onClick={handleSave}>
           {t("Save Changes")}

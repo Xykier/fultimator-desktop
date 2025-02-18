@@ -139,58 +139,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
           </Grid>
         )}
       </div>
-      <Button onClick={onEditKeys}>Edit Keys</Button>
-      {/* Row 2 */}
-      {magichant.rank >= 1 && (
-        <div
-          style={{
-            background: `linear-gradient(to right, ${theme.ternary}, ${gradientColor})`,
-            padding: "3px 17px",
-            display: "flex",
-            justifyContent: "space-between",
-            borderTop: `1px solid ${theme.secondary}`,
-            borderBottom: `1px solid ${theme.secondary}`,
-          }}
-        >
-          <Grid container style={{ flexGrow: 1 }}>
-            <Grid
-              item
-              xs
-              flexGrow
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "left",
-              }}
-            >
-              <Typography
-                fontWeight="bold"
-                style={{ flexGrow: 1, marginRight: "5px" }}
-              >
-                {t("Basic Infusions")}
-              </Typography>
-            </Grid>
-          </Grid>
-          {isEditMode && (
-            <Grid
-              item
-              xs
-              style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
-            >
-              {!showInPlayerSheet && (
-                <Tooltip title={t("Infusion not shown in player sheet")}>
-                  <Icon>
-                    <VisibilityOff style={{ color: "black" }} />
-                  </Icon>
-                </Tooltip>
-              )}
-              <IconButton size="small" onClick={onEditKeys}>
-                <Edit style={{ color: iconColor }} />
-              </IconButton>
-            </Grid>
-          )}
-        </div>
-      )}
+
       {/* Row 3 */}
       {magichant.keys.map((chantKey, i) => (
         <Grid
@@ -276,13 +225,9 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
           </Grid>
         </Grid>
       ))}
-      {/* Row 2 */}
-
-      {/* Row 3 */}
-
-      {/* Row 2 */}
-
-      {/* Row 3 */}
+      <Button onClick={onEditKeys} variant="outlined">
+        Edit Keys
+      </Button>
     </>
   );
 }
