@@ -17,63 +17,63 @@ import { Close, Delete } from "@mui/icons-material";
 
 const availableKeys = [
   {
-    name: "Flame",
+    name: "magichant_flame",
     type: "fire",
-    status: "shaken",
-    attribute: "Might",
-    recovery: "Hit Points",
+    status: "Shaken",
+    attribute: "MIG",
+    recovery: "HP",
   },
   {
-    name: "Frost",
+    name: "magichant_frost",
     type: "ice",
-    status: "weak",
-    attribute: "Willpower",
-    recovery: "Mind Points",
+    status: "Weak",
+    attribute: "WLP",
+    recovery: "MP",
   },
   {
-    name: "Iron",
+    name: "magichant_iron",
     type: "physical",
-    status: "slow",
-    attribute: "Willpower",
-    recovery: "Mind Points",
+    status: "Slow",
+    attribute: "WLP",
+    recovery: "MP",
   },
   {
-    name: "Radiance",
+    name: "magichant_radiance",
     type: "bolt",
-    status: "shaken",
-    attribute: "Dexterity",
-    recovery: "Hit Points",
+    status: "Shaken",
+    attribute: "DEX",
+    recovery: "HP",
   },
   {
-    name: "Shadow",
+    name: "magichant_shadow",
     type: "light",
-    status: "dazed",
-    attribute: "Insight",
-    recovery: "Hit Points",
+    status: "Dazed",
+    attribute: "INS",
+    recovery: "HP",
   },
   {
-    name: "Stone",
+    name: "magichant_stone",
     type: "dark",
-    status: "weak",
-    attribute: "Dexterity",
-    recovery: "Mind Points",
+    status: "Weak",
+    attribute: "DEX",
+    recovery: "MP",
   },
   {
-    name: "Thunder",
+    name: "magichant_thunder",
     type: "earth",
-    status: "dazed",
-    attribute: "Might",
-    recovery: "Hit Points",
+    status: "Dazed",
+    attribute: "MIG",
+    recovery: "HP",
   },
   {
-    name: "Wind",
-    type: "air",
-    status: "slow",
-    attribute: "Insight",
-    recovery: "Mind Points",
+    name: "magichant_wind",
+    type: "wind",
+    status: "Slow",
+    attribute: "INS",
+    recovery: "MP",
   },
   {
-    name: "Custom",
+    name: "magichant_custom_name",
     type: "",
     status: "",
     attribute: "",
@@ -99,13 +99,14 @@ export default function SpellChanterKeysModal({
     if (magichant) {
       setShowInPlayerSheet(!!magichant.showInPlayerSheet);
     }
+    setCurrentKeys(magichant?.keys || []);
   }, [magichant]);
 
   const handleAddKey = () => {
     setCurrentKeys([
       ...currentKeys,
       {
-        name: "Custom",
+        name: "magichant_custom_name",
         type: "",
         status: "",
         attribute: "",
@@ -125,7 +126,7 @@ export default function SpellChanterKeysModal({
         updatedKeys[index] = {
           ...selectedKey,
           customName:
-            selectedKey.name === "Custom" ? updatedKeys[index].customName : "",
+            selectedKey.name === "magichant_custom_name" ? updatedKeys[index].customName : "",
         };
       }
     } else {
@@ -154,7 +155,7 @@ export default function SpellChanterKeysModal({
       PaperProps={{ sx: { width: "80%", maxWidth: "lg" } }}
     >
       <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-        {t("Edit Learnt Magichant Keys")}
+        {t("magichant_edit_keys_modal")}
       </DialogTitle>
       <Button
         aria-label="close"
@@ -191,10 +192,10 @@ export default function SpellChanterKeysModal({
                   <InputLabel
                     sx={{ fontSize: { xs: "0.75rem", sm: "0.9rem" } }}
                   >
-                    {t("Key")}
+                    {t("magichant_key")}
                   </InputLabel>
                   <Select
-                    label="Key"
+                    label={t("magichant_key")}
                     value={key.name}
                     onChange={(e) =>
                       handleKeyChange(index, "name", e.target.value)
@@ -213,7 +214,7 @@ export default function SpellChanterKeysModal({
                         value={option.name}
                         sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
                       >
-                        {option.name}
+                        {t(option.name)}
                       </MenuItem>
                     ))}
                   </Select>
@@ -222,12 +223,12 @@ export default function SpellChanterKeysModal({
 
               <Grid item xs={12} sm={4} md={2}>
                 <TextField
-                  label={t("Name")}
-                  value={key.name === "Custom" ? key.customName : key.name}
+                  label={t("magichant_name")}
+                  value={key.name === "magichant_custom_name" ? key.customName : t(key.name)}
                   onChange={(e) =>
                     handleKeyChange(index, "customName", e.target.value)
                   }
-                  disabled={key.name !== "Custom"}
+                  disabled={key.name !== "magichant_custom_name"}
                   fullWidth
                   sx={{
                     "& .MuiInputBase-root": {
@@ -238,16 +239,17 @@ export default function SpellChanterKeysModal({
                       fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
                     },
                   }}
+                  inputProps={{ maxLength: 200 }}
                 />
               </Grid>
               <Grid item xs={6} sm={4} md={1}>
                 <TextField
-                  label={t("Type")}
-                  value={key.type}
+                  label={t("magichant_type")}
+                  value={key.name === "magichant_custom_name" ? key.type : t(key.type)}
                   onChange={(e) =>
                     handleKeyChange(index, "type", e.target.value)
                   }
-                  disabled={key.name !== "Custom"}
+                  disabled={key.name !== "magichant_custom_name"}
                   fullWidth
                   sx={{
                     "& .MuiInputBase-root": {
@@ -258,16 +260,17 @@ export default function SpellChanterKeysModal({
                       fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
                     },
                   }}
+                  inputProps={{ maxLength: 200 }}
                 />
               </Grid>
               <Grid item xs={6} sm={4} md={2}>
                 <TextField
-                  label={t("Status Effect")}
-                  value={key.status}
+                  label={t("magichant_status_effect")}
+                  value={key.name === "magichant_custom_name" ? key.status : t(key.status)}
                   onChange={(e) =>
                     handleKeyChange(index, "status", e.target.value)
                   }
-                  disabled={key.name !== "Custom"}
+                  disabled={key.name !== "magichant_custom_name"}
                   fullWidth
                   sx={{
                     "& .MuiInputBase-root": {
@@ -278,16 +281,17 @@ export default function SpellChanterKeysModal({
                       fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
                     },
                   }}
+                  inputProps={{ maxLength: 200 }}
                 />
               </Grid>
               <Grid item xs={6} sm={4} md={2}>
                 <TextField
-                  label={t("Attribute")}
-                  value={key.attribute}
+                  label={t("magichant_attribute")}
+                  value={key.name === "magichant_custom_name" ? key.attribute : t(key.attribute)}
                   onChange={(e) =>
                     handleKeyChange(index, "attribute", e.target.value)
                   }
-                  disabled={key.name !== "Custom"}
+                  disabled={key.name !== "magichant_custom_name"}
                   fullWidth
                   sx={{
                     "& .MuiInputBase-root": {
@@ -298,16 +302,17 @@ export default function SpellChanterKeysModal({
                       fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
                     },
                   }}
+                  inputProps={{ maxLength: 200 }}
                 />
               </Grid>
               <Grid item xs={6} sm={4} md={2}>
                 <TextField
-                  label={t("Recovery")}
-                  value={key.recovery}
+                  label={t("magichant_recovery")}
+                  value={key.name === "magichant_custom_name" ? key.recovery : t(key.recovery)}
                   onChange={(e) =>
                     handleKeyChange(index, "recovery", e.target.value)
                   }
-                  disabled={key.name !== "Custom"}
+                  disabled={key.name !== "magichant_custom_name"}
                   fullWidth
                   sx={{
                     "& .MuiInputBase-root": {
@@ -318,6 +323,7 @@ export default function SpellChanterKeysModal({
                       fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
                     },
                   }}
+                  inputProps={{ maxLength: 200 }}
                 />
               </Grid>
 
@@ -364,7 +370,7 @@ export default function SpellChanterKeysModal({
             padding: { xs: "12px", sm: "16px" }, // Adjust button padding for mobile
           }}
         >
-          {t("Add Key")}
+          {t("magichant_add_key")}
         </Button>
       </DialogContent>
 

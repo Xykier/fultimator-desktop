@@ -81,7 +81,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               }}
             >
-              {t("Key")}
+              {t("magichant_key")}
             </Typography>
           </Grid>
           <Grid
@@ -100,7 +100,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               }}
             >
-              {t("Type")}
+              {t("magichant_type")}
             </Typography>
           </Grid>
           <Grid
@@ -118,7 +118,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               }}
             >
-              {t("Status Effect")}
+              {t("magichant_status_effect")}
             </Typography>
           </Grid>
           <Grid
@@ -137,7 +137,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               }}
             >
-              {t("Attribute")}
+              {t("magichant_attribute")}
             </Typography>
           </Grid>
           <Grid
@@ -155,7 +155,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               }}
             >
-              {t("Recovery")}
+              {t("magichant_recovery")}
             </Typography>
           </Grid>
         </Grid>
@@ -172,7 +172,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
             fontStyle: "italic",
           }}
         >
-          {t("No keys added yet")}
+          {t("magichant_empty_keys")}
         </Typography>
       ) : (
         magichant.keys.map((chantKey, i) => (
@@ -204,7 +204,9 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                     fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
                   }}
                 >
-                  {chantKey.name}
+                  {chantKey.name === "magichant_custom_name"
+                    ? chantKey.customName
+                    : t(chantKey.name)}
                 </Typography>
               </Grid>
               <Grid
@@ -218,7 +220,9 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 }}
               >
                 <ReactMarkdown components={components}>
-                  {chantKey.type}
+                  {chantKey.name === "magichant_custom_name"
+                    ? chantKey.type
+                    : t(chantKey.type)}
                 </ReactMarkdown>
               </Grid>
               <Grid
@@ -231,7 +235,9 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 }}
               >
                 <ReactMarkdown components={components}>
-                  {chantKey.status}
+                  {chantKey.name === "magichant_custom_name"
+                    ? chantKey.status
+                    : t(chantKey.status)}
                 </ReactMarkdown>
               </Grid>
               <Grid
@@ -245,7 +251,9 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 }}
               >
                 <ReactMarkdown components={components}>
-                  {chantKey.attribute}
+                  {chantKey.name === "magichant_custom_name"
+                    ? chantKey.attribute
+                    : t(chantKey.attribute)}
                 </ReactMarkdown>
               </Grid>
               <Grid
@@ -258,7 +266,10 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 }}
               >
                 <ReactMarkdown components={components}>
-                  {chantKey.recovery}
+                  { chantKey.name === "magichant_custom_name"
+                   ? chantKey.recovery
+                    : t(
+                  chantKey.recovery)}
                 </ReactMarkdown>
               </Grid>
             </Grid>
@@ -266,7 +277,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
         ))
       )}
       <Button onClick={onEditKeys} variant="outlined" sx={{ marginTop: 2 }}>
-        Edit Keys
+        {t("magichant_edit_keys_button")}
       </Button>
     </>
   );
