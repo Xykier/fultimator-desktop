@@ -16,7 +16,12 @@ import { useTranslate } from "../../../translation/translate";
 import ReactMarkdown from "react-markdown";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";
 
-function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
+function ThemedSpellChanter({
+  magichant,
+  onEditKeys,
+  onEditTones,
+  isEditMode,
+}) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
   const isDarkMode = theme.mode === "dark";
@@ -49,7 +54,7 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
           <ReactMarkdown>{t("asd asd")}</ReactMarkdown>
         </AccordionDetails>
       </Accordion>
-      {/* Row 1 */}
+      {/* KEYS */}
       <div
         style={{
           backgroundColor: theme.primary,
@@ -161,7 +166,6 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
         </Grid>
       </div>
 
-      {/* Row 3 */}
       {magichant.keys.length === 0 ? (
         <Typography
           sx={{
@@ -266,18 +270,168 @@ function ThemedSpellChanter({ magichant, onEditKeys, isEditMode }) {
                 }}
               >
                 <ReactMarkdown components={components}>
-                  { chantKey.name === "magichant_custom_name"
-                   ? chantKey.recovery
-                    : t(
-                  chantKey.recovery)}
+                  {chantKey.name === "magichant_custom_name"
+                    ? chantKey.recovery
+                    : t(chantKey.recovery)}
                 </ReactMarkdown>
               </Grid>
             </Grid>
           </Grid>
         ))
       )}
-      <Button onClick={onEditKeys} variant="outlined" sx={{ marginTop: 2 }}>
+      <Button
+        onClick={onEditKeys}
+        variant="outlined"
+        sx={{ marginTop: 2, marginBottom: 2 }}
+      >
         {t("magichant_edit_keys_button")}
+      </Button>
+
+      {/* TONES */}
+      <div
+        style={{
+          backgroundColor: theme.primary,
+          fontFamily: "Antonio",
+          fontWeight: "normal",
+          fontSize: "1.1em",
+          padding: "2px 17px",
+          color: theme.white,
+          textTransform: "uppercase",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Grid container style={{ flexGrow: 1 }}>
+          <Grid
+            item
+            xs={3}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "left",
+              minHeight: "40px",
+            }}
+          >
+            <Typography
+              variant="h3"
+              style={{ flexGrow: 1, marginRight: "5px" }}
+              sx={{
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              }}
+            >
+              {t("magichant_tone")}
+            </Typography>
+          </Grid>
+        </Grid>
+      </div>
+
+      {magichant.tones.length === 0 ? (
+        <Typography
+          sx={{
+            padding: "3px 17px",
+            textAlign: "center",
+            color: theme.primary,
+            borderBottom: `1px solid ${theme.secondary}`,
+            fontStyle: "italic",
+          }}
+        >
+          {t("magichant_empty_tones")}
+        </Typography>
+      ) : (
+        magichant.tones.map((tone, i) => (
+          <React.Fragment key={i}>
+            <div
+              style={{
+                background: `linear-gradient(to right, ${theme.ternary}, ${gradientColor})`,
+                padding: "3px 17px",
+                display: "flex",
+                justifyContent: "space-between",
+                borderTop: `1px solid ${theme.secondary}`,
+                borderBottom: `1px solid ${theme.secondary}`,
+              }}
+            >
+              <Grid container style={{ flexGrow: 1 }}>
+                <Grid
+                  item
+                  xs
+                  flexGrow
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "left",
+                  }}
+                >
+                  <Typography
+                    fontWeight="bold"
+                    style={{ flexGrow: 1, marginRight: "5px" }}
+                  >
+                    {tone.name === "magichant_custom_name"
+                      ? tone.customName
+                      : t(tone.name)}
+                  </Typography>
+                </Grid>
+              </Grid>
+              {isEditMode && (
+                <Grid
+                  item
+                  xs
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    flexShrink: 0,
+                    minHeight: 34,
+                  }}
+                ></Grid>
+              )}
+            </div>
+            <Grid
+              container
+              justifyContent="flex-start"
+              sx={{
+                background: "transparent",
+                padding: "3px 17px",
+                marginBottom: "6px",
+                borderBottom: `1px solid ${theme.secondary}`,
+              }}
+            >
+              <Grid container style={{ flexGrow: 1 }}>
+                <Grid
+                  item
+                  xs={12}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "left",
+                  }}
+                >
+                  <ReactMarkdown components={components}>
+                    {tone.name === "magichant_custom_name"
+                    ? tone.effect
+                    : t(tone.effect)}
+                    </ReactMarkdown>
+                  {/*<Typography
+                    fontWeight="bold"
+                    style={{ flexGrow: 1, marginRight: "5px" }}
+                    sx={{
+                      fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+                    }}
+                  >
+                    {tone.name === "magichant_custom_name"
+                      ? tone.effect
+                      : t(tone.effect)}
+                  </Typography>*/}
+                </Grid>
+              </Grid>
+            </Grid>
+          </React.Fragment>
+        ))
+      )}
+      <Button
+        onClick={onEditTones}
+        variant="outlined"
+        sx={{ marginTop: 2, marginBottom: 2 }}
+      >
+        {t("magichant_edit_tones_button")}
       </Button>
     </>
   );

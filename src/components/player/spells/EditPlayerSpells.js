@@ -23,6 +23,7 @@ import SpellEntropistGambleModal from "./SpellEntropistGambleModal";
 import SpellEntropistGamble from "./SpellEntropistGamble";
 import SpellChanter from "./SpellChanter";
 import SpellChanterKeysModal from "./SpellChanterKeysModal";
+import SpellChanterTonesModal from "./SpellChanterTonesModal";
 import GambleExplain from "./GambleExplain";
 
 export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
@@ -42,6 +43,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
   const [openMagitechRankModal, setOpenMagitechRankModal] = useState(false);
   const [openGambleModal, setOpenGambleModal] = useState(false);
   const [openChantKeyModal, setOpenChantKeyModal] = useState(false);
+  const [openChantToneModal, setOpenChantToneModal] = useState(false);
   const [spellBeingEdited, setSpellBeingEdited] = useState(null);
   const [editingSpellClass, setEditingSpellClass] = useState(null);
   const [editingSpellIndex, setEditingSpellIndex] = useState(null);
@@ -422,6 +424,13 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setOpenChantKeyModal(true);
   };
 
+  const handleEditChantTone = (spell, spellClass, spellIndex) => {
+    setSpellBeingEdited(spell);
+    setEditingSpellClass(spellClass);
+    setEditingSpellIndex(spellIndex);
+    setOpenChantToneModal(true);
+  };
+
   const handleSaveEditedSpell = (spellIndex, editedSpell) => {
     setPlayer((prev) => ({
       ...prev,
@@ -477,6 +486,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
     setSpellBeingEdited(null);
     setOpenMagitechRankModal(false);
     setOpenChantKeyModal(false);
+    setOpenChantToneModal(false);
     setEditingSpellClass(null);
   };
 
@@ -790,6 +800,9 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                               onEditKeys={() =>
                                 handleEditChantKey(spell, cls.name, index)
                               }
+                              onEditTones={() =>
+                                handleEditChantTone(spell, cls.name, index)
+                              }
                               isEditMode={isEditMode}
                             />
                           )}
@@ -894,6 +907,16 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
         open={openChantKeyModal}
         onClose={() => {
           setOpenChantKeyModal(false);
+          setEditingSpellClass(null);
+          setSpellBeingEdited(null);
+        }}
+        onSave={handleSaveEditedSpell}
+        magichant={{ ...spellBeingEdited, index: editingSpellIndex }}
+      />
+      <SpellChanterTonesModal
+        open={openChantToneModal}
+        onClose={() => {
+          setOpenChantToneModal(false);
           setEditingSpellClass(null);
           setSpellBeingEdited(null);
         }}
