@@ -110,7 +110,6 @@ const availableDances = [
   },
 ];
 
-
 export default function SpellDancerDancesModal({
   open,
   onClose,
@@ -152,16 +151,17 @@ export default function SpellDancerDancesModal({
         updatedDances[index] = {
           ...selectedDance,
           customName:
-          selectedDance.name === "dance_custom_name"
+            selectedDance.name === "dance_custom_name"
               ? updatedDances[index].customName
               : "",
+          duration: selectedDance.duration || "", // Ensure duration is updated
         };
       }
     } else {
       updatedDances[index][field] = value;
     }
 
-    setCurrentDances(updatedDances);
+    setCurrentDances([...updatedDances]); // Ensure state updates properly
   };
 
   const handleDeleteDance = (index) => {
@@ -279,8 +279,8 @@ export default function SpellDancerDancesModal({
                   label={t("dance_duration")}
                   value={
                     dan.name === "dance_custom_name"
-                      ? dan.duration
-                      : t(dan.duration)
+                      ? dan.duration || ""
+                      : t(dan.duration) || ""
                   }
                   onChange={(e) =>
                     handleDanceChange(index, "duration", e.target.value)
@@ -289,11 +289,11 @@ export default function SpellDancerDancesModal({
                   fullWidth
                   sx={{
                     "& .MuiInputBase-root": {
-                      fontSize: { xs: "0.85rem", sm: "1rem" }, // Smaller font on mobile
-                      height: { xs: "40px", sm: "48px", md: "56px" }, // Adjusted height
+                      fontSize: { xs: "0.85rem", sm: "1rem" },
+                      height: { xs: "40px", sm: "48px", md: "56px" },
                     },
                     "& .MuiInputLabel-root": {
-                      fontSize: { xs: "0.75rem", sm: "0.9rem" }, // Smaller label
+                      fontSize: { xs: "0.75rem", sm: "0.9rem" },
                     },
                   }}
                   inputProps={{ maxLength: 200 }}
