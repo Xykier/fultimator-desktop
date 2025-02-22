@@ -67,6 +67,7 @@ import {
 } from "../../components/icons";
 
 import { getPcs, updatePc } from "../../utility/db";
+import PlayerSymbol from "../../components/player/playerSheet/PlayerSymbol";
 
 export default function PlayerEdit() {
   const { t } = useTranslate();
@@ -423,6 +424,11 @@ export default function PlayerEdit() {
                 isEditMode={isOwner}
               />
               <PlayerMagichant
+                player={playerTemp}
+                setPlayer={setPlayerTemp}
+                isEditMode={isOwner}
+              />
+              <PlayerSymbol
                 player={playerTemp}
                 setPlayer={setPlayerTemp}
                 isEditMode={isOwner}

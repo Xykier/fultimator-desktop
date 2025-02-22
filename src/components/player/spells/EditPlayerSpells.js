@@ -758,7 +758,7 @@ export default function EditPlayerSpells({ player, setPlayer, isEditMode }) {
                             {spell.spellType === "symbol" &&
                               !spellTypeHeaders.symbol && (
                                 <>
-                                  <CustomHeader2 headerText={t("Symbol")} />
+                                  <CustomHeader2 headerText={t("symbol_symbol")} />
                                   {(spellTypeHeaders.symbol = true)}
                                 </>
                               )}
