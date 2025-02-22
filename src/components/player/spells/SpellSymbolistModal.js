@@ -13,34 +13,34 @@ import { useTranslate } from "../../../translation/translate";
 import { Close } from "@mui/icons-material";
 
 
-export default function SpellChanterModal({
+export default function SpellSymbolistModal({
   open,
   onClose,
   onSave,
   onDelete,
-  magichant,
+  symbol,
 }) {
   const { t } = useTranslate();
 
   const [showInPlayerSheet, setShowInPlayerSheet] = useState(
-    magichant ? !!magichant.showInPlayerSheet : true
+    symbol ? !!symbol.showInPlayerSheet : true
   );
 
   useEffect(() => {
-    if (magichant) {
-      setShowInPlayerSheet(!!magichant.showInPlayerSheet);
+    if (symbol) {
+      setShowInPlayerSheet(!!symbol.showInPlayerSheet);
     }
-  }, [magichant]);
+  }, [symbol]);
 
   const handleSave = () => {
-    onSave(magichant.index, {
-      ...magichant,
+    onSave(symbol.index, {
+      ...symbol,
       showInPlayerSheet: showInPlayerSheet,
     });
   };
 
   const handleDelete = () => {
-    onDelete(magichant.index);
+    onDelete(symbol.index);
   };
 
   return (
@@ -50,7 +50,7 @@ export default function SpellChanterModal({
       PaperProps={{ sx: { width: "80%", maxWidth: "lg" } }}
     >
       <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-        {t("magichant_settings_modal")}
+        {t("symbol_settings_modal")}
       </DialogTitle>
       <Button
         aria-label="close"
@@ -82,7 +82,7 @@ export default function SpellChanterModal({
 
       <DialogActions>
         <Button variant="contained" color="error" onClick={handleDelete}>
-          {t("magichant_delete_button")}
+          {t("symbol_delete_button")}
         </Button>
         <Button variant="contained" color="secondary" onClick={handleSave}>
           {t("Save Changes")}
