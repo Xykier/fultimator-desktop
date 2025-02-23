@@ -68,6 +68,7 @@ import {
 
 import { getPcs, updatePc } from "../../utility/db";
 import PlayerSymbol from "../../components/player/playerSheet/PlayerSymbol";
+import PlayerDance from "../../components/player/playerSheet/PlayerDance";
 
 export default function PlayerEdit() {
   const { t } = useTranslate();
@@ -429,6 +430,11 @@ export default function PlayerEdit() {
                 isEditMode={isOwner}
               />
               <PlayerSymbol
+                player={playerTemp}
+                setPlayer={setPlayerTemp}
+                isEditMode={isOwner}
+              />
+              <PlayerDance
                 player={playerTemp}
                 setPlayer={setPlayerTemp}
                 isEditMode={isOwner}
