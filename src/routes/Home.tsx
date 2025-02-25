@@ -42,7 +42,7 @@ function Home() {
     },
     {
       image: combat_simulator,
-      link: "/combat",
+      link: "/combat-sim",
       hoverKey: "combat_simulator",
     },
     {
