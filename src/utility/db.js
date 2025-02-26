@@ -33,6 +33,11 @@ export const getNpcs = async () => {
   return db.getAll(NPC_STORE_NAME);
 };
 
+export const getNpc = async (id) => {
+  const db = await dbPromise;
+  return db.get(NPC_STORE_NAME, id);
+};
+
 export const deleteNpc = async (id) => {
   const db = await dbPromise;
   await db.delete(NPC_STORE_NAME, id);
