@@ -1,6 +1,6 @@
 import React from "react";
-import { Typography, Box, Button, TextField, Icon } from "@mui/material";
-import { Edit } from "@mui/icons-material";
+import { Typography, Box, Button, TextField, Icon, IconButton } from "@mui/material";
+import { Edit, ArrowRight, ArrowLeft } from "@mui/icons-material";
 
 export default function BattleHeader({
   encounterName,
@@ -11,6 +11,9 @@ export default function BattleHeader({
   handleKeyPress,
   handleSaveState,
   timeAgo,
+  round,
+  handleIncreaseRound,
+  handleDecreaseRound,
 }) {
   return (
     <Box
@@ -53,6 +56,28 @@ export default function BattleHeader({
           </>
         )}
       </Box>
+
+      {/* Center Section for Round */}
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+        <IconButton
+          onClick={handleDecreaseRound}
+          color="primary"
+          sx={{ padding: 1 }}
+        >
+          <ArrowLeft fontSize="small" />
+        </IconButton>
+        <Typography variant="h5" sx={{ marginX: 2 }}>
+          {`Round ${round}`}
+        </Typography>
+        <IconButton
+          onClick={handleIncreaseRound}
+          color="primary"
+          sx={{ padding: 1 }}
+        >
+          <ArrowRight fontSize="small" />
+        </IconButton>
+      </Box>
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         {timeAgo !== "Not saved yet" && (
           <Typography variant="body2">Last saved: {timeAgo}</Typography>

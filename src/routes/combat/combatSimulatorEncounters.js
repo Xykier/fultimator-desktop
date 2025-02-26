@@ -56,6 +56,7 @@ const CombatSimEncounters = () => {
 
     const newEncounter = {
       name: encounterName,
+      round: 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
