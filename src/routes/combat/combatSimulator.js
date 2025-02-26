@@ -13,10 +13,15 @@ import {
   CircularProgress,
   Button,
   useMediaQuery,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
 import NpcSelector from "../../components/combatSim/NpcSelector";
+import NpcPretty from "../../components/npc/Pretty";
 
 export default function CombatSimulator() {
   return (
@@ -32,6 +37,7 @@ const CombatSim = () => {
   const [loading, setLoading] = useState(true);
   const [npcList, setNpcList] = useState([]); // List of available NPCs
   const [selectedNPCs, setSelectedNPCs] = useState([]); // State for selected NPCs (with only identifiers)
+  const [selectedNPC, setSelectedNPC] = useState(null); // State for selected NPC (full data)
   const [npcDrawerOpen, setNpcDrawerOpen] = useState(false);
   const [lastSaved, setLastSaved] = useState(null); // Track last saved time
   const [isEditing, setIsEditing] = useState(false); // Editing mode for encounter name
@@ -134,6 +140,11 @@ const CombatSim = () => {
     );
   };
 
+  const handleNpcClick = (npcCombatId) => {
+    const npc = selectedNPCs.find((npc) => npc.combatId === npcCombatId);
+    setSelectedNPC(npc); // Set clicked NPC as the selected NPC
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
@@ -176,35 +187,55 @@ const CombatSim = () => {
           handleSelectNPC={handleSelectNPC}
         />
 
-        {/* Selected NPCs */}
         <Box
           sx={{
             flex: 1,
             bgcolor: "#fff",
             padding: 2,
-            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
             height: "100%",
           }}
         >
-          <Typography variant="h5">Selected NPCs</Typography>
-          {selectedNPCs.length === 0 ? (
-            <Typography>No NPC selected</Typography>
-          ) : (
-            selectedNPCs.map((npc) => (
-              <Box
-                key={npc.combatId}
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <Typography>{npc.id ? npc.name : "DELETED NPC"}</Typography>
-                <Button
-                  onClick={() => handleRemoveNPC(npc.combatId)}
-                  sx={{ color: "red" }}
-                >
-                  Remove
-                </Button>
-              </Box>
-            ))
-          )}
+          <Typography
+            variant="h5"
+            sx={{
+              flexShrink: 0,
+              borderBottom: "1px solid #ccc",
+              paddingBottom: 1,
+            }}
+          >
+            Selected NPCs
+          </Typography>
+          <Box sx={{ flexGrow: 1, overflowY: "auto", paddingTop: 1 }}>
+            {selectedNPCs.length === 0 ? (
+              <Typography>No NPC selected</Typography>
+            ) : (
+              <List>
+                {selectedNPCs.map((npc) => (
+                  <ListItem
+                    key={npc.combatId}
+                    button
+                    onClick={() => handleNpcClick(npc.combatId)}
+                    sx={{border: "1px solid #ccc", marginY: 1, borderRadius: 1}}
+                  >
+                    <ListItemText primary={npc.id ? npc.name : "DELETED NPC"} />
+                    <ListItemSecondaryAction>
+                      <Button
+                        sx={{ color: "red" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                            handleRemoveNPC(npc.combatId);
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            )}
+          </Box>
         </Box>
 
         {/* NPC Sheet */}
@@ -213,21 +244,24 @@ const CombatSim = () => {
             width: "30%",
             bgcolor: "#fff",
             padding: 2,
-            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
             height: "100%",
           }}
         >
-          <Typography variant="h5">NPC Sheet</Typography>
-          {selectedNPCs.length === 0 ? (
-            <Typography>Select an NPC</Typography>
-          ) : (
-            selectedNPCs.map((npc) => (
-              <Box key={npc.combatId}>
-                <Typography>{npc.name}</Typography>
-                {/* Display other NPC details here */}
-              </Box>
-            ))
-          )}
+          <Typography
+            variant="h5"
+            sx={{
+              flexShrink: 0,
+              borderBottom: "1px solid #ccc",
+              paddingBottom: 1,
+            }}
+          >
+            NPC Sheet
+          </Typography>
+          <Box sx={{ flexGrow: 1, overflowY: "auto", paddingTop: 1 }}>
+            {selectedNPC && <NpcPretty npc={selectedNPC} collapse={true} />}
+          </Box>
         </Box>
       </Box>
     </Box>

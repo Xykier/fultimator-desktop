@@ -96,7 +96,7 @@ export default function NpcSelector({
         height: "100%",
       }}
     >
-      <Typography variant="h5" sx={{ marginBottom: 2 }}>
+      <Typography variant="h5" sx={{ marginBottom: 2, borderBottom: "1px solid #ccc", paddingBottom: 1 }}>
         NPC Selector
       </Typography>
 
