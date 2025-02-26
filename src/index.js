@@ -8,7 +8,7 @@ import Home from "./routes/Home";
 import Generator from "./routes/generator/generator";
 import NpcGallery from "./routes/npc-gallery/npc-gallery";
 import NpcEdit from "./routes/npc-edit/npc-edit";
-import CombatSim from "./routes/combat/combatSim";
+import CombatSimulatorEncounters from "./routes/combat/combatSimulatorEncounters";
 import CharacterSheet from "./routes/character-sheet/character-sheet";
 import { lightFabula, darkFabula } from "./themes/Fabula";
 import { lightHigh, darkHigh } from "./themes/High";
@@ -24,6 +24,7 @@ import {
 import PlayerGallery from "./routes/player-gallery/player-gallery";
 import PlayerEdit from "./routes/player-edit/player-edit";
 import ErrorBoundary from "./ErrorBoundary";
+import CombatSimulator from "./routes/combat/combatSimulator";
 
 const themes = {
   Fabula: { light: lightFabula, dark: darkFabula },
@@ -54,7 +55,8 @@ const App = () => {
               <Route path="/npc-gallery/:npcId" element={<NpcEdit />} />
               <Route path="/npc-gallery" element={<NpcGallery />} />
               <Route path="/generate" element={<Generator />} />
-              <Route path="/combat-sim" element={<CombatSim />} />
+              <Route path="/combat-sim" element={<CombatSimulatorEncounters />} />
+              <Route path="/combat-sim/:id" element={<CombatSimulator />} />
               <Route
                 path="/character-sheet/:playerId"
                 element={<CharacterSheet />}

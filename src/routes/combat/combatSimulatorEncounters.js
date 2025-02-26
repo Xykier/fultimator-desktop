@@ -25,15 +25,15 @@ import { SportsMartialArts, NavigateNext } from "@mui/icons-material";
 
 const MAX_ENCOUNTERS = 10;
 
-export default function CombatSimulator() {
+export default function CombatSimulatorEncounters() {
   return (
     <Layout fullWidth={true}>
-      <CombatSim />
+      <CombatSimEncounters />
     </Layout>
   );
 }
 
-const CombatSim = () => {
+const CombatSimEncounters = () => {
   const [encounters, setEncounters] = useState([]);
   const [encounterName, setEncounterName] = useState("");
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ const CombatSim = () => {
   };
 
   const handleNavigateToEncounter = (id) => {
-    navigate(`/encounter/${id}`);
+    navigate(`/combat-sim/${id}`);
   };
 
   return (
