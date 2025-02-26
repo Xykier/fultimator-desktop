@@ -11,17 +11,20 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Button,
   useMediaQuery,
   List,
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
+  IconButton,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
 import NpcSelector from "../../components/combatSim/NpcSelector";
 import NpcPretty from "../../components/npc/Pretty";
+import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 export default function CombatSimulator() {
   return (
@@ -92,6 +95,7 @@ const CombatSim = () => {
       selectedNPCs: selectedNPCs.map((npc) => ({
         id: npc.id,
         combatId: npc.combatId,
+        combatStats: npc.combatStats,
       })),
       lastSaved: currentTime,
     });
@@ -130,7 +134,7 @@ const CombatSim = () => {
     const npc = await getNpc(npcId); // Fetch full NPC data using getNpc
     setSelectedNPCs((prev) => [
       ...prev,
-      { ...npc, combatId: `${npc.id}-${Date.now()}` },
+      { ...npc, combatId: `${npc.id}-${Date.now()}`, combatStats: { notes: "", currentHp: ((npc.attributes["might"] * 5)+(npc.lvl*2) + parseInt(npc.extra.hp || 0))} },
     ]);
   };
 
@@ -138,6 +142,26 @@ const CombatSim = () => {
     setSelectedNPCs((prev) =>
       prev.filter((npc) => npc.combatId !== npcCombatId)
     );
+  };
+
+  const handleMoveUp = (npcCombatId) => {
+    const index = selectedNPCs.findIndex((npc) => npc.combatId === npcCombatId);
+    if (index > 0) {
+      const updatedNPCs = [...selectedNPCs];
+      const [movedNpc] = updatedNPCs.splice(index, 1);
+      updatedNPCs.splice(index - 1, 0, movedNpc);
+      setSelectedNPCs(updatedNPCs);
+    }
+  };
+
+  const handleMoveDown = (npcCombatId) => {
+    const index = selectedNPCs.findIndex((npc) => npc.combatId === npcCombatId);
+    if (index < selectedNPCs.length - 1) {
+      const updatedNPCs = [...selectedNPCs];
+      const [movedNpc] = updatedNPCs.splice(index, 1);
+      updatedNPCs.splice(index + 1, 0, movedNpc);
+      setSelectedNPCs(updatedNPCs);
+    }
   };
 
   const handleNpcClick = (npcCombatId) => {
@@ -211,29 +235,94 @@ const CombatSim = () => {
             {selectedNPCs.length === 0 ? (
               <Typography>No NPC selected</Typography>
             ) : (
-              <List>
-                {selectedNPCs.map((npc) => (
+                <List>
+                {selectedNPCs.map((npc, index) => (
                   <ListItem
-                    key={npc.combatId}
-                    button
-                    onClick={() => handleNpcClick(npc.combatId)}
-                    sx={{border: "1px solid #ccc", marginY: 1, borderRadius: 1}}
+                  key={npc.combatId}
+                  button
+                  onClick={() => handleNpcClick(npc.combatId)}
+                  sx={{
+                    border: "1px solid #ddd", // Light border for separation
+                    marginY: 1,
+                    borderRadius: 1,
+                    display: "flex",
+                    justifyContent: "space-between", // Aligning elements properly
+                    '&:hover': {
+                      backgroundColor: "#f1f1f1", // Hover effect for the item
+                    },
+                  }}
+                >
+                  {/* Left part: Index */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "30px",
+                      height: "100%",
+                      borderRight: "1px solid #ccc",
+                      padding: "0 10px", // Add padding for spacing
+                    }}
                   >
-                    <ListItemText primary={npc.id ? npc.name : "DELETED NPC"} />
-                    <ListItemSecondaryAction>
-                      <Button
-                        sx={{ color: "red" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                            handleRemoveNPC(npc.combatId);
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </ListItemSecondaryAction>
-                  </ListItem>
+                    <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333" }}>
+                      {index + 1}
+                    </Typography>
+                  </Box>
+                
+                  {/* Right part: NPC Name */}
+                  <ListItemText
+                    primary={npc.id ? npc.name : "DELETED NPC"}
+                    secondary={npc.combatStats?.currentHp}
+                    sx={{
+                      flex: 1,
+                      paddingLeft: 2,
+                      fontWeight: "500",
+                      fontSize: "1rem", // Adjust font size for readability
+                    }}
+                  />
+                
+                  {/* Right part: Actions */}
+                  <ListItemSecondaryAction sx={{ display: "flex", alignItems: "center" }}>
+                    <IconButton
+                      edge="end"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveUp(npc.combatId);
+                      }}
+                      disabled={index === 0} // Disable up button for the first NPC
+                      sx={{ padding: 1 }}
+                    >
+                      <ArrowUpwardIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveDown(npc.combatId);
+                      }}
+                      disabled={index === selectedNPCs.length - 1} // Disable down button for the last NPC
+                      sx={{ padding: 1 }}
+                    >
+                      <ArrowDownwardIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveNPC(npc.combatId);
+                      }}
+                      sx={{ padding: 1 }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+                
                 ))}
-              </List>
+              </List>              
             )}
           </Box>
         </Box>
