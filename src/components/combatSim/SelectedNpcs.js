@@ -35,6 +35,7 @@ export default function SelectedNpcs({
   popoverNpcId,
   getTurnCount,
   handleNpcClick,
+  handleHpMpClick,
 }) {
   return (
     <Box
@@ -127,7 +128,7 @@ export default function SelectedNpcs({
                   </Box>
                   <ListItemText
                     primary={
-                      <Typography variant="h4" >
+                      <Typography variant="h4">
                         {npc.id ? npc.name : "DELETED NPC"}
                       </Typography>
                     }
@@ -136,7 +137,19 @@ export default function SelectedNpcs({
                         <Typography
                           component="span"
                           variant="h5"
-                          sx={{ color: "#4CAF50", fontWeight: "bold" }}
+                          sx={{
+                            color: "#4CAF50",
+                            fontWeight: "bold",
+                            transition: "color 0.2s ease-in-out",
+                            "&:hover": {
+                              color: "#388E3C",
+                              textDecoration: "underline",
+                            },
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleHpMpClick("HP", npc);
+                          }}
                         >
                           {npc.combatStats?.currentHp}/{calcHP(npc)} HP
                         </Typography>
@@ -144,7 +157,19 @@ export default function SelectedNpcs({
                         <Typography
                           component="span"
                           variant="h5"
-                          sx={{ color: "#2196F3", fontWeight: "bold" }}
+                          sx={{
+                            color: "#2196F3",
+                            fontWeight: "bold",
+                            transition: "color 0.2s ease-in-out",
+                            "&:hover": {
+                              color: "#1976D2",
+                              textDecoration: "underline",
+                            },
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleHpMpClick("MP", npc);
+                          }}
                         >
                           {npc.combatStats?.currentMp}/{calcMP(npc)} MP
                         </Typography>

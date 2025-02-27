@@ -20,6 +20,10 @@ import {
   Tabs,
   Tab,
   TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
@@ -53,6 +57,7 @@ const CombatSim = () => {
   const [npcList, setNpcList] = useState([]); // List of available NPCs
   const [selectedNPCs, setSelectedNPCs] = useState([]); // State for selected NPCs (with only identifiers)
   const [selectedNPC, setSelectedNPC] = useState(null); // State for selected NPC (full data)
+  const [npcClicked, setNpcClicked] = useState(null);
   const [npcDrawerOpen, setNpcDrawerOpen] = useState(false);
   const [lastSaved, setLastSaved] = useState(null); // Track last saved time
   const [isEditing, setIsEditing] = useState(false); // Editing mode for encounter name
@@ -65,6 +70,10 @@ const CombatSim = () => {
   const [selectedStudy, setSelectedStudy] = useState(0);
   const ref = useRef();
   const [downloadImage] = useDownloadImage(selectedNPC?.name, ref);
+
+  const [open, setOpen] = useState(false);
+  const [statType, setStatType] = useState(null); // "HP" or "MP"
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
     const fetchEncounter = async () => {
@@ -261,6 +270,73 @@ const CombatSim = () => {
     setSelectedStudy(event.target.value);
   };
 
+  const handleOpen = (type, npc) => {
+    setStatType(type);
+    setValue(0);
+    setOpen(true);
+    setNpcClicked(npc);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setNpcClicked(null);
+  };
+
+  const handleConfirm = () => {
+    const updatedNPCs = selectedNPCs.map((npc) => {
+      if (npc.combatId === npcClicked.combatId) {
+        const maxHP = calcHP(npcClicked);
+        const maxMP = calcMP(npcClicked);
+        const newHp = Math.min(
+          Math.max(npc.combatStats.currentHp - value, 0),
+          maxHP
+        );
+        const newMp = Math.min(
+          Math.max(npc.combatStats.currentMp - value, 0),
+          maxMP
+        );
+
+        return {
+          ...npc,
+          combatStats: {
+            ...npc.combatStats,
+            currentHp: statType === "HP" ? newHp : npc.combatStats.currentHp,
+            currentMp: statType === "MP" ? newMp : npc.combatStats.currentMp,
+          },
+        };
+      }
+      return npc;
+    });
+
+    setSelectedNPCs(updatedNPCs);
+
+    if (selectedNPC && selectedNPC.combatId === npcClicked.combatId) {
+      const maxHP = calcHP(npcClicked);
+      const maxMP = calcMP(npcClicked);
+      const newHp = Math.min(
+        Math.max(npcClicked.combatStats.currentHp - value, 0),
+        maxHP
+      );
+      const newMp = Math.min(
+        Math.max(npcClicked.combatStats.currentMp - value, 0),
+        maxMP
+      );
+
+      setSelectedNPC({
+        ...selectedNPC,
+        combatStats: {
+          ...selectedNPC.combatStats,
+          currentHp:
+            statType === "HP" ? newHp : selectedNPC.combatStats.currentHp,
+          currentMp:
+            statType === "MP" ? newMp : selectedNPC.combatStats.currentMp,
+        },
+      });
+    }
+
+    handleClose();
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
@@ -342,6 +418,7 @@ const CombatSim = () => {
           popoverNpcId={popoverNpcId}
           getTurnCount={getTurnCount}
           handleNpcClick={handleNpcClick}
+          handleHpMpClick={(type, npc) => handleOpen(type, npc)}
         />
 
         {/* NPC Sheet */}
@@ -433,52 +510,50 @@ const CombatSim = () => {
               )}
               {tabIndex === 1 && (
                 <Box>
-                  {/* HP and MP Section */}
-                  <Box sx={{ marginTop: 2 }}>
-                    {/* HP */}
+                  {/* HP Section */}
+                  <Box
+                    sx={{ marginTop: 2, display: "flex", alignItems: "center" }}
+                  >
                     <HealthBar
                       label="HP"
-                      currentValue={
-                        selectedNPCs.find(
-                          (npc) => npc.combatId === selectedNPC.combatId
-                        )?.combatStats?.currentHp || 0
-                      }
+                      currentValue={selectedNPC?.combatStats?.currentHp || 0}
                       maxValue={calcHP(selectedNPC)}
                       startColor="#66bb6a"
                       endColor="#388e3c"
                       bgColor="#333333"
                     />
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() => handleOpen("HP", selectedNPC)}
+                      size="small"
+                      sx={{ ml: 2 }}
+                    >
+                      Modify
+                    </Button>
+                  </Box>
 
-                    {/* MP */}
+                  {/* MP Section */}
+                  <Box
+                    sx={{ marginTop: 2, display: "flex", alignItems: "center" }}
+                  >
                     <HealthBar
                       label="MP"
-                      currentValue={
-                        selectedNPCs.find(
-                          (npc) => npc.combatId === selectedNPC.combatId
-                        )?.combatStats?.currentMp || 0
-                      }
+                      currentValue={selectedNPC?.combatStats?.currentMp || 0}
                       maxValue={calcMP(selectedNPC)}
                       startColor="#42a5f5"
                       endColor="#0288d1"
                       bgColor="#333333"
                     />
-                    {/* Test Bars */}
-                    <HealthBar
-                      label="HP"
-                      currentValue={50}
-                      maxValue={100}
-                      startColor="#66bb6a"
-                      endColor="#388e3c"
-                      bgColor="#333333"
-                    />
-                    <HealthBar
-                      label="MP"
-                      currentValue={50}
-                      maxValue={100}
-                      startColor="#42a5f5"
-                      endColor="#0288d1"
-                      bgColor="#333333"
-                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleOpen("MP", selectedNPC)}
+                      size="small"
+                      sx={{ ml: 2 }}
+                    >
+                      Modify
+                    </Button>
                   </Box>
                 </Box>
               )}
@@ -627,6 +702,83 @@ const CombatSim = () => {
           </Box>
         )}
       </Box>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        sx={{ "& .MuiDialog-paper": { borderRadius: 3, padding: 2 } }}
+      >
+        <DialogTitle
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            borderBottom: "1px solid #ddd",
+            pb: 1,
+          }}
+        >
+          {statType === "HP" ? "Modify HP" : "Modify MP"}
+        </DialogTitle>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleConfirm();
+          }}
+        >
+          <DialogContent
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              mt: 1,
+            }}
+          >
+            <TextField
+              fullWidth
+              type="text"
+              label="Amount (negative to heal)"
+              value={value}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                if (/^-?\d*$/.test(inputValue)) {
+                  setValue(inputValue);
+                }
+              }}
+              onBlur={() => {
+                setValue(value === "" ? 0 : Number(value));
+              }}
+              margin="normal"
+              autoFocus
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                },
+              }}
+            />
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+            <Button
+              onClick={handleClose}
+              color="primary"
+              sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                px: 3,                
+              }}
+            >
+              OK
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </Box>
   );
 };

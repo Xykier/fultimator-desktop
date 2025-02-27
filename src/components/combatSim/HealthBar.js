@@ -13,7 +13,6 @@ const HealthBar = ({ label, currentValue, maxValue, startColor, endColor, bgColo
         display: "flex",
         alignItems: "center",
         width: "100%",
-        marginBottom: 2,
         border: "2px solid #e0e0e0", // Border around the label and progress bar
       }}
     >
