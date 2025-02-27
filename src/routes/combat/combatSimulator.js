@@ -36,6 +36,7 @@ import {
 import { calcHP, calcMP } from "../../libs/npcs";
 import SelectedNpcs from "../../components/combatSim/SelectedNpcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
+import HealthBar from "../../components/combatSim/HealthBar";
 
 export default function CombatSimulator() {
   return (
@@ -318,13 +319,15 @@ const CombatSim = () => {
       {/* Three Columns: NPC Selector, Selected NPCs, NPC Sheet */}
       <Box sx={{ display: "flex", gap: 2, height: "calc(100vh - 205px)" }}>
         {/* NPC Selector */}
-        {!isMobile && <NpcSelector
-          isMobile={isMobile}
-          npcDrawerOpen={npcDrawerOpen}
-          setNpcDrawerOpen={setNpcDrawerOpen}
-          npcList={npcList}
-          handleSelectNPC={handleSelectNPC}
-        />}
+        {!isMobile && (
+          <NpcSelector
+            isMobile={isMobile}
+            npcDrawerOpen={npcDrawerOpen}
+            setNpcDrawerOpen={setNpcDrawerOpen}
+            npcList={npcList}
+            handleSelectNPC={handleSelectNPC}
+          />
+        )}
         {/* Selected NPCs */}
         <SelectedNpcs
           selectedNPCs={selectedNPCs}
@@ -429,8 +432,57 @@ const CombatSim = () => {
                 </>
               )}
               {tabIndex === 1 && (
-                <Typography>HP / MP / Statuses Section</Typography>
+                <Box>
+                  {/* HP and MP Section */}
+                  <Box sx={{ marginTop: 2 }}>
+                    {/* HP */}
+                    <HealthBar
+                      label="HP"
+                      currentValue={
+                        selectedNPCs.find(
+                          (npc) => npc.combatId === selectedNPC.combatId
+                        )?.combatStats?.currentHp || 0
+                      }
+                      maxValue={calcHP(selectedNPC)}
+                      startColor="#66bb6a"
+                      endColor="#388e3c"
+                      bgColor="#333333"
+                    />
+
+                    {/* MP */}
+                    <HealthBar
+                      label="MP"
+                      currentValue={
+                        selectedNPCs.find(
+                          (npc) => npc.combatId === selectedNPC.combatId
+                        )?.combatStats?.currentMp || 0
+                      }
+                      maxValue={calcMP(selectedNPC)}
+                      startColor="#42a5f5"
+                      endColor="#0288d1"
+                      bgColor="#333333"
+                    />
+                    {/* Test Bars */}
+                    <HealthBar
+                      label="HP"
+                      currentValue={50}
+                      maxValue={100}
+                      startColor="#66bb6a"
+                      endColor="#388e3c"
+                      bgColor="#333333"
+                    />
+                    <HealthBar
+                      label="MP"
+                      currentValue={50}
+                      maxValue={100}
+                      startColor="#42a5f5"
+                      endColor="#0288d1"
+                      bgColor="#333333"
+                    />
+                  </Box>
+                </Box>
               )}
+
               {tabIndex === 2 && <Typography>Rolls Section</Typography>}
               {tabIndex === 3 && selectedNPC && (
                 <TextField
