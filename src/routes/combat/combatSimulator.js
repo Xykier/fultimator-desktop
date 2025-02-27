@@ -24,6 +24,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
@@ -337,6 +339,54 @@ const CombatSim = () => {
     handleClose();
   };
 
+  const toggleStatusEffect = (npc, status) => {
+    const updatedStatusEffects = [...(npc.combatStats?.statusEffects || [])];
+
+    // Toggle the status effect (add if not present, remove if present)
+    if (updatedStatusEffects.includes(status)) {
+      const index = updatedStatusEffects.indexOf(status);
+      updatedStatusEffects.splice(index, 1);
+    } else {
+      updatedStatusEffects.push(status);
+    }
+
+    // Update the NPC with the new status effects
+    const updatedNPC = {
+      ...npc,
+      combatStats: {
+        ...npc.combatStats,
+        statusEffects: updatedStatusEffects,
+      },
+    };
+
+    setSelectedNPC(updatedNPC);
+
+    // Update data in the selectedNPCs list
+    setSelectedNPCs((prev) =>
+      prev.map((npc) =>
+        npc.combatId === updatedNPC.combatId ? updatedNPC : npc
+      )
+    );
+  };
+
+  function calcAttr(statusEffect1, statusEffect2, attribute, npc) {
+    // Define the base attribute value (e.g., dexterity)
+    let attributeValue = npc?.attributes?.[attribute] || 6; // Default to 6 if attribute is missing
+
+    // Check in npc.combatStats.statusEffects for the status effects
+    if (npc.combatStats.statusEffects.includes(statusEffect1)) {
+      attributeValue -= 2;
+    }
+    if (npc.combatStats.statusEffects.includes(statusEffect2)) {
+      attributeValue -= 2;
+    }
+
+    // Ensure the attribute stays within the defined bounds
+    attributeValue = Math.max(6, Math.min(12, attributeValue));
+
+    return attributeValue;
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
@@ -532,7 +582,6 @@ const CombatSim = () => {
                       Modify
                     </Button>
                   </Box>
-
                   {/* MP Section */}
                   <Box
                     sx={{ marginTop: 2, display: "flex", alignItems: "center" }}
@@ -555,9 +604,79 @@ const CombatSim = () => {
                       Modify
                     </Button>
                   </Box>
+                  {/* Status Effects */}
+                  <Box sx={{ marginTop: 3 }}>
+                    <Box sx={{ marginTop: 1 }}>
+                      <ToggleButtonGroup
+                        value={selectedNPC?.combatStats?.statusEffects || []}
+                        exclusive
+                        onChange={(event, newStatusEffects) => {
+                          toggleStatusEffect(selectedNPC, newStatusEffects);
+                        }}
+                        sx={{
+                          display: "flex",
+                          width: "100%",
+                        }}
+                      >
+                        {["Slow", "Dazed", "Weak", "Shaken"].map((status) => (
+                          <ToggleButton
+                            key={status}
+                            value={status}
+                            color="error"
+                            sx={{
+                              flex: "1 1 16%",
+                              minWidth: "100px",
+                              justifyContent: "center",
+                              padding: "10px 0",
+                            }}
+                          >
+                            <Typography
+                              variant="h4"
+                              sx={{ fontWeight: "bold", textAlign: "center" }}
+                            >
+                              {status}
+                            </Typography>
+                          </ToggleButton>
+                        ))}
+                      </ToggleButtonGroup>
+                      <ToggleButtonGroup
+                        value={selectedNPC?.combatStats?.statusEffects || []}
+                        exclusive
+                        onChange={(event, newStatusEffects) => {
+                          toggleStatusEffect(selectedNPC, newStatusEffects);
+                        }}
+                        sx={{
+                          display: "flex",
+                          //flexWrap: "wrap",
+                          width: "100%",
+                          mt: 1,
+                        }}
+                      >
+                        {["Enraged", "Poisoned"].map((status) => (
+                          <ToggleButton
+                            key={status}
+                            value={status}
+                            color="error"
+                            sx={{
+                              flex: "1 1 16%",
+                              minWidth: "100px",
+                              justifyContent: "center",
+                              padding: "10px 0",
+                            }}
+                          >
+                            <Typography
+                              variant="h4"
+                              sx={{ fontWeight: "bold", textAlign: "center" }}
+                            >
+                              {status}
+                            </Typography>
+                          </ToggleButton>
+                        ))}
+                      </ToggleButtonGroup>
+                    </Box>
+                  </Box>
                 </Box>
               )}
-
               {tabIndex === 2 && <Typography>Rolls Section</Typography>}
               {tabIndex === 3 && selectedNPC && (
                 <TextField
@@ -640,22 +759,27 @@ const CombatSim = () => {
                 {[
                   {
                     label: "DEX",
-                    value: selectedNPC.attributes?.dexterity,
+                    value: calcAttr(
+                      "Slow",
+                      "Enraged",
+                      "dexterity",
+                      selectedNPC
+                    ),
                     color: "#ff7043",
                   }, // Orange
                   {
                     label: "INT",
-                    value: selectedNPC.attributes?.insight,
+                    value: calcAttr("Dazed", "Enraged", "insight", selectedNPC),
                     color: "#42a5f5",
                   }, // Blue
                   {
                     label: "MIG",
-                    value: selectedNPC.attributes?.might,
+                    value: calcAttr("Weak", "Poisoned", "might", selectedNPC),
                     color: "#66bb6a",
                   }, // Green
                   {
                     label: "WLP",
-                    value: selectedNPC.attributes?.will,
+                    value: calcAttr("Shaken", "Poisoned", "will", selectedNPC),
                     color: "#ab47bc",
                   }, // Purple
                 ].map((attr) => (
@@ -771,7 +895,7 @@ const CombatSim = () => {
               sx={{
                 borderRadius: 2,
                 textTransform: "none",
-                px: 3,                
+                px: 3,
               }}
             >
               OK
