@@ -1,9 +1,26 @@
 // SelectedNpcs.js
 
 import React from "react";
-import { Box, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Tooltip, Button, Checkbox, Popover } from "@mui/material";
-import { Replay, ArrowUpward, ArrowDownward, Delete } from "@mui/icons-material";
-import {calcHP, calcMP} from "../../libs/npcs";
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  Tooltip,
+  Button,
+  Checkbox,
+  Popover,
+} from "@mui/material";
+import {
+  Replay,
+  ArrowUpward,
+  ArrowDownward,
+  Delete,
+} from "@mui/icons-material";
+import { calcHP, calcMP } from "../../libs/npcs";
 
 export default function SelectedNpcs({
   selectedNPCs,
@@ -17,7 +34,7 @@ export default function SelectedNpcs({
   anchorEl,
   popoverNpcId,
   getTurnCount,
-    handleNpcClick,
+  handleNpcClick,
 }) {
   return (
     <Box
@@ -108,15 +125,31 @@ export default function SelectedNpcs({
                       {index + 1}
                     </Typography>
                   </Box>
-
-                  {/* Center: NPC Name & Stats */}
                   <ListItemText
-                    primary={npc.id ? npc.name : "DELETED NPC"}
-                    secondary={`${npc.combatStats?.currentHp}/${calcHP(
-                      npc
-                    )} HP | ${npc.combatStats?.currentMp}/${calcMP(
-                      npc
-                    )} MP`}
+                    primary={
+                      <Typography variant="h4" >
+                        {npc.id ? npc.name : "DELETED NPC"}
+                      </Typography>
+                    }
+                    secondary={
+                      <>
+                        <Typography
+                          component="span"
+                          variant="h5"
+                          sx={{ color: "#4CAF50", fontWeight: "bold" }}
+                        >
+                          {npc.combatStats?.currentHp}/{calcHP(npc)} HP
+                        </Typography>
+                        {" | "}
+                        <Typography
+                          component="span"
+                          variant="h5"
+                          sx={{ color: "#2196F3", fontWeight: "bold" }}
+                        >
+                          {npc.combatStats?.currentMp}/{calcMP(npc)} MP
+                        </Typography>
+                      </>
+                    }
                     sx={{
                       flex: 1,
                       paddingLeft: 2,
@@ -158,11 +191,8 @@ export default function SelectedNpcs({
                           zIndex: 10, // Ensure button appears on top when clicked
                         }}
                       >
-                        {
-                          npc.combatStats.turns.filter((turn) => turn)
-                            .length
-                        }{" "}
-                        / {npc.combatStats.turns.length}
+                        {npc.combatStats.turns.filter((turn) => turn).length} /{" "}
+                        {npc.combatStats.turns.length}
                       </Button>
                     ) : (
                       npc.combatStats.turns

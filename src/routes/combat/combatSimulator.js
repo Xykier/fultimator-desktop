@@ -17,12 +17,22 @@ import {
   Select,
   MenuItem,
   Tooltip,
+  Tabs,
+  Tab,
+  TextField,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
 import NpcSelector from "../../components/combatSim/NpcSelector";
 import NpcPretty from "../../components/npc/Pretty";
-import { Close, Download } from "@mui/icons-material";
+import {
+  Close,
+  Download,
+  Description,
+  Favorite,
+  Casino,
+  Edit,
+} from "@mui/icons-material";
 import { calcHP, calcMP } from "../../libs/npcs";
 import SelectedNpcs from "../../components/combatSim/SelectedNpcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
@@ -50,6 +60,7 @@ const CombatSim = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorEl, setAnchorEl] = useState(null);
   const [popoverNpcId, setPopoverNpcId] = useState(null);
+  const [tabIndex, setTabIndex] = useState(0);
   const [selectedStudy, setSelectedStudy] = useState(0);
   const ref = useRef();
   const [downloadImage] = useDownloadImage(selectedNPC?.name, ref);
@@ -348,26 +359,135 @@ const CombatSim = () => {
               <IconButton
                 size="small"
                 sx={{ padding: 0 }}
-                onClick={() => setSelectedNPC(null)}
+                onClick={() => {
+                  setSelectedNPC(null);
+                  setTabIndex(0);
+                }}
               >
                 <Close />
               </IconButton>
             )}
           </Box>
 
-          {/* Scrollable NPC Content */}
+          {/* Tabs */}
+          {selectedNPC && (
+            <Tabs
+              value={tabIndex}
+              onChange={(_, newIndex) => setTabIndex(newIndex)}
+              variant="fullWidth"
+              sx={{ minHeight: 40 }} // Reduce overall height
+            >
+              <Tab
+                icon={<Description fontSize="small" />}
+                label={<Typography variant="body2">Sheet</Typography>}
+                iconPosition="start"
+                sx={{ minHeight: 40, padding: "4px 8px" }}
+              />
+              <Tab
+                icon={<Favorite fontSize="small" />}
+                label={<Typography variant="body2">Stats</Typography>}
+                iconPosition="start"
+                sx={{ minHeight: 40, padding: "4px 8px" }}
+              />
+              <Tab
+                icon={<Casino fontSize="small" />}
+                label={<Typography variant="body2">Rolls</Typography>}
+                iconPosition="start"
+                sx={{ minHeight: 40, padding: "4px 8px" }}
+              />
+              <Tab
+                icon={<Edit fontSize="small" />}
+                label={<Typography variant="body2">Notes</Typography>}
+                iconPosition="start"
+                sx={{ minHeight: 40, padding: "4px 8px" }}
+              />
+            </Tabs>
+          )}
+
+          {/* Tab Content */}
           <Box sx={{ flexGrow: 1, overflowY: "auto", paddingTop: 1 }}>
-            {selectedNPC && (
-              <NpcPretty
-                npc={selectedNPC}
-                collapse={true}
-                study={selectedStudy}
-                ref={ref}
+            {tabIndex === 0 && selectedNPC && (
+              <>
+                <NpcPretty
+                  npc={selectedNPC}
+                  npcImage={selectedNPC.imgurl}
+                  collapse={true}
+                  study={selectedStudy}
+                  ref={ref}
+                />
+              </>
+            )}
+            {tabIndex === 1 && (
+              <Typography>HP / MP / Statuses Section</Typography>
+            )}
+            {tabIndex === 2 && <Typography>Rolls Section</Typography>}
+            {tabIndex === 3 && selectedNPC && (
+              <TextField
+                label="Notes"
+                variant="outlined"
+                fullWidth                
+                multiline
+                rows={10}
+                value={
+                  selectedNPCs.find(
+                    (npc) => npc.combatId === selectedNPC.combatId
+                  )?.combatStats?.notes || ""
+                }
+                onChange={(e) => {
+                  const updatedNPCs = selectedNPCs.map((npc) => {
+                    if (npc.combatId === selectedNPC.combatId) {
+                      return {
+                        ...npc,
+                        combatStats: {
+                          ...npc.combatStats,
+                          notes: e.target.value,
+                        },
+                      };
+                    }
+                    return npc;
+                  });
+
+                  // Update the list of selected NPCs with the modified notes
+                  setSelectedNPCs(updatedNPCs);
+                }}
+                sx={{ mt: 2 }} // Add some top margin for spacing
               />
             )}
           </Box>
-
-          {/* Attributes Section */}
+          {selectedNPC && tabIndex === 0 && (
+            <Box
+              sx={{
+                borderTop: "1px solid #ccc",
+                paddingTop: 1,
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 1,
+              }}
+            >
+              {/* Study Dropdown Only in NPC Sheet */}
+              <Select
+                value={selectedStudy}
+                onChange={handleStudyChange}
+                size="small"
+              >
+                <MenuItem value={0}>Study</MenuItem>
+                <MenuItem value={1}>7+</MenuItem>
+                <MenuItem value={2}>10+</MenuItem>
+                <MenuItem value={3}>13+</MenuItem>
+              </Select>
+              <Tooltip title="Download Sheet" placement="bottom">
+                <Button
+                  color="primary"
+                  aria-label="download"
+                  onClick={downloadImage}
+                  sx={{ cursor: "pointer" }}
+                >
+                  <Download />
+                </Button>
+              </Tooltip>
+            </Box>
+          )}
+          {/* NPC Attributes Always Visible */}
           {selectedNPC && (
             <Box
               sx={{
@@ -424,7 +544,6 @@ const CombatSim = () => {
                   >
                     {attr.label}
                   </Box>
-
                   {/* Value Part */}
                   <Box
                     sx={{
@@ -441,51 +560,7 @@ const CombatSim = () => {
             </Box>
           )}
 
-          {/* Static Button Section */}
-          {selectedNPC && (
-            <Box
-              sx={{
-                borderTop: "1px solid #ccc",
-                paddingTop: 1,
-                paddingBottom: 1,
-                display: "flex",
-                justifyContent: "space-evenly",
-              }}
-            >
-              <Button variant="contained" color="primary">
-                HP - MP - Statuses
-              </Button>
-              <Button variant="contained" color="secondary">
-                Rolls
-              </Button>
-              <Button variant="contained" color="ternary">
-                Notes
-              </Button>
-              <Select
-                labelId="study"
-                id="study"
-                value={selectedStudy}
-                onChange={handleStudyChange}
-                
-              >
-                <MenuItem value={0}>Study</MenuItem>
-                <MenuItem value={1}>7+</MenuItem>
-                <MenuItem value={2}>10+</MenuItem>
-                <MenuItem value={3}>13+</MenuItem>
-              </Select>
-              {/* Download Button */}
-              <Button
-                color="primary"
-                aria-label="download"
-                onClick={downloadImage}
-                style={{ cursor: "pointer" }}
-              >
-                <Tooltip title="Download Sheet" placement="bottom">
-                  <Download />
-                </Tooltip>
-              </Button>
-            </Box>
-          )}
+          {/* Download Button Always Visible */}
         </Box>
       </Box>
     </Box>
