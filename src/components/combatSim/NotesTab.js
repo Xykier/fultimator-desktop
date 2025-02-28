@@ -9,6 +9,7 @@ const NotesTab = ({ selectedNPC, selectedNPCs, setSelectedNPCs }) => {
       fullWidth
       multiline
       rows={10}
+      inputProps={{ maxLength: 2000 }}
       value={
         selectedNPCs.find((npc) => npc.combatId === selectedNPC.combatId)
           ?.combatStats?.notes || ""

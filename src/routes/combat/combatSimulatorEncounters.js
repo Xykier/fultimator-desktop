@@ -102,6 +102,7 @@ const CombatSimEncounters = () => {
                 fullWidth
                 value={encounterName}
                 onChange={handleEncounterNameChange}
+                inputProps={{ maxLength: 200 }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>

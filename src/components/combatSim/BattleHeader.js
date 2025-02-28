@@ -37,6 +37,7 @@ export default function BattleHeader({
             variant="standard"
             error={encounterName.trim() === ""}
             helperText={encounterName.trim() === "" ? "Name cannot be empty" : ""}
+            inputProps={{ maxLength: 100 }}
           />
         ) : (
           <>

@@ -1,6 +1,4 @@
-// SelectedNpcs.js
-
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -13,14 +11,18 @@ import {
   Button,
   Checkbox,
   Popover,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import {
   Replay,
   ArrowUpward,
   ArrowDownward,
   Delete,
+  MoreVert,
 } from "@mui/icons-material";
 import { calcHP, calcMP } from "../../libs/npcs";
+import { GiDeathSkull } from "react-icons/gi";
 
 export default function SelectedNpcs({
   selectedNPCs,
@@ -36,7 +38,21 @@ export default function SelectedNpcs({
   getTurnCount,
   handleNpcClick,
   handleHpMpClick,
+  isMobile,
 }) {
+  const [anchorMenu, setAnchorMenu] = useState(null);
+  const [selectedNpcMenu, setSelectedNpcMenu] = useState(null);
+
+  const handleMenuOpen = (event, npcId) => {
+    setAnchorMenu(event.currentTarget);
+    setSelectedNpcMenu(npcId);
+  };
+
+  const handleMenuClose = (e) => {
+    e.stopPropagation();
+    setAnchorMenu(null);
+    setSelectedNpcMenu(null);
+  };
   return (
     <Box
       sx={{
@@ -101,6 +117,10 @@ export default function SelectedNpcs({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    backgroundColor:
+                      npc.combatStats?.currentHp === 0
+                        ? "lightgray"
+                        : "inherit",
                     "&:hover": { backgroundColor: "#f1f1f1" },
                     paddingY: 1,
                     flexDirection: "row",
@@ -113,7 +133,7 @@ export default function SelectedNpcs({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      width: "40px",
+                      width: isMobile ? "5px" : "10px",
                       height: "100%",
                       borderRight: "1px solid #ccc",
                       padding: "0 10px",
@@ -129,7 +149,18 @@ export default function SelectedNpcs({
                   <ListItemText
                     primary={
                       <Typography variant="h4">
-                        {npc.id ? npc.name : "DELETED NPC"}
+                        {npc.id ? (
+                          npc.combatStats?.currentHp === 0 ? (
+                            <>
+                              <GiDeathSkull style={{ marginRight: 5 }} />
+                              {npc.name}
+                            </>
+                          ) : (
+                            npc.name
+                          )
+                        ) : (
+                          "DELETED NPC"
+                        )}
                       </Typography>
                     }
                     secondary={
@@ -236,41 +267,95 @@ export default function SelectedNpcs({
                           />
                         ))
                     )}
-                    <IconButton
-                      edge="end"
-                      color="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMoveUp(npc.combatId);
-                      }}
-                      disabled={index === 0}
-                      sx={{ padding: 1 }}
-                    >
-                      <ArrowUpward fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      color="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMoveDown(npc.combatId);
-                      }}
-                      disabled={index === selectedNPCs.length - 1}
-                      sx={{ padding: 1 }}
-                    >
-                      <ArrowDownward fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      color="error"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveNPC(npc.combatId);
-                      }}
-                      sx={{ padding: 1 }}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
+                    {isMobile ? (
+                      <>
+                        <IconButton
+                          edge="end"
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMenuOpen(e, npc.combatId);
+                          }}
+                          sx={{ padding: 1 }}
+                        >
+                          <MoreVert fontSize="small" />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorMenu}
+                          open={
+                            Boolean(anchorMenu) &&
+                            selectedNpcMenu === npc.combatId
+                          }
+                          onClose={(e) => handleMenuClose(e)}
+                        >
+                          <MenuItem
+                            onClick={(e) => {
+                              handleMoveUp(npc.combatId);
+                              handleMenuClose(e);
+                            }}
+                            disabled={index === 0}
+                          >
+                            Move Up
+                          </MenuItem>
+                          <MenuItem
+                            onClick={(e) => {
+                              handleMoveDown(npc.combatId);
+                              handleMenuClose(e);
+                            }}
+                            disabled={index === selectedNPCs.length - 1}
+                          >
+                            Move Down
+                          </MenuItem>
+                          <MenuItem
+                            onClick={(e) => {
+                              handleRemoveNPC(npc.combatId);
+                              handleMenuClose(e);
+                            }}
+                            sx={{ color: "error.main" }}
+                          >
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </>
+                    ) : (
+                      <>
+                        <IconButton
+                          edge="end"
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveUp(npc.combatId);
+                          }}
+                          disabled={index === 0}
+                          sx={{ padding: 1 }}
+                        >
+                          <ArrowUpward fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveDown(npc.combatId);
+                          }}
+                          disabled={index === selectedNPCs.length - 1}
+                          sx={{ padding: 1 }}
+                        >
+                          <ArrowDownward fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveNPC(npc.combatId);
+                          }}
+                          sx={{ padding: 1 }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
                   </ListItemSecondaryAction>
 
                   {/* Popover for extra turn checkboxes */}

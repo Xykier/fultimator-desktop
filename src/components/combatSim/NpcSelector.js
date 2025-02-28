@@ -14,8 +14,36 @@ import {
   Divider,
   IconButton,
   Drawer,
+  Tooltip,
 } from "@mui/material";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material"; // Import Material-UI icons
+import {
+  GiRaiseZombie,
+  GiWolfHead,
+  GiRobotGolem,
+  GiEvilBat,
+  GiFire,
+  GiSwordwoman,
+  GiGooeyDaemon,
+  GiRose,
+} from "react-icons/gi";
+
+function rankText(rank) {
+  const rankMap = {
+    soldier: "Soldier",
+    elite: "Elite",
+    companion: "Companion",
+    groupveichle: "Group Vehicle",
+    champion1: "Champion (1)",
+    champion2: "Champion (2)",
+    champion3: "Champion (3)",
+    champion4: "Champion (4)",
+    champion5: "Champion (5)",
+    champion6: "Champion (6)",
+  };
+
+  return rankMap[rank] || "";
+};
 
 export default function NpcSelector({
   isMobile,
@@ -177,7 +205,11 @@ export default function NpcSelector({
             <List sx={{ height: "calc(68vh - 40px)", overflowY: "auto" }}>
               {filteredNpcList.map((npc) => (
                 <Box key={npc.id}>
-                  <ListItem button onClick={() => handleSelectNPC(npc.id)}>
+                  <ListItem
+                    button
+                    onClick={() => handleSelectNPC(npc.id)}
+                    sx={{ padding: "5px 10px" }}
+                  >
                     <Box
                       sx={{
                         display: "flex",
@@ -186,11 +218,37 @@ export default function NpcSelector({
                       }}
                     >
                       <ListItemText
-                        primary={npc.name}
-                        secondary={
-                          <Typography variant="body2" color="text.secondary">
-                            Level: {npc.lvl}
+                        primary={
+                          <Typography variant="h5" fontWeight={"bold"}>
+                            {npc.name}
                           </Typography>
+                        }
+                        secondary={
+                          <>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontFamily: "Antonio" }}
+                            >
+                              <Tooltip title={npc.species}>
+                              {npc.species === "Beast" && (
+                                
+                                  <GiWolfHead />
+                                
+                              )}
+                              {npc.species === "Construct" && <GiRobotGolem />}
+                              {npc.species === "Demon" && <GiEvilBat />}
+                              {npc.species === "Elemental" && <GiFire />}
+                              {npc.species === "Humanoid" && <GiSwordwoman />}
+                              {npc.species === "Undead" && <GiRaiseZombie />}
+                              {npc.species === "Plant" && <GiRose />}
+                              {npc.species === "Monster" && <GiGooeyDaemon />}
+                              </Tooltip>
+                              {" | "}
+                              Level: {npc.lvl}
+                              {npc.rank && " | " + rankText(npc.rank)}
+                            </Typography>
+                          </>
                         }
                       />
                     </Box>

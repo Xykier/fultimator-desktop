@@ -501,6 +501,7 @@ const CombatSim = () => {
           getTurnCount={getTurnCount}
           handleNpcClick={handleNpcClick}
           handleHpMpClick={(type, npc) => handleOpen(type, npc)}
+          isMobile={isMobile}
         />
 
         {/* NPC Sheet */}
