@@ -23,6 +23,7 @@ import {
 } from "@mui/icons-material";
 import { calcHP, calcMP } from "../../libs/npcs";
 import { GiDeathSkull } from "react-icons/gi";
+import { useTheme } from "@mui/material/styles";
 
 export default function SelectedNpcs({
   selectedNPCs,
@@ -39,9 +40,13 @@ export default function SelectedNpcs({
   handleNpcClick,
   handleHpMpClick,
   isMobile,
+  selectedNpcID,
 }) {
   const [anchorMenu, setAnchorMenu] = useState(null);
   const [selectedNpcMenu, setSelectedNpcMenu] = useState(null);
+
+  const theme = useTheme();
+  const primary = theme.palette.primary.main;
 
   const handleMenuOpen = (event, npcId) => {
     setAnchorMenu(event.currentTarget);
@@ -111,7 +116,7 @@ export default function SelectedNpcs({
                   button
                   onClick={(e) => handleListItemClick(e, npc.combatId)}
                   sx={{
-                    border: "1px solid #ddd",
+                    border: (selectedNpcID && selectedNpcID === npc.combatId) ? "1px solid " + primary : "1px solid #ddd",
                     marginY: 1,
                     borderRadius: 1,
                     display: "flex",

@@ -24,6 +24,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
@@ -58,6 +60,7 @@ const CombatSim = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true); // Loading state
+  const inputRef = useRef(null);
 
   // Encounter states
   const [encounter, setEncounter] = useState(null); // State for the current encounter
@@ -75,6 +78,7 @@ const CombatSim = () => {
   const [open, setOpen] = useState(false); // Dialog open state for HP/MP change
   const [statType, setStatType] = useState(null); // "HP" or "MP"
   const [value, setValue] = useState(0); // Value for HP/MP change
+  const [isHealing, setIsHealing] = useState(false); // true = Heal, false = Damage
 
   // Study and Download image states
   const [selectedStudy, setSelectedStudy] = useState(0); // Study dropdown value
@@ -113,7 +117,7 @@ const CombatSim = () => {
     fetchNpcs();
   }, [id]);
 
-  // Save encounter state 
+  // Save encounter state
   const handleSaveState = () => {
     const currentTime = new Date();
     setLastSaved(currentTime);
@@ -148,7 +152,7 @@ const CombatSim = () => {
     ? `${Math.floor((new Date() - lastSaved) / 1000 / 60)} minutes ago`
     : "Not saved yet";
 
-    /* ENCOUNTER NAME EDITING */  
+  /* ENCOUNTER NAME EDITING */
   // Handle Encounter Name Change
   const handleEncounterNameChange = (event) => {
     setEncounterName(event.target.value);
@@ -300,29 +304,42 @@ const CombatSim = () => {
   // Handle Open HP/MP Dialog
   const handleOpen = (type, npc) => {
     setStatType(type);
-    setValue(0);
+    setValue("");
     setOpen(true);
     setNpcClicked(npc);
+
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
   };
 
   // Handle Close HP/MP Dialog
   const handleClose = () => {
     setOpen(false);
     setNpcClicked(null);
+    setIsHealing(false);
   };
 
   // Handle Confirm HP/MP Dialog
   const handleConfirm = () => {
+    const adjustedValue = isHealing ? Number(value) : -Number(value);
+
     const updatedNPCs = selectedNPCs.map((npc) => {
       if (npc.combatId === npcClicked.combatId) {
         const maxHP = calcHP(npcClicked);
         const maxMP = calcMP(npcClicked);
         const newHp = Math.min(
-          Math.max(npc.combatStats.currentHp - value, 0),
+          Math.max(
+            npc.combatStats.currentHp + (statType === "HP" ? adjustedValue : 0),
+            0
+          ),
           maxHP
         );
         const newMp = Math.min(
-          Math.max(npc.combatStats.currentMp - value, 0),
+          Math.max(
+            npc.combatStats.currentMp + (statType === "MP" ? adjustedValue : 0),
+            0
+          ),
           maxMP
         );
 
@@ -344,11 +361,19 @@ const CombatSim = () => {
       const maxHP = calcHP(npcClicked);
       const maxMP = calcMP(npcClicked);
       const newHp = Math.min(
-        Math.max(npcClicked.combatStats.currentHp - value, 0),
+        Math.max(
+          npcClicked.combatStats.currentHp +
+            (statType === "HP" ? adjustedValue : 0),
+          0
+        ),
         maxHP
       );
       const newMp = Math.min(
-        Math.max(npcClicked.combatStats.currentMp - value, 0),
+        Math.max(
+          npcClicked.combatStats.currentMp +
+            (statType === "MP" ? adjustedValue : 0),
+          0
+        ),
         maxMP
       );
 
@@ -365,6 +390,21 @@ const CombatSim = () => {
     }
 
     handleClose();
+  };
+
+  // Handle Input Change in HP/MP Dialog
+  const handleChange = (e) => {
+    const inputValue = e.target.value;
+    if (/^\d*$/.test(inputValue)) {
+      setValue(inputValue);
+    }
+  };
+
+  // Handle Submit in HP/MP Dialog
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (value !== "") handleConfirm(isHealing ? Number(value) : -Number(value));
+    else handleClose();
   };
 
   // Handle Status Effect Toggle
@@ -502,6 +542,7 @@ const CombatSim = () => {
           handleNpcClick={handleNpcClick}
           handleHpMpClick={(type, npc) => handleOpen(type, npc)}
           isMobile={isMobile}
+          selectedNpcID={selectedNPC?.combatId}
         />
 
         {/* NPC Sheet */}
@@ -665,12 +706,7 @@ const CombatSim = () => {
         >
           {statType === "HP" ? "Modify HP" : "Modify MP"}
         </DialogTitle>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleConfirm();
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <DialogContent
             sx={{
               display: "flex",
@@ -679,22 +715,33 @@ const CombatSim = () => {
               mt: 1,
             }}
           >
+            <ToggleButtonGroup
+              value={isHealing ? "heal" : "damage"}
+              exclusive
+              onChange={(event, newValue) => {
+                if (newValue !== null) {
+                  setIsHealing(newValue === "heal");
+                }
+              }}
+              sx={{ mb: 2 }}
+            >
+              <ToggleButton value="heal" color="success">
+                Healing
+              </ToggleButton>
+              <ToggleButton value="damage" color="error">
+                Damage
+              </ToggleButton>
+            </ToggleButtonGroup>
+
             <TextField
               fullWidth
               type="text"
-              label="Amount (negative to heal)"
+              label="Amount"
               value={value}
-              onChange={(e) => {
-                const inputValue = e.target.value;
-                if (/^-?\d*$/.test(inputValue)) {
-                  setValue(inputValue);
-                }
-              }}
-              onBlur={() => {
-                setValue(value === "" ? 0 : Number(value));
-              }}
+              onChange={handleChange}
+              onBlur={() => setValue(value === "" ? "" : Number(value))}
               margin="normal"
-              autoFocus
+              inputRef={inputRef} // Auto-focus when dialog opens
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
@@ -715,11 +762,7 @@ const CombatSim = () => {
               type="submit"
               variant="contained"
               color="primary"
-              sx={{
-                borderRadius: 2,
-                textTransform: "none",
-                px: 3,
-              }}
+              sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
             >
               OK
             </Button>
