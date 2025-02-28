@@ -374,10 +374,10 @@ const CombatSim = () => {
     let attributeValue = npc?.attributes?.[attribute] || 6; // Default to 6 if attribute is missing
 
     // Check in npc.combatStats.statusEffects for the status effects
-    if (npc.combatStats.statusEffects.includes(statusEffect1)) {
+    if (npc.combatStats.statusEffects?.includes(statusEffect1)) {
       attributeValue -= 2;
     }
-    if (npc.combatStats.statusEffects.includes(statusEffect2)) {
+    if (npc.combatStats.statusEffects?.includes(statusEffect2)) {
       attributeValue -= 2;
     }
 
@@ -607,6 +607,7 @@ const CombatSim = () => {
                   {/* Status Effects */}
                   <Box sx={{ marginTop: 3 }}>
                     <Box sx={{ marginTop: 1 }}>
+                      {/* First row: Slow, Dazed, Weak, Shaken */}
                       <ToggleButtonGroup
                         value={selectedNPC?.combatStats?.statusEffects || []}
                         exclusive
@@ -618,27 +619,58 @@ const CombatSim = () => {
                           width: "100%",
                         }}
                       >
-                        {["Slow", "Dazed", "Weak", "Shaken"].map((status) => (
+                        {[
+                          { label: "Slow", color: "#1565c0" }, // Blue
+                          { label: "Dazed", color: "#ab47bc" }, // Purple
+                          { label: "Weak", color: "#ff7043" }, // Orange
+                          { label: "Shaken", color: "#e8b923" }, // Yellow
+                        ].map(({ label, color }) => (
                           <ToggleButton
-                            key={status}
-                            value={status}
-                            color="error"
+                            key={label}
+                            value={label}
                             sx={{
                               flex: "1 1 16%",
                               minWidth: "100px",
                               justifyContent: "center",
-                              padding: "10px 0",
+                              padding: "5px 0",
+                              backgroundColor: "#ECECEC",
+                              color: "black !important",
+                              fontWeight: "bold",
+                              letterSpacing: "1.5px",
+                              fontSize: "1.2rem",
+                              transition: "all 0.3s ease-in-out",
+
+                              "&:hover": {
+                                backgroundColor: "#D3D3D3 !important",
+                                color: "black !important",
+                              },
+
+                              "&.Mui-selected": {
+                                backgroundColor: color,
+                                color: "white !important",
+
+                                "&:hover": {
+                                  backgroundColor: color + " !important",
+                                  color: "white !important",
+                                },
+                              },
                             }}
                           >
                             <Typography
-                              variant="h4"
-                              sx={{ fontWeight: "bold", textAlign: "center" }}
+                              variant="h5"
+                              sx={{
+                                fontWeight: "bold",
+                                textAlign: "center",
+                                color: "inherit",
+                              }}
                             >
-                              {status}
+                              {label}
                             </Typography>
                           </ToggleButton>
                         ))}
                       </ToggleButtonGroup>
+
+                      {/* Second row: Enraged, Poisoned */}
                       <ToggleButtonGroup
                         value={selectedNPC?.combatStats?.statusEffects || []}
                         exclusive
@@ -647,28 +679,53 @@ const CombatSim = () => {
                         }}
                         sx={{
                           display: "flex",
-                          //flexWrap: "wrap",
                           width: "100%",
                           mt: 1,
                         }}
                       >
-                        {["Enraged", "Poisoned"].map((status) => (
+                        {[
+                          { label: "Enraged", color: "#d32f2f" }, // Red
+                          { label: "Poisoned", color: "#4caf50" }, // Green
+                        ].map(({ label, color }) => (
                           <ToggleButton
-                            key={status}
-                            value={status}
-                            color="error"
+                            key={label}
+                            value={label}
                             sx={{
-                              flex: "1 1 16%",
+                              flex: "1 1 50%",
                               minWidth: "100px",
                               justifyContent: "center",
-                              padding: "10px 0",
+                              padding: "5px 0",
+                              backgroundColor: "#ECECEC",
+                              color: "black !important",
+                              fontWeight: "bold",
+                              letterSpacing: "1.5px",
+                              fontSize: "1.2rem",
+                              transition: "all 0.3s ease-in-out",
+                              "&:hover": {
+                                backgroundColor: "#D3D3D3 !important",
+                                color: "black !important",
+                              },
+
+                              "&.Mui-selected": {
+                                backgroundColor: color,
+                                color: "white !important",
+
+                                "&:hover": {
+                                  backgroundColor: color + " !important",
+                                  color: "white !important",
+                                },
+                              },
                             }}
                           >
                             <Typography
-                              variant="h4"
-                              sx={{ fontWeight: "bold", textAlign: "center" }}
+                              variant="h5"
+                              sx={{
+                                fontWeight: "bold",
+                                textAlign: "center",
+                                color: "inherit",
+                              }}
                             >
-                              {status}
+                              {label}
                             </Typography>
                           </ToggleButton>
                         ))}
@@ -765,23 +822,27 @@ const CombatSim = () => {
                       "dexterity",
                       selectedNPC
                     ),
-                    color: "#ff7043",
-                  }, // Orange
+                    color: "#42a5f5", // Blue
+                    originalValue: selectedNPC.attributes?.dexterity,
+                  },
                   {
                     label: "INT",
                     value: calcAttr("Dazed", "Enraged", "insight", selectedNPC),
-                    color: "#42a5f5",
-                  }, // Blue
+                    color: "#ab47bc", // Purple
+                    originalValue: selectedNPC.attributes?.insight,
+                  },
                   {
                     label: "MIG",
                     value: calcAttr("Weak", "Poisoned", "might", selectedNPC),
-                    color: "#66bb6a",
-                  }, // Green
+                    color: "#ff7043", // Orange
+                    originalValue: selectedNPC.attributes?.might,
+                  },
                   {
                     label: "WLP",
                     value: calcAttr("Shaken", "Poisoned", "will", selectedNPC),
-                    color: "#ab47bc",
-                  }, // Purple
+                    color: "#e8b923", // Yellow
+                    originalValue: selectedNPC.attributes?.will,
+                  },
                 ].map((attr) => (
                   <Box
                     key={attr.label}
@@ -801,7 +862,7 @@ const CombatSim = () => {
                         paddingX: 1,
                         paddingY: 0.5,
                         fontWeight: "bold",
-                        fontSize: "0.875rem",
+                        fontSize: "1rem",
                       }}
                     >
                       {attr.label}
@@ -811,8 +872,14 @@ const CombatSim = () => {
                       sx={{
                         paddingX: 1.5,
                         paddingY: 0.5,
-                        fontSize: "0.875rem",
+                        fontSize: "1rem",
                         fontWeight: "bold",
+                        color:
+                          attr.value === attr.originalValue
+                            ? "inherit"
+                            : attr.value > attr.originalValue
+                            ? "green !important"
+                            : "red !important",
                       }}
                     >
                       {attr.value}
