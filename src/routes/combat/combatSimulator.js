@@ -24,8 +24,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  ToggleButton,
-  ToggleButtonGroup,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
@@ -42,7 +40,9 @@ import {
 import { calcHP, calcMP } from "../../libs/npcs";
 import SelectedNpcs from "../../components/combatSim/SelectedNpcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
-import HealthBar from "../../components/combatSim/HealthBar";
+import StatsTab from "../../components/combatSim/StatsTab";
+import NotesTab from "../../components/combatSim/NotesTab";
+import AttributeSection from "../../components/combatSim/AttributeSection";
 
 export default function CombatSimulator() {
   return (
@@ -53,30 +53,35 @@ export default function CombatSimulator() {
 }
 
 const CombatSim = () => {
-  const { id } = useParams();
-  const [encounter, setEncounter] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [npcList, setNpcList] = useState([]); // List of available NPCs
-  const [selectedNPCs, setSelectedNPCs] = useState([]); // State for selected NPCs (with only identifiers)
-  const [selectedNPC, setSelectedNPC] = useState(null); // State for selected NPC (full data)
-  const [npcClicked, setNpcClicked] = useState(null);
-  const [npcDrawerOpen, setNpcDrawerOpen] = useState(false);
+  // Base states
+  const { id } = useParams(); // Get the encounter ID from the URL
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [loading, setLoading] = useState(true); // Loading state
+
+  // Encounter states
+  const [encounter, setEncounter] = useState(null); // State for the current encounter
+  const [npcList, setNpcList] = useState([]); // List of available NPCs ready for selection
+  const [selectedNPCs, setSelectedNPCs] = useState([]); // State for selected NPCs list
+  const [selectedNPC, setSelectedNPC] = useState(null); // State for selected NPC (for NPC Sheet)
+  const [npcClicked, setNpcClicked] = useState(null); // State for the NPC clicked for HP/MP change
+  const [npcDrawerOpen, setNpcDrawerOpen] = useState(false); // NPC Drawer open state (for mobile)
   const [lastSaved, setLastSaved] = useState(null); // Track last saved time
   const [isEditing, setIsEditing] = useState(false); // Editing mode for encounter name
   const [encounterName, setEncounterName] = useState(""); // Encounter name
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [popoverNpcId, setPopoverNpcId] = useState(null);
-  const [tabIndex, setTabIndex] = useState(0);
-  const [selectedStudy, setSelectedStudy] = useState(0);
-  const ref = useRef();
-  const [downloadImage] = useDownloadImage(selectedNPC?.name, ref);
-
-  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // Turns popover anchor element
+  const [popoverNpcId, setPopoverNpcId] = useState(null); // NPC ID for the turns popover
+  const [tabIndex, setTabIndex] = useState(0); // Tab index for the selected NPC sheet/stats/rolls/notes
+  const [open, setOpen] = useState(false); // Dialog open state for HP/MP change
   const [statType, setStatType] = useState(null); // "HP" or "MP"
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(0); // Value for HP/MP change
 
+  // Study and Download image states
+  const [selectedStudy, setSelectedStudy] = useState(0); // Study dropdown value
+  const ref = useRef(); // Reference for the NPC sheet image download
+  const [downloadImage] = useDownloadImage(selectedNPC?.name, ref); // Download image hook
+
+  // Fetch encounter and NPCs on initial load
   useEffect(() => {
     const fetchEncounter = async () => {
       const encounters = await getEncounterList();
@@ -108,6 +113,7 @@ const CombatSim = () => {
     fetchNpcs();
   }, [id]);
 
+  // Save encounter state 
   const handleSaveState = () => {
     const currentTime = new Date();
     setLastSaved(currentTime);
@@ -137,14 +143,18 @@ const CombatSim = () => {
     });
   };
 
+  // Calculate time since last save
   const timeAgo = lastSaved
     ? `${Math.floor((new Date() - lastSaved) / 1000 / 60)} minutes ago`
     : "Not saved yet";
 
+    /* ENCOUNTER NAME EDITING */  
+  // Handle Encounter Name Change
   const handleEncounterNameChange = (event) => {
     setEncounterName(event.target.value);
   };
 
+  // Save Encounter Name
   const handleSaveEncounterName = () => {
     if (encounterName.trim() === "") {
       return;
@@ -152,32 +162,39 @@ const CombatSim = () => {
     setIsEditing(false);
   };
 
+  // Handle Enter key press and blur for saving encounter name
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
       handleSaveEncounterName();
     }
   };
 
+  // Handle Blur for saving encounter name
   const handleBlur = () => {
     handleSaveEncounterName();
   };
 
+  // Handle Edit Click
   const handleEditClick = () => {
     setIsEditing(true);
   };
 
+  /* NPC ROUNDS AND TURNS */
+  // Handle Round Increase
   const handleIncreaseRound = () => {
     // Increment the round
     encounter.round += 1;
     setEncounter({ ...encounter }); // Trigger re-render or state update
   };
 
+  // Handle Round Decrease
   const handleDecreaseRound = () => {
     // Decrease the round and prevent negative values
     encounter.round = Math.max(1, encounter.round - 1);
     setEncounter({ ...encounter }); // Trigger re-render or state update
   };
 
+  // Handle Reset Turns
   const handleResetTurns = () => {
     // Reset the turns for each selected NPC
     selectedNPCs.forEach((npc) => {
@@ -190,6 +207,39 @@ const CombatSim = () => {
     setEncounter({ ...encounter }); // Trigger re-render or state update
   };
 
+  // Handle Update NPC Turns
+  const handleUpdateNpcTurns = (combatId, newTurns) => {
+    setSelectedNPCs((prev) =>
+      prev.map((npc) =>
+        npc.combatId === combatId
+          ? { ...npc, combatStats: { ...npc.combatStats, turns: newTurns } }
+          : npc
+      )
+    );
+  };
+
+  // Handle Turns Popover open
+  const handlePopoverOpen = (event, npcId) => {
+    setAnchorEl(event.currentTarget);
+    setPopoverNpcId(npcId);
+  };
+
+  // Handle Turns Popover close
+  const handlePopoverClose = (e) => {
+    e.stopPropagation();
+    setAnchorEl(null);
+    setPopoverNpcId(null);
+  };
+
+  // Determine number of turns based on rank
+  const getTurnCount = (rank) => {
+    if (rank === "soldier" || rank === "champion1" || !rank) return 1;
+    if (rank === "elite") return 2;
+    const match = rank.match(/champion(\d)/);
+    return match ? parseInt(match[1], 10) : 1;
+  };
+
+  // Handle Select NPC from the list of available NPCs
   const handleSelectNPC = async (npcId) => {
     const npc = await getNpc(npcId); // Fetch full NPC data using getNpc
     setSelectedNPCs((prev) => [
@@ -206,12 +256,14 @@ const CombatSim = () => {
     ]);
   };
 
+  // Handle Remove NPC from the selected NPCs list
   const handleRemoveNPC = (npcCombatId) => {
     setSelectedNPCs((prev) =>
       prev.filter((npc) => npc.combatId !== npcCombatId)
     );
   };
 
+  // Handle Move Up in the selected NPCs list
   const handleMoveUp = (npcCombatId) => {
     const index = selectedNPCs.findIndex((npc) => npc.combatId === npcCombatId);
     if (index > 0) {
@@ -222,6 +274,7 @@ const CombatSim = () => {
     }
   };
 
+  // Handle Move Down in the selected NPCs list
   const handleMoveDown = (npcCombatId) => {
     const index = selectedNPCs.findIndex((npc) => npc.combatId === npcCombatId);
     if (index < selectedNPCs.length - 1) {
@@ -232,46 +285,19 @@ const CombatSim = () => {
     }
   };
 
+  // Handle NPC Click in the selected NPCs list
   const handleNpcClick = (npcCombatId) => {
     const npc = selectedNPCs.find((npc) => npc.combatId === npcCombatId);
     setSelectedNPC(npc); // Set clicked NPC as the selected NPC
     setSelectedStudy(0);
   };
 
-  const handleUpdateNpcTurns = (combatId, newTurns) => {
-    setSelectedNPCs((prev) =>
-      prev.map((npc) =>
-        npc.combatId === combatId
-          ? { ...npc, combatStats: { ...npc.combatStats, turns: newTurns } }
-          : npc
-      )
-    );
-  };
-
-  // Handle Popover open and close
-  const handlePopoverOpen = (event, npcId) => {
-    setAnchorEl(event.currentTarget);
-    setPopoverNpcId(npcId);
-  };
-
-  const handlePopoverClose = (e) => {
-    e.stopPropagation();
-    setAnchorEl(null);
-    setPopoverNpcId(null);
-  };
-
-  // Determine number of turns based on rank
-  const getTurnCount = (rank) => {
-    if (rank === "soldier" || rank === "champion1" || !rank) return 1;
-    if (rank === "elite") return 2;
-    const match = rank.match(/champion(\d)/);
-    return match ? parseInt(match[1], 10) : 1;
-  };
-
+  // Handle Study Change
   const handleStudyChange = (event) => {
     setSelectedStudy(event.target.value);
   };
 
+  // Handle Open HP/MP Dialog
   const handleOpen = (type, npc) => {
     setStatType(type);
     setValue(0);
@@ -279,11 +305,13 @@ const CombatSim = () => {
     setNpcClicked(npc);
   };
 
+  // Handle Close HP/MP Dialog
   const handleClose = () => {
     setOpen(false);
     setNpcClicked(null);
   };
 
+  // Handle Confirm HP/MP Dialog
   const handleConfirm = () => {
     const updatedNPCs = selectedNPCs.map((npc) => {
       if (npc.combatId === npcClicked.combatId) {
@@ -339,6 +367,7 @@ const CombatSim = () => {
     handleClose();
   };
 
+  // Handle Status Effect Toggle
   const toggleStatusEffect = (npc, status) => {
     const updatedStatusEffects = [...(npc.combatStats?.statusEffects || [])];
 
@@ -369,6 +398,7 @@ const CombatSim = () => {
     );
   };
 
+  // Calculate Current Attribute Value based on Status Effects
   function calcAttr(statusEffect1, statusEffect2, attribute, npc) {
     // Define the base attribute value (e.g., dexterity)
     let attributeValue = npc?.attributes?.[attribute] || 6; // Default to 6 if attribute is missing
@@ -387,6 +417,7 @@ const CombatSim = () => {
     return attributeValue;
   }
 
+  // During loading state
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
@@ -395,6 +426,7 @@ const CombatSim = () => {
     );
   }
 
+  // If encounter is not found
   if (!encounter) {
     return (
       <Box sx={{ textAlign: "center", mt: 5 }}>
@@ -559,212 +591,20 @@ const CombatSim = () => {
                 </>
               )}
               {tabIndex === 1 && (
-                <Box>
-                  {/* HP Section */}
-                  <Box
-                    sx={{ marginTop: 2, display: "flex", alignItems: "center" }}
-                  >
-                    <HealthBar
-                      label="HP"
-                      currentValue={selectedNPC?.combatStats?.currentHp || 0}
-                      maxValue={calcHP(selectedNPC)}
-                      startColor="#66bb6a"
-                      endColor="#388e3c"
-                      bgColor="#333333"
-                    />
-                    <Button
-                      variant="contained"
-                      color="error"
-                      onClick={() => handleOpen("HP", selectedNPC)}
-                      size="small"
-                      sx={{ ml: 2 }}
-                    >
-                      Modify
-                    </Button>
-                  </Box>
-                  {/* MP Section */}
-                  <Box
-                    sx={{ marginTop: 2, display: "flex", alignItems: "center" }}
-                  >
-                    <HealthBar
-                      label="MP"
-                      currentValue={selectedNPC?.combatStats?.currentMp || 0}
-                      maxValue={calcMP(selectedNPC)}
-                      startColor="#42a5f5"
-                      endColor="#0288d1"
-                      bgColor="#333333"
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleOpen("MP", selectedNPC)}
-                      size="small"
-                      sx={{ ml: 2 }}
-                    >
-                      Modify
-                    </Button>
-                  </Box>
-                  {/* Status Effects */}
-                  <Box sx={{ marginTop: 3 }}>
-                    <Box sx={{ marginTop: 1 }}>
-                      {/* First row: Slow, Dazed, Weak, Shaken */}
-                      <ToggleButtonGroup
-                        value={selectedNPC?.combatStats?.statusEffects || []}
-                        exclusive
-                        onChange={(event, newStatusEffects) => {
-                          toggleStatusEffect(selectedNPC, newStatusEffects);
-                        }}
-                        sx={{
-                          display: "flex",
-                          width: "100%",
-                        }}
-                      >
-                        {[
-                          { label: "Slow", color: "#1565c0" }, // Blue
-                          { label: "Dazed", color: "#ab47bc" }, // Purple
-                          { label: "Weak", color: "#ff7043" }, // Orange
-                          { label: "Shaken", color: "#e8b923" }, // Yellow
-                        ].map(({ label, color }) => (
-                          <ToggleButton
-                            key={label}
-                            value={label}
-                            sx={{
-                              flex: "1 1 16%",
-                              minWidth: "100px",
-                              justifyContent: "center",
-                              padding: "5px 0",
-                              backgroundColor: "#ECECEC",
-                              color: "black !important",
-                              fontWeight: "bold",
-                              letterSpacing: "1.5px",
-                              fontSize: "1.2rem",
-                              transition: "all 0.3s ease-in-out",
-
-                              "&:hover": {
-                                backgroundColor: "#D3D3D3 !important",
-                                color: "black !important",
-                              },
-
-                              "&.Mui-selected": {
-                                backgroundColor: color,
-                                color: "white !important",
-
-                                "&:hover": {
-                                  backgroundColor: color + " !important",
-                                  color: "white !important",
-                                },
-                              },
-                            }}
-                          >
-                            <Typography
-                              variant="h5"
-                              sx={{
-                                fontWeight: "bold",
-                                textAlign: "center",
-                                color: "inherit",
-                              }}
-                            >
-                              {label}
-                            </Typography>
-                          </ToggleButton>
-                        ))}
-                      </ToggleButtonGroup>
-
-                      {/* Second row: Enraged, Poisoned */}
-                      <ToggleButtonGroup
-                        value={selectedNPC?.combatStats?.statusEffects || []}
-                        exclusive
-                        onChange={(event, newStatusEffects) => {
-                          toggleStatusEffect(selectedNPC, newStatusEffects);
-                        }}
-                        sx={{
-                          display: "flex",
-                          width: "100%",
-                          mt: 1,
-                        }}
-                      >
-                        {[
-                          { label: "Enraged", color: "#d32f2f" }, // Red
-                          { label: "Poisoned", color: "#4caf50" }, // Green
-                        ].map(({ label, color }) => (
-                          <ToggleButton
-                            key={label}
-                            value={label}
-                            sx={{
-                              flex: "1 1 50%",
-                              minWidth: "100px",
-                              justifyContent: "center",
-                              padding: "5px 0",
-                              backgroundColor: "#ECECEC",
-                              color: "black !important",
-                              fontWeight: "bold",
-                              letterSpacing: "1.5px",
-                              fontSize: "1.2rem",
-                              transition: "all 0.3s ease-in-out",
-                              "&:hover": {
-                                backgroundColor: "#D3D3D3 !important",
-                                color: "black !important",
-                              },
-
-                              "&.Mui-selected": {
-                                backgroundColor: color,
-                                color: "white !important",
-
-                                "&:hover": {
-                                  backgroundColor: color + " !important",
-                                  color: "white !important",
-                                },
-                              },
-                            }}
-                          >
-                            <Typography
-                              variant="h5"
-                              sx={{
-                                fontWeight: "bold",
-                                textAlign: "center",
-                                color: "inherit",
-                              }}
-                            >
-                              {label}
-                            </Typography>
-                          </ToggleButton>
-                        ))}
-                      </ToggleButtonGroup>
-                    </Box>
-                  </Box>
-                </Box>
+                <StatsTab
+                  selectedNPC={selectedNPC}
+                  calcHP={calcHP}
+                  calcMP={calcMP}
+                  handleOpen={handleOpen}
+                  toggleStatusEffect={toggleStatusEffect}
+                />
               )}
               {tabIndex === 2 && <Typography>Rolls Section</Typography>}
               {tabIndex === 3 && selectedNPC && (
-                <TextField
-                  label="Notes"
-                  variant="outlined"
-                  fullWidth
-                  multiline
-                  rows={10}
-                  value={
-                    selectedNPCs.find(
-                      (npc) => npc.combatId === selectedNPC.combatId
-                    )?.combatStats?.notes || ""
-                  }
-                  onChange={(e) => {
-                    const updatedNPCs = selectedNPCs.map((npc) => {
-                      if (npc.combatId === selectedNPC.combatId) {
-                        return {
-                          ...npc,
-                          combatStats: {
-                            ...npc.combatStats,
-                            notes: e.target.value,
-                          },
-                        };
-                      }
-                      return npc;
-                    });
-
-                    // Update the list of selected NPCs with the modified notes
-                    setSelectedNPCs(updatedNPCs);
-                  }}
-                  sx={{ mt: 2 }} // Add some top margin for spacing
+                <NotesTab
+                  selectedNPC={selectedNPC}
+                  selectedNPCs={selectedNPCs}
+                  setSelectedNPCs={setSelectedNPCs}
                 />
               )}
             </Box>
@@ -803,93 +643,8 @@ const CombatSim = () => {
             )}
             {/* NPC Attributes Always Visible */}
             {selectedNPC && (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-around",
-                  alignItems: "center",
-                  borderTop: "1px solid #ccc",
-                  paddingY: 1,
-                  bgcolor: "#f5f5f5",
-                }}
-              >
-                {[
-                  {
-                    label: "DEX",
-                    value: calcAttr(
-                      "Slow",
-                      "Enraged",
-                      "dexterity",
-                      selectedNPC
-                    ),
-                    color: "#42a5f5", // Blue
-                    originalValue: selectedNPC.attributes?.dexterity,
-                  },
-                  {
-                    label: "INT",
-                    value: calcAttr("Dazed", "Enraged", "insight", selectedNPC),
-                    color: "#ab47bc", // Purple
-                    originalValue: selectedNPC.attributes?.insight,
-                  },
-                  {
-                    label: "MIG",
-                    value: calcAttr("Weak", "Poisoned", "might", selectedNPC),
-                    color: "#ff7043", // Orange
-                    originalValue: selectedNPC.attributes?.might,
-                  },
-                  {
-                    label: "WLP",
-                    value: calcAttr("Shaken", "Poisoned", "will", selectedNPC),
-                    color: "#e8b923", // Yellow
-                    originalValue: selectedNPC.attributes?.will,
-                  },
-                ].map((attr) => (
-                  <Box
-                    key={attr.label}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      borderRadius: "16px",
-                      overflow: "hidden",
-                      bgcolor: "#e0e0e0",
-                    }}
-                  >
-                    {/* Label Part */}
-                    <Box
-                      sx={{
-                        bgcolor: attr.color,
-                        color: "white",
-                        paddingX: 1,
-                        paddingY: 0.5,
-                        fontWeight: "bold",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      {attr.label}
-                    </Box>
-                    {/* Value Part */}
-                    <Box
-                      sx={{
-                        paddingX: 1.5,
-                        paddingY: 0.5,
-                        fontSize: "1rem",
-                        fontWeight: "bold",
-                        color:
-                          attr.value === attr.originalValue
-                            ? "inherit"
-                            : attr.value > attr.originalValue
-                            ? "green !important"
-                            : "red !important",
-                      }}
-                    >
-                      {attr.value}
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
+              <AttributeSection selectedNPC={selectedNPC} calcAttr={calcAttr} />
             )}
-
-            {/* Download Button Always Visible */}
           </Box>
         )}
       </Box>
