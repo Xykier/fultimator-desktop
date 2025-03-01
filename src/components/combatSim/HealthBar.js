@@ -1,9 +1,16 @@
 import React from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
 
-const HealthBar = ({ label, currentValue, maxValue, startColor, endColor, bgColor }) => {
+const HealthBar = ({
+  label,
+  currentValue,
+  maxValue,
+  startColor,
+  endColor,
+  bgColor,
+}) => {
   const percentage = (currentValue / maxValue) * 100 || 0;
-  
+
   // Create a gradient from startColor to endColor
   const gradient = `linear-gradient(to right, ${startColor}, ${endColor})`;
 
@@ -29,10 +36,10 @@ const HealthBar = ({ label, currentValue, maxValue, startColor, endColor, bgColo
         }}
       >
         <Typography
-          variant="body2"
           sx={{
             fontWeight: "bold",
             fontFamily: "'Press Start 2P', cursive",
+            fontSize: `calc(0.60rem + 0.25vw)`,
           }}
         >
           {label}
@@ -65,6 +72,8 @@ const HealthBar = ({ label, currentValue, maxValue, startColor, endColor, bgColo
             fontWeight: "bold",
             color: "#fff",
             fontFamily: "'Press Start 2P', cursive",
+            letterSpacing: "5px",
+            fontSize: `calc(0.60rem + 0.25vw)`,
           }}
         >
           {`${currentValue} / ${maxValue}`}

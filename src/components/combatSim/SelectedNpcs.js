@@ -7,7 +7,6 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  Tooltip,
   Button,
   Checkbox,
   Popover,
@@ -80,7 +79,7 @@ export default function SelectedNpcs({
         }}
       >
         <Typography variant="h5">Selected NPCs</Typography>
-        <Tooltip title="Reset Turns & Go to Next Round">
+        {isMobile ? (
           <IconButton
             size="small"
             sx={{ padding: 0 }}
@@ -89,7 +88,18 @@ export default function SelectedNpcs({
           >
             <Replay />
           </IconButton>
-        </Tooltip>
+        ) : (
+          <Button
+            size="small"
+            sx={{ padding: "0 0.5rem" }}
+            color="primary"
+            variant="outlined"
+            onClick={handleResetTurns}
+            endIcon={<Replay />}
+          >
+            Next Round
+          </Button>
+        )}
       </Box>
 
       <Box sx={{ flexGrow: 1, overflowY: "auto", paddingTop: 1 }}>
@@ -116,17 +126,23 @@ export default function SelectedNpcs({
                   button
                   onClick={(e) => handleListItemClick(e, npc.combatId)}
                   sx={{
-                    border: (selectedNpcID && selectedNpcID === npc.combatId) ? "1px solid " + primary : "1px solid #ddd",
+                    border:
+                      selectedNpcID && selectedNpcID === npc.combatId
+                        ? "1px solid " + primary
+                        : "1px solid #ddd",
                     marginY: 1,
                     borderRadius: 1,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     backgroundColor:
-                      npc.combatStats?.currentHp === 0
-                        ? "lightgray"
-                        : "inherit",
-                    "&:hover": { backgroundColor: "#f1f1f1" },
+                      npc.combatStats?.currentHp === 0 ? "#ffe6e6" : "inherit",
+                    "&:hover": {
+                      backgroundColor:
+                        npc.combatStats?.currentHp === 0
+                          ? "#ffcccc"
+                          : "#f1f1f1",
+                    },
                     paddingY: 1,
                     flexDirection: "row",
                     overflow: "hidden",
@@ -153,7 +169,15 @@ export default function SelectedNpcs({
                   </Box>
                   <ListItemText
                     primary={
-                      <Typography variant="h4">
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: npc.combatStats.turns.length > 1 ? "calc(100% - 88px)"  : "calc(100% - 55px)",
+                        }}
+                      >
                         {npc.id ? (
                           npc.combatStats?.currentHp === 0 ? (
                             <>
@@ -174,11 +198,21 @@ export default function SelectedNpcs({
                           component="span"
                           variant="h5"
                           sx={{
-                            color: "#4CAF50",
+                            color:
+                              /* if HP is <= to half of max, make it red */ npc
+                                .combatStats?.currentHp <=
+                              Math.floor(calcHP(npc) / 2)
+                                ? "#D32F2F"
+                                : "#4CAF50",
                             fontWeight: "bold",
                             transition: "color 0.2s ease-in-out",
                             "&:hover": {
-                              color: "#388E3C",
+                              /* if HP is <= to half of max, make it dark red */
+                              color:
+                                npc.combatStats?.currentHp <=
+                                Math.floor(calcHP(npc) / 2)
+                                  ? "#B71C1C"
+                                  : "#388E3C",
                               textDecoration: "underline",
                             },
                           }}
@@ -249,8 +283,9 @@ export default function SelectedNpcs({
                           handlePopoverOpen(event, npc.combatId);
                         }}
                         sx={{
-                          zIndex: 10, // Ensure button appears on top when clicked
+                          zIndex: 10,
                         }}
+                        size= {isMobile ? "small" : "medium"}
                       >
                         {npc.combatStats.turns.filter((turn) => turn).length} /{" "}
                         {npc.combatStats.turns.length}

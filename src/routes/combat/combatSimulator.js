@@ -12,13 +12,7 @@ import {
   Box,
   CircularProgress,
   useMediaQuery,
-  IconButton,
   Button,
-  Select,
-  MenuItem,
-  Tooltip,
-  Tabs,
-  Tab,
   TextField,
   Dialog,
   DialogActions,
@@ -30,21 +24,10 @@ import {
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
 import NpcSelector from "../../components/combatSim/NpcSelector";
-import NpcPretty from "../../components/npc/Pretty";
-import {
-  Close,
-  Download,
-  Description,
-  Favorite,
-  Casino,
-  Edit,
-} from "@mui/icons-material";
 import { calcHP, calcMP } from "../../libs/npcs";
 import SelectedNpcs from "../../components/combatSim/SelectedNpcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
-import StatsTab from "../../components/combatSim/StatsTab";
-import NotesTab from "../../components/combatSim/NotesTab";
-import AttributeSection from "../../components/combatSim/AttributeSection";
+import NPCDetail from "../../components/combatSim/NPCDetail";
 
 export default function CombatSimulator() {
   return (
@@ -503,6 +486,7 @@ const CombatSim = () => {
         round={encounter.round}
         handleIncreaseRound={handleIncreaseRound}
         handleDecreaseRound={handleDecreaseRound}
+        isMobile={isMobile}
       />
       {isMobile && (
         <NpcSelector // NPC Selector
@@ -515,7 +499,7 @@ const CombatSim = () => {
       )}
 
       {/* Three Columns: NPC Selector, Selected NPCs, NPC Sheet */}
-      <Box sx={{ display: "flex", gap: 2, height: "calc(100vh - 205px)" }}>
+      <Box sx={{ display: "flex", gap: 2, height: isMobile ? "calc(100vh - 245px)" : "calc(100vh - 205px)" }}>
         {/* NPC Selector */}
         {!isMobile && (
           <NpcSelector
@@ -546,149 +530,23 @@ const CombatSim = () => {
         />
 
         {/* NPC Sheet */}
-        {selectedNPC && (
-          <Box
-            sx={{
-              width: "30%",
-              bgcolor: "#fff",
-              padding: 2,
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-            }}
-          >
-            {/* Header with Close Button */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                borderBottom: "1px solid #ccc",
-                paddingBottom: 1,
-              }}
-            >
-              <Typography variant="h5" sx={{ flexShrink: 0 }}>
-                {selectedNPC ? selectedNPC.name : "NPC Sheet"}
-              </Typography>
-              {selectedNPC && (
-                <IconButton
-                  size="small"
-                  sx={{ padding: 0 }}
-                  onClick={() => {
-                    setSelectedNPC(null);
-                    setTabIndex(0);
-                  }}
-                >
-                  <Close />
-                </IconButton>
-              )}
-            </Box>
-
-            {/* Tabs */}
-            {selectedNPC && (
-              <Tabs
-                value={tabIndex}
-                onChange={(_, newIndex) => setTabIndex(newIndex)}
-                variant="fullWidth"
-                sx={{ minHeight: 40 }} // Reduce overall height
-              >
-                <Tab
-                  icon={<Description fontSize="small" />}
-                  label={<Typography variant="body2">Sheet</Typography>}
-                  iconPosition="start"
-                  sx={{ minHeight: 40, padding: "4px 8px" }}
-                />
-                <Tab
-                  icon={<Favorite fontSize="small" />}
-                  label={<Typography variant="body2">Stats</Typography>}
-                  iconPosition="start"
-                  sx={{ minHeight: 40, padding: "4px 8px" }}
-                />
-                <Tab
-                  icon={<Casino fontSize="small" />}
-                  label={<Typography variant="body2">Rolls</Typography>}
-                  iconPosition="start"
-                  sx={{ minHeight: 40, padding: "4px 8px" }}
-                />
-                <Tab
-                  icon={<Edit fontSize="small" />}
-                  label={<Typography variant="body2">Notes</Typography>}
-                  iconPosition="start"
-                  sx={{ minHeight: 40, padding: "4px 8px" }}
-                />
-              </Tabs>
-            )}
-
-            {/* Tab Content */}
-            <Box sx={{ flexGrow: 1, overflowY: "auto", paddingTop: 1 }}>
-              {tabIndex === 0 && selectedNPC && (
-                <>
-                  <NpcPretty
-                    npc={selectedNPC}
-                    npcImage={selectedNPC.imgurl}
-                    collapse={true}
-                    study={selectedStudy}
-                    ref={ref}
-                  />
-                </>
-              )}
-              {tabIndex === 1 && (
-                <StatsTab
-                  selectedNPC={selectedNPC}
-                  calcHP={calcHP}
-                  calcMP={calcMP}
-                  handleOpen={handleOpen}
-                  toggleStatusEffect={toggleStatusEffect}
-                />
-              )}
-              {tabIndex === 2 && <Typography>Rolls Section</Typography>}
-              {tabIndex === 3 && selectedNPC && (
-                <NotesTab
-                  selectedNPC={selectedNPC}
-                  selectedNPCs={selectedNPCs}
-                  setSelectedNPCs={setSelectedNPCs}
-                />
-              )}
-            </Box>
-            {selectedNPC && tabIndex === 0 && (
-              <Box
-                sx={{
-                  borderTop: "1px solid #ccc",
-                  paddingTop: 1,
-                  display: "flex",
-                  justifyContent: "center",
-                  marginBottom: 1,
-                }}
-              >
-                {/* Study Dropdown Only in NPC Sheet */}
-                <Select
-                  value={selectedStudy}
-                  onChange={handleStudyChange}
-                  size="small"
-                >
-                  <MenuItem value={0}>Study</MenuItem>
-                  <MenuItem value={1}>7+</MenuItem>
-                  <MenuItem value={2}>10+</MenuItem>
-                  <MenuItem value={3}>13+</MenuItem>
-                </Select>
-                <Tooltip title="Download Sheet" placement="bottom">
-                  <Button
-                    color="primary"
-                    aria-label="download"
-                    onClick={downloadImage}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <Download />
-                  </Button>
-                </Tooltip>
-              </Box>
-            )}
-            {/* NPC Attributes Always Visible */}
-            {selectedNPC && (
-              <AttributeSection selectedNPC={selectedNPC} calcAttr={calcAttr} />
-            )}
-          </Box>
-        )}
+        <NPCDetail
+          selectedNPC={selectedNPC}
+          setSelectedNPC={setSelectedNPC}
+          tabIndex={tabIndex}
+          setTabIndex={setTabIndex}
+          selectedStudy={selectedStudy}
+          handleStudyChange={handleStudyChange}
+          downloadImage={downloadImage}
+          calcHP={calcHP}
+          calcMP={calcMP}
+          handleOpen={handleOpen}
+          toggleStatusEffect={toggleStatusEffect}
+          selectedNPCs={selectedNPCs}
+          setSelectedNPCs={setSelectedNPCs}
+          calcAttr={calcAttr}
+          isMobile={isMobile}
+        />
       </Box>
       <Dialog
         open={open}
@@ -715,6 +573,9 @@ const CombatSim = () => {
               mt: 1,
             }}
           >
+            <Typography variant="h6" sx={{ mb: 1, mt: -2 }}>
+              {npcClicked?.name}
+            </Typography>
             <ToggleButtonGroup
               value={isHealing ? "heal" : "damage"}
               exclusive

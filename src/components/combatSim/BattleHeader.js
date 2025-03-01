@@ -1,6 +1,13 @@
 import React from "react";
-import { Typography, Box, Button, TextField, Icon, IconButton } from "@mui/material";
-import { Edit, ArrowRight, ArrowLeft } from "@mui/icons-material";
+import {
+  Typography,
+  Box,
+  Button,
+  TextField,
+  Icon,
+  IconButton,
+} from "@mui/material";
+import { Edit, ArrowRight, ArrowLeft, Save } from "@mui/icons-material";
 
 export default function BattleHeader({
   encounterName,
@@ -14,6 +21,7 @@ export default function BattleHeader({
   round,
   handleIncreaseRound,
   handleDecreaseRound,
+  isMobile,
 }) {
   return (
     <Box
@@ -36,13 +44,15 @@ export default function BattleHeader({
             autoFocus
             variant="standard"
             error={encounterName.trim() === ""}
-            helperText={encounterName.trim() === "" ? "Name cannot be empty" : ""}
+            helperText={
+              encounterName.trim() === "" ? "Name cannot be empty" : ""
+            }
             inputProps={{ maxLength: 100 }}
           />
         ) : (
           <>
             <Typography
-              variant="h4"
+              variant={isMobile ? "h6" : "h4"}
               onClick={handleEditClick}
               sx={{
                 cursor: "pointer",
@@ -52,40 +62,68 @@ export default function BattleHeader({
               {encounterName}
             </Typography>
             <Icon onClick={handleEditClick} sx={{ cursor: "pointer" }}>
-              <Edit />
+              <Edit fontSize={isMobile ? "small" : "medium"} />
             </Icon>
           </>
         )}
       </Box>
 
       {/* Center Section for Round */}
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+        }}
+      >
         <IconButton
           onClick={handleDecreaseRound}
           color="primary"
           sx={{ padding: 1 }}
         >
-          <ArrowLeft fontSize="small" />
+          <ArrowLeft fontSize={isMobile ? "small" : "medium"} />
         </IconButton>
-        <Typography variant="h5" sx={{ marginX: 2 }}>
-          {`Round ${round}`}
+        <Typography
+          variant={isMobile ? "h6" : "h3"}
+          sx={{ marginX: 2, textTransform: "uppercase" }}
+        >
+          {`Round: ${round}`}
         </Typography>
         <IconButton
           onClick={handleIncreaseRound}
           color="primary"
           sx={{ padding: 1 }}
         >
-          <ArrowRight fontSize="small" />
+          <ArrowRight fontSize={isMobile ? "small" : "medium"}  />
         </IconButton>
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        {timeAgo !== "Not saved yet" && (
+        {timeAgo !== "Not saved yet" && !isMobile && (
           <Typography variant="body2">Last saved: {timeAgo}</Typography>
         )}
-        <Button variant="contained" color="primary" onClick={handleSaveState}>
-          Save
-        </Button>
+        {isMobile ? (
+          <IconButton
+            onClick={handleSaveState}
+            color="white"
+            sx={{
+              backgroundColor: "primary.main",
+              margin: 0,
+            }}
+          >
+            <Save fontSize="small" />
+          </IconButton>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSaveState}
+            startIcon={<Save />}
+          >
+            Save
+          </Button>
+        )}
       </Box>
     </Box>
   );

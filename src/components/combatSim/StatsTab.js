@@ -6,6 +6,7 @@ import {
   Typography,
 } from "@mui/material";
 import HealthBar from "./HealthBar";
+import { Edit } from "@mui/icons-material";
 
 const StatsTab = ({
   selectedNPC,
@@ -13,6 +14,7 @@ const StatsTab = ({
   calcMP,
   handleOpen,
   toggleStatusEffect,
+  isMobile,
 }) => {
   return (
     <Box>
@@ -26,15 +28,28 @@ const StatsTab = ({
           endColor="#388e3c"
           bgColor="#333333"
         />
-        <Button
-          variant="contained"
-          color="error"
-          onClick={() => handleOpen("HP", selectedNPC)}
-          size="small"
-          sx={{ ml: 2 }}
-        >
-          Modify
-        </Button>
+        {isMobile ? (
+          <Button
+            onClick={() => handleOpen("MP", selectedNPC)}
+            size="small"
+            sx={{ ml: 2 }}
+            variant="contained"
+            color="error"
+          >
+            <Edit />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => handleOpen("MP", selectedNPC)}
+            endIcon={<Edit />}
+            size="small"
+            sx={{ ml: 2 }}
+          >
+            Edit
+          </Button>
+        )}
       </Box>
 
       {/* MP Section */}
@@ -47,15 +62,28 @@ const StatsTab = ({
           endColor="#0288d1"
           bgColor="#333333"
         />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpen("MP", selectedNPC)}
-          size="small"
-          sx={{ ml: 2 }}
-        >
-          Modify
-        </Button>
+        {isMobile ? (
+          <Button
+            onClick={() => handleOpen("MP", selectedNPC)}
+            size="small"
+            sx={{ ml: 2 }}
+            variant="contained"
+            color="primary"
+          >
+            <Edit />
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleOpen("MP", selectedNPC)}
+            endIcon={<Edit />}
+            size="small"
+            sx={{ ml: 2 }}
+          >
+            Edit
+          </Button>
+        )}
       </Box>
 
       {/* Status Effects */}
@@ -79,7 +107,12 @@ const StatsTab = ({
             onChange={(event, newStatusEffects) =>
               toggleStatusEffect(selectedNPC, newStatusEffects)
             }
-            sx={{ display: "flex", width: "100%", mt: rowIndex === 0 ? 0 : 1 }}
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center", // Center the buttons
+              mt: rowIndex === 0 ? 0 : 1,
+            }}
           >
             {row.map(({ label, color }) => (
               <ToggleButton
@@ -87,14 +120,14 @@ const StatsTab = ({
                 value={label}
                 sx={{
                   flex: "1 1 16%",
-                  minWidth: "100px",
+                  minWidth: "80px", // Minimum width for small screens
                   justifyContent: "center",
                   padding: "5px 0",
                   backgroundColor: "#ECECEC",
                   color: "black !important",
                   fontWeight: "bold",
                   letterSpacing: "1.5px",
-                  fontSize: "1.2rem",
+                  fontSize: { xs: "1rem", sm: "1.2rem" }, // Adjust font size for smaller screens
                   transition: "all 0.3s ease-in-out",
                   "&:hover": {
                     backgroundColor: "#D3D3D3 !important",
@@ -116,6 +149,7 @@ const StatsTab = ({
                     fontWeight: "bold",
                     textAlign: "center",
                     color: "inherit",
+                    fontSize: { xs: "1rem", sm: "1.2rem" }, // Adjust typography size for small screens
                   }}
                 >
                   {label}
