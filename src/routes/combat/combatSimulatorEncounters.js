@@ -41,11 +41,15 @@ const CombatSimEncounters = () => {
   const secondary = theme.palette.secondary.main;
 
   useEffect(() => {
-    const fetchData = async () => {
-      setEncounters(await getEncounterList());
-    };
+    // Fetch data when the component mounts
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    const encounterList = await getEncounterList();
+    encounterList.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    setEncounters(encounterList);
+  };
 
   const handleEncounterNameChange = (event) => {
     setEncounterName(event.target.value);
@@ -62,13 +66,13 @@ const CombatSimEncounters = () => {
     };
 
     await addEncounter(newEncounter);
-    setEncounters(await getEncounterList());
+    fetchData();
     setEncounterName("");
   };
 
   const handleDeleteEncounter = async (id) => {
     await deleteEncounter(id);
-    setEncounters(await getEncounterList());
+    fetchData();
   };
 
   const handleNavigateToEncounter = (id) => {

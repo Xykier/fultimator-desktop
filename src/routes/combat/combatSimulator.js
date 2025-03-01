@@ -20,6 +20,11 @@ import {
   DialogTitle,
   ToggleButton,
   ToggleButtonGroup,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  ListItemText,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
@@ -28,6 +33,8 @@ import { calcHP, calcMP } from "../../libs/npcs";
 import SelectedNpcs from "../../components/combatSim/SelectedNpcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
 import NPCDetail from "../../components/combatSim/NPCDetail";
+import { typesList } from "../../libs/types";
+import { TypeIcon } from "../../components/types";
 
 export default function CombatSimulator() {
   return (
@@ -62,6 +69,7 @@ const CombatSim = () => {
   const [statType, setStatType] = useState(null); // "HP" or "MP"
   const [value, setValue] = useState(0); // Value for HP/MP change
   const [isHealing, setIsHealing] = useState(false); // true = Heal, false = Damage
+  const [damageType, setDamageType] = useState(""); // Type of damage (physical, magical, etc.)
 
   // Study and Download image states
   const [selectedStudy, setSelectedStudy] = useState(0); // Study dropdown value
@@ -288,6 +296,7 @@ const CombatSim = () => {
   const handleOpen = (type, npc) => {
     setStatType(type);
     setValue("");
+    setDamageType("");
     setOpen(true);
     setNpcClicked(npc);
 
@@ -460,17 +469,6 @@ const CombatSim = () => {
     );
   }
 
-  // if mobile, not yet implemented
-  /*if (isMobile) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Typography variant="h5" color="error" sx={{ mt: 5 }}>
-          Mobile View not yet implemented!
-        </Typography>
-      </Box>
-    );
-  }*/
-
   return (
     <Box sx={{ padding: 3, display: "flex", flexDirection: "column", gap: 1 }}>
       {/* Encounter Name, Save Button and Last Saved Time */}
@@ -499,7 +497,13 @@ const CombatSim = () => {
       )}
 
       {/* Three Columns: NPC Selector, Selected NPCs, NPC Sheet */}
-      <Box sx={{ display: "flex", gap: 2, height: isMobile ? "calc(100vh - 245px)" : "calc(100vh - 205px)" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          height: isMobile ? "calc(100vh - 245px)" : "calc(100vh - 208px)",
+        }}
+      >
         {/* NPC Selector */}
         {!isMobile && (
           <NpcSelector
@@ -610,6 +614,68 @@ const CombatSim = () => {
                 },
               }}
             />
+            {/* Damage type selector (from typesList) only for hp damage */}
+            {statType === "HP" && !isHealing && (
+              <>
+                <FormControl
+                  fullWidth
+                  sx={{
+                    mt: 2,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                    },
+                  }}
+                >
+                  <InputLabel id="damage-type-label">Damage Type</InputLabel>
+                  <Select
+                    label="Damage Type"
+                    value={damageType}
+                    onChange={(e) => setDamageType(e.target.value)}
+                  >
+                    <MenuItem value="">
+                      <ListItemText>None</ListItemText>
+                    </MenuItem>
+                    {typesList.map((type) => (
+                      <MenuItem
+                        key={type}
+                        value={type}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center", // Ensure horizontal alignment
+                          paddingY: "6px", // Adjust vertical padding if necessary
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            minWidth: 70,
+                          }}
+                        >
+                          <TypeIcon type={type} />
+                          <ListItemText
+                            sx={{
+                              ml: 1,
+                              marginBottom: 0,
+                              /*capitalize*/ textTransform: "capitalize",
+                            }}
+                          >
+                            {type}
+                          </ListItemText>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {damageType !== "" && value !== "" && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Calculated:{" "}
+                    <strong>{value + " " + damageType + " damage"}</strong>
+                  </Typography>
+                )}
+              </>
+            )}
           </DialogContent>
           <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
             <Button
