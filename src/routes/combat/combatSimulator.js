@@ -506,7 +506,15 @@ const CombatSim = () => {
   }
 
   return (
-    <Box sx={{ padding: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+    <Box
+      sx={{
+        padding: 2,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        mt: -2,
+      }}
+    >
       {/* Encounter Name, Save Button and Last Saved Time */}
       <BattleHeader
         encounterName={encounterName}
@@ -537,7 +545,7 @@ const CombatSim = () => {
         sx={{
           display: "flex",
           gap: 2,
-          height: isMobile ? "calc(100vh - 245px)" : "calc(100vh - 208px)",
+          height: isMobile ? "calc(100vh - 211px)" : "calc(100vh - 176px)",
         }}
       >
         {/* NPC Selector */}
