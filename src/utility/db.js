@@ -124,3 +124,11 @@ export const deleteEncounter = async (id) => {
   const db = await dbPromise;
   await db.delete(ENCOUNTER_STORE_NAME, id);
 };
+
+export const deleteAllEncounters = async () => {
+  const db = await dbPromise;
+  const transaction = db.transaction(ENCOUNTER_STORE_NAME, 'readwrite');
+  const store = transaction.objectStore(ENCOUNTER_STORE_NAME);
+  await store.clear();
+  await transaction.done;
+};

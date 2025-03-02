@@ -236,19 +236,27 @@ const CombatSim = () => {
 
   // Handle Select NPC from the list of available NPCs
   const handleSelectNPC = async (npcId) => {
-    const npc = await getNpc(npcId); // Fetch full NPC data using getNpc
-    setSelectedNPCs((prev) => [
-      ...prev,
-      {
-        ...npc,
-        combatId: `${npc.id}-${Date.now()}`,
-        combatStats: {
-          notes: "",
-          currentHp: calcHP(npc),
-          currentMp: calcMP(npc),
+    if (selectedNPCs.length < 30) {
+      const npc = await getNpc(npcId); // Fetch full NPC data using getNpc
+      setSelectedNPCs((prev) => [
+        ...prev,
+        {
+          ...npc,
+          combatId: `${npc.id}-${Date.now()}`,
+          combatStats: {
+            notes: "",
+            currentHp: calcHP(npc),
+            currentMp: calcMP(npc),
+          },
         },
-      },
-    ]);
+      ]);
+    } else {
+      if (window.electron) {
+        window.electron.alert("You cannot select more than 30 NPCs.");
+      } else {
+        alert("You cannot select more than 30 NPCs.");
+      }
+    }
   };
 
   // Handle Remove NPC from the selected NPCs list
@@ -256,6 +264,10 @@ const CombatSim = () => {
     setSelectedNPCs((prev) =>
       prev.filter((npc) => npc.combatId !== npcCombatId)
     );
+    // if selectedNPC is the one removed, set selectedNPC to null
+    if (selectedNPC?.combatId === npcCombatId) {
+      setSelectedNPC(null);
+    }
   };
 
   // Handle Move Up in the selected NPCs list

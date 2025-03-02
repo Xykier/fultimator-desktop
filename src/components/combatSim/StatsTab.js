@@ -30,7 +30,7 @@ const StatsTab = ({
         />
         {isMobile ? (
           <Button
-            onClick={() => handleOpen("MP", selectedNPC)}
+            onClick={() => handleOpen("HP", selectedNPC)}
             size="small"
             sx={{ ml: 2 }}
             variant="contained"
@@ -42,7 +42,7 @@ const StatsTab = ({
           <Button
             variant="contained"
             color="error"
-            onClick={() => handleOpen("MP", selectedNPC)}
+            onClick={() => handleOpen("HP", selectedNPC)}
             endIcon={<Edit />}
             size="small"
             sx={{ ml: 2 }}

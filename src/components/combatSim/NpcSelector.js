@@ -43,7 +43,7 @@ function rankText(rank) {
   };
 
   return rankMap[rank] || "";
-};
+}
 
 export default function NpcSelector({
   isMobile,
@@ -59,9 +59,17 @@ export default function NpcSelector({
   // Filtered NPC list based on selected filter field and text
   const filteredNpcList = npcList.filter((npc) => {
     if (filterText === "") return true;
-    const value = npc[filterField]
-      ? npc[filterField].toString().toLowerCase()
-      : "";
+
+    let value = "";
+    if (filterField === "tags") {
+      // Safely handle the case where npc.tags might be undefined
+      value = (npc.tags || [])
+        .map((tag) => tag.name)
+        .join(", ")
+        .toLowerCase();
+    } else {
+      value = npc[filterField] ? npc[filterField].toString().toLowerCase() : "";
+    }
     return value.includes(filterText.toLowerCase());
   });
 
@@ -80,10 +88,12 @@ export default function NpcSelector({
         onClose={() => setNpcDrawerOpen(false)}
       >
         <Box sx={{ width: 250, padding: 2 }}>
-          <Typography variant="h5">NPC Selector</Typography>
+          <Typography variant="h5" sx={{ marginBottom: 1 }}>
+            NPC Selector
+          </Typography>
 
           {/* Filter Controls */}
-          <Box sx={{ marginBottom: 2 }}>
+          <Box sx={{ marginBottom: 1 }}>
             <TextField
               label="Search"
               variant="outlined"
@@ -104,23 +114,83 @@ export default function NpcSelector({
                 <MenuItem value="name">Name</MenuItem>
                 <MenuItem value="lvl">Level</MenuItem>
                 <MenuItem value="species">Species</MenuItem>
+                <MenuItem value="rank">Rank</MenuItem>
+                <MenuItem value="tags">Tags</MenuItem> {/* Add Tags filter */}
               </Select>
             </FormControl>
           </Box>
 
-          {/* NPC List */}
-          <Box sx={{ maxHeight: "80vh", overflowY: "auto" }}>
-            {filteredNpcList.map((npc) => (
-              <React.Fragment key={npc.id}>
-                <Button
-                  sx={{ display: "block" }}
-                  onClick={() => handleSelectNPC(npc.id)}
-                >
-                  {npc.name}
-                </Button>
-                <Divider />
-              </React.Fragment>
-            ))}
+          <Box sx={{ maxHeight: "75vh", overflowY: "auto" }}>
+            {filteredNpcList.length > 0 ? (
+              filteredNpcList.map((npc) => (
+                <React.Fragment key={npc.id}>
+                  <Button
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-start",
+                      width: "100%",
+                      padding: "10px",
+                      textAlign: "left",
+                      textTransform: "none", // Prevent text from being automatically converted to uppercase
+                      "&:hover": {
+                        bgcolor: "rgba(0, 0, 0, 0.08)",
+                      },
+                    }}
+                    onClick={() => handleSelectNPC(npc.id)}
+                  >
+                    {/* Displaying NPC Icon based on species */}
+                    {npc.species === "Beast" && (
+                      <GiWolfHead style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Construct" && (
+                      <GiRobotGolem style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Demon" && (
+                      <GiEvilBat style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Elemental" && (
+                      <GiFire style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Humanoid" && (
+                      <GiSwordwoman style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Undead" && (
+                      <GiRaiseZombie style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Plant" && (
+                      <GiRose style={{ marginRight: 10 }} />
+                    )}
+                    {npc.species === "Monster" && (
+                      <GiGooeyDaemon style={{ marginRight: 10 }} />
+                    )}
+
+                    <Box>
+                      <Typography variant="body1" fontWeight="bold">
+                        {npc.name} {/* Displaying the original NPC name */}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
+                        <span>
+                          Level: {npc.lvl}{" "}
+                          {npc.rank && " | " + rankText(npc.rank)}
+                        </span>
+                      </Typography>
+                    </Box>
+                  </Button>
+                  <Divider />
+                </React.Fragment>
+              ))
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{ padding: 2, color: "text.secondary" }}
+              >
+                No NPCs found.
+              </Typography>
+            )}
           </Box>
         </Box>
       </Drawer>
@@ -196,6 +266,8 @@ export default function NpcSelector({
                 <MenuItem value="name">Name</MenuItem>
                 <MenuItem value="lvl">Level</MenuItem>
                 <MenuItem value="species">Species</MenuItem>
+                <MenuItem value="rank">Rank</MenuItem>
+                <MenuItem value="tags">Tags</MenuItem> {/* Add Tags filter */}
               </Select>
             </FormControl>
           </Box>
@@ -231,18 +303,16 @@ export default function NpcSelector({
                               sx={{ fontFamily: "Antonio" }}
                             >
                               <Tooltip title={npc.species}>
-                              {npc.species === "Beast" && (
-                                
-                                  <GiWolfHead />
-                                
-                              )}
-                              {npc.species === "Construct" && <GiRobotGolem />}
-                              {npc.species === "Demon" && <GiEvilBat />}
-                              {npc.species === "Elemental" && <GiFire />}
-                              {npc.species === "Humanoid" && <GiSwordwoman />}
-                              {npc.species === "Undead" && <GiRaiseZombie />}
-                              {npc.species === "Plant" && <GiRose />}
-                              {npc.species === "Monster" && <GiGooeyDaemon />}
+                                {npc.species === "Beast" && <GiWolfHead />}
+                                {npc.species === "Construct" && (
+                                  <GiRobotGolem />
+                                )}
+                                {npc.species === "Demon" && <GiEvilBat />}
+                                {npc.species === "Elemental" && <GiFire />}
+                                {npc.species === "Humanoid" && <GiSwordwoman />}
+                                {npc.species === "Undead" && <GiRaiseZombie />}
+                                {npc.species === "Plant" && <GiRose />}
+                                {npc.species === "Monster" && <GiGooeyDaemon />}
                               </Tooltip>
                               {" | "}
                               Level: {npc.lvl}
