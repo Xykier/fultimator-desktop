@@ -314,7 +314,13 @@ const CombatSim = () => {
 
   // Handle Confirm HP/MP Dialog
   const handleConfirm = () => {
-    const adjustedValue = isHealing ? Number(value) : -Number(value);
+    let adjustedValue = 0;
+
+    if (damageType !== "" && !isHealing && statType === "HP") {
+      adjustedValue = -Number(calculateDamage(npcClicked, value, damageType));
+    } else {
+      adjustedValue = isHealing ? Number(value) : -Number(value);
+    }
 
     const updatedNPCs = selectedNPCs.map((npc) => {
       if (npc.combatId === npcClicked.combatId) {
@@ -391,6 +397,36 @@ const CombatSim = () => {
       setValue(inputValue);
     }
   };
+
+  // Calculate damage with affinities
+  function calculateDamage(npc, damageValue, damageType) {
+    const affinities = npc.affinities || {};
+    const damage = parseInt(damageValue, 10) || 0;
+
+    // Default damage value
+    let finalDamage = damage;
+
+    if (affinities[damageType]) {
+      switch (affinities[damageType]) {
+        case "vu": // Vulnerable (x2)
+          finalDamage = damage * 2;
+          break;
+        case "rs": // Resistant (x0.5, rounded down)
+          finalDamage = Math.floor(damage * 0.5);
+          break;
+        case "ab": // Absorb (turn damage into healing)
+          finalDamage = -damage;
+          break;
+        case "im": // Immune (no damage)
+          finalDamage = 0;
+          break;
+        default:
+          break;
+      }
+    }
+
+    return finalDamage;
+  }
 
   // Handle Submit in HP/MP Dialog
   const handleSubmit = (e) => {
@@ -631,7 +667,9 @@ const CombatSim = () => {
                   <Select
                     label="Damage Type"
                     value={damageType}
-                    onChange={(e) => setDamageType(e.target.value)}
+                    onChange={(e) => {
+                      setDamageType(e.target.value);
+                    }}
                   >
                     <MenuItem value="">
                       <ListItemText>None</ListItemText>
@@ -668,10 +706,32 @@ const CombatSim = () => {
                     ))}
                   </Select>
                 </FormControl>
-                {damageType !== "" && value !== "" && (
+                {npcClicked && damageType !== "" && value !== "" && (
                   <Typography variant="body2" sx={{ mt: 1 }}>
                     Calculated:{" "}
-                    <strong>{value + " " + damageType + " damage"}</strong>
+                    <strong
+                      style={{
+                        color: (() => {
+                          const calculated = calculateDamage(
+                            npcClicked,
+                            value,
+                            damageType
+                          );
+                          return calculated < 0 ? "green" : "#cc0000"; // Green for healing, Red for damage
+                        })(),
+                      }}
+                    >
+                      {(() => {
+                        const calculated = calculateDamage(
+                          npcClicked,
+                          value,
+                          damageType
+                        );
+                        return calculated < 0
+                          ? `${Math.abs(calculated)} ${damageType} healing`
+                          : `${calculated} ${damageType} damage`;
+                      })()}
+                    </strong>
                   </Typography>
                 )}
               </>
