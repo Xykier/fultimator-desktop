@@ -20,7 +20,7 @@ import {
   Delete,
   MoreVert,
 } from "@mui/icons-material";
-import { calcHP, calcMP } from "../../libs/npcs";
+import { calcHP, calcMP, calcInit } from "../../libs/npcs";
 import { GiDeathSkull } from "react-icons/gi";
 import { useTheme } from "@mui/material/styles";
 
@@ -57,6 +57,10 @@ export default function SelectedNpcs({
     setAnchorMenu(null);
     setSelectedNpcMenu(null);
   };
+
+  // Calculate the highest initiative for the selected NPCs
+  const highestInit = Math.max(...selectedNPCs.map((npc) => calcInit(npc)));
+
   return (
     <Box
       sx={{
@@ -79,6 +83,11 @@ export default function SelectedNpcs({
         }}
       >
         <Typography variant="h5">Selected NPCs</Typography>
+        {selectedNPCs.length > 0 && (
+          <Typography variant="h5" color={primary}>
+            NPC Initiative: <strong>{highestInit}</strong>
+          </Typography>
+        )}
         {isMobile ? (
           <IconButton
             size="small"
@@ -104,7 +113,18 @@ export default function SelectedNpcs({
 
       <Box sx={{ flexGrow: 1, overflowY: "auto", paddingTop: 1 }}>
         {selectedNPCs.length === 0 ? (
-          <Typography>No NPC selected</Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              fontStyle: "italic",
+            }}
+          >
+            No NPC selected yet
+          </Typography>
         ) : (
           <List>
             {selectedNPCs.map((npc, index) => {
@@ -175,7 +195,10 @@ export default function SelectedNpcs({
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          maxWidth: npc.combatStats.turns.length > 1 ? "calc(100% - 88px)"  : "calc(100% - 55px)",
+                          maxWidth:
+                            npc.combatStats.turns.length > 1
+                              ? "calc(100% - 88px)"
+                              : "calc(100% - 55px)",
                         }}
                       >
                         {npc.id ? (
@@ -285,7 +308,7 @@ export default function SelectedNpcs({
                         sx={{
                           zIndex: 10,
                         }}
-                        size= {isMobile ? "small" : "medium"}
+                        size={isMobile ? "small" : "medium"}
                       >
                         {npc.combatStats.turns.filter((turn) => turn).length} /{" "}
                         {npc.combatStats.turns.length}
