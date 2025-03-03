@@ -13,6 +13,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import {
   Close,
@@ -26,6 +29,16 @@ import NpcPretty from "../npc/Pretty";
 import StatsTab from "./StatsTab";
 import NotesTab from "./NotesTab";
 import AttributeSection from "./AttributeSection";
+import CasinoIcon from "@mui/icons-material/Casino";
+import ReactMarkdown from "react-markdown";
+import {
+  DistanceIcon,
+  MeleeIcon,
+  OffensiveSpellIcon,
+  SpellIcon,
+} from "../icons.js";
+import Diamond from "../Diamond";
+import { calcPrecision, calcDamage, calcMagic } from "../../libs/npcs";
 
 const NPCDetail = ({
   selectedNPC,
@@ -47,6 +60,43 @@ const NPCDetail = ({
   isMobile,
 }) => {
   if (!selectedNPC) return null;
+
+  const generateButtonLabel = (attack) => {
+    const attributeMap = {
+      dexterity: "DEX",
+      insight: "INS",
+      might: "MIG",
+      will: "WLP",
+    };
+
+    // Determine the source and correct attribute keys
+    let source, attrKey1, attrKey2;
+
+    if (attack.weapon) {
+      source = attack.weapon;
+      attrKey1 = "att1";
+      attrKey2 = "att2";
+    } else if (attack.spell) {
+      source = attack.spell;
+      attrKey1 = "attr1";
+      attrKey2 = "attr2";
+    } else {
+      source = attack;
+      attrKey1 = "attr1";
+      attrKey2 = "attr2";
+    }
+
+    // Extract attributes
+    const attr1 = source?.[attrKey1];
+    const attr2 = source?.[attrKey2];
+
+    if (!attr1 || !attr2) return "Invalid Attack"; // Handle missing attributes
+
+    const translatedAttribute1 = `${attributeMap[attr1]} d${selectedNPC.attributes[attr1]}`;
+    const translatedAttribute2 = `${attributeMap[attr2]} d${selectedNPC.attributes[attr2]}`;
+
+    return `【${translatedAttribute1} + ${translatedAttribute2}】`;
+  };
 
   const handleTabChange = (_, newIndex) => setTabIndex(newIndex);
 
@@ -144,7 +194,126 @@ const NPCDetail = ({
           />
         )}
         {tabIndex === 2 && (
-          <Typography>Rolls Section still in development</Typography>
+          <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+            {[
+              ...(selectedNPC?.attacks || []).map((attack) => ({
+                type: "Attack",
+                data: attack,
+                extra: attack.special?.length
+                  ? attack.special.join("\n\n")
+                  : null,
+                icon:
+                  attack.range === "distance" ? (
+                    <DistanceIcon />
+                  ) : (
+                    <MeleeIcon />
+                  ),
+              })),
+              ...(selectedNPC?.weaponattacks || []).map((wattack) => ({
+                type: "Weapon Attack",
+                data: wattack,
+                extra: wattack.special?.length
+                  ? wattack.special.join("\n\n")
+                  : null,
+                icon:
+                  wattack.weapon.range === "distance" ? (
+                    <DistanceIcon />
+                  ) : (
+                    <MeleeIcon />
+                  ),
+              })),
+              ...(
+                selectedNPC?.spells?.filter(
+                  (spell) => spell.type === "offensive"
+                ) || []
+              ).map((spell) => ({
+                type: "Spell",
+                data: spell,
+                extra: spell.effect || null,
+                icon: <SpellIcon />,
+              })),
+            ].map(({ type, data, extra, icon }, index) => (
+              <ListItem
+                key={index}
+                secondaryAction={
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<CasinoIcon />}
+                    onClick={() => console.log(`Rolling for ${data.name}`)}
+                    sx={{ color: "#fff" }}
+                  >
+                    Roll
+                  </Button>
+                }
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  borderBottom: "1px solid #ddd",
+                  py: 1.5,
+                }}
+              >
+                {icon && (
+                  <Box sx={{ mr: 1, display: "flex", alignItems: "center" }}>
+                    {icon}
+                  </Box>
+                )}
+                <ListItemText
+                  sx={{ ml: 1 }}
+                  primary={
+                    <>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {data.name} {type === "Spell" && <OffensiveSpellIcon />}
+                      </Typography>
+                    </>
+                  }
+                  secondary={
+                    <>
+                      <Typography variant="body2" sx={{ ml: -1 }}>
+                        {generateButtonLabel(data)}
+
+                        {/* Attacks & Weapon Attacks */}
+                        {(type === "Attack" || type === "Weapon Attack") && (
+                          <>
+                            {calcPrecision(data, selectedNPC) > 0 &&
+                              `+${calcPrecision(data, selectedNPC)} `}
+                            <Diamond color="primary" />
+                            {`【HR + ${calcDamage(data, selectedNPC)}】`}
+                          </>
+                        )}
+
+                        {/* Spells */}
+                        {type === "Spell" && (
+                          <>
+                            <Diamond />
+                            {calcMagic(selectedNPC) > 0 &&
+                              `+${calcMagic(selectedNPC)} `}
+                            {data.mp} MP <Diamond /> {data.target} <Diamond />{" "}
+                            {data.duration}
+                          </>
+                        )}
+                      </Typography>
+
+                      {extra && (
+                        <Box
+                          sx={{ maxWidth: "80%", overflowWrap: "break-word" }}
+                        >
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            component="div"
+                            sx={{ whiteSpace: "pre-wrap" }}
+                          >
+                            <ReactMarkdown>{extra}</ReactMarkdown>
+                          </Typography>
+                        </Box>
+                      )}
+                    </>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
         )}
         {tabIndex === 3 && (
           <NotesTab
@@ -217,7 +386,9 @@ const NPCDetail = ({
       </DialogTitle>
       {renderTabs}
       <DialogContent dividers>{content}</DialogContent>
-      <DialogActions sx={{ width: "100%", justifyContent: "center", padding: 0 }}>
+      <DialogActions
+        sx={{ width: "100%", justifyContent: "center", padding: 0 }}
+      >
         <AttributeSection selectedNPC={selectedNPC} calcAttr={calcAttr} />
       </DialogActions>
     </Dialog>
