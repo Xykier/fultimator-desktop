@@ -23,6 +23,8 @@ import {
   Select,
   MenuItem,
   FormControl,
+  FormControlLabel,
+  Checkbox,
   InputLabel,
   ListItemText,
 } from "@mui/material";
@@ -35,6 +37,7 @@ import useDownloadImage from "../../hooks/useDownloadImage";
 import NPCDetail from "../../components/combatSim/NPCDetail";
 import { typesList } from "../../libs/types";
 import { TypeIcon } from "../../components/types";
+import { IoShield } from "react-icons/io5";
 
 export default function CombatSimulator() {
   return (
@@ -70,6 +73,7 @@ const CombatSim = () => {
   const [value, setValue] = useState(0); // Value for HP/MP change
   const [isHealing, setIsHealing] = useState(false); // true = Heal, false = Damage
   const [damageType, setDamageType] = useState(""); // Type of damage (physical, magical, etc.)
+  const [isGuarding, setIsGuarding] = useState(false); // true = Guarding, false = Not guarding
 
   // Study and Download image states
   const [selectedStudy, setSelectedStudy] = useState(0); // Study dropdown value
@@ -238,16 +242,31 @@ const CombatSim = () => {
   const handleSelectNPC = async (npcId) => {
     if (selectedNPCs.length < 30) {
       const npc = await getNpc(npcId); // Fetch full NPC data using getNpc
+
+      // Calculate Ultima value only if the NPC is a villain
+      let ultimaValue = null;
+      if (npc.villain === "minor") {
+        ultimaValue = 5;
+      } else if (npc.villain === "major") {
+        ultimaValue = 10;
+      } else if (npc.villain === "superme") {
+        ultimaValue = 15;
+      }
+
+      // Create combatStats object and conditionally add ultima
+      const combatStats = {
+        notes: "",
+        currentHp: calcHP(npc),
+        currentMp: calcMP(npc),
+        ...(ultimaValue !== null && { ultima: ultimaValue }), // Only add ultima if it's not null
+      };
+
       setSelectedNPCs((prev) => [
         ...prev,
         {
           ...npc,
           combatId: `${npc.id}-${Date.now()}`,
-          combatStats: {
-            notes: "",
-            currentHp: calcHP(npc),
-            currentMp: calcMP(npc),
-          },
+          combatStats: combatStats,
         },
       ]);
     } else {
@@ -309,6 +328,7 @@ const CombatSim = () => {
     setStatType(type);
     setValue("");
     setDamageType("");
+    setIsGuarding(false);
     setOpen(true);
     setNpcClicked(npc);
 
@@ -329,7 +349,9 @@ const CombatSim = () => {
     let adjustedValue = 0;
 
     if (damageType !== "" && !isHealing && statType === "HP") {
-      adjustedValue = -Number(calculateDamage(npcClicked, value, damageType));
+      adjustedValue = -Number(
+        calculateDamage(npcClicked, value, damageType, isGuarding)
+      );
     } else {
       adjustedValue = isHealing ? Number(value) : -Number(value);
     }
@@ -411,7 +433,12 @@ const CombatSim = () => {
   };
 
   // Calculate damage with affinities
-  function calculateDamage(npc, damageValue, damageType) {
+  function calculateDamage(
+    npc,
+    damageValue,
+    damageType = "",
+    isGuarding = false
+  ) {
     const affinities = npc.affinities || {};
     const damage = parseInt(damageValue, 10) || 0;
 
@@ -421,7 +448,7 @@ const CombatSim = () => {
     if (affinities[damageType]) {
       switch (affinities[damageType]) {
         case "vu": // Vulnerable (x2)
-          finalDamage = damage * 2;
+          finalDamage = isGuarding ? damage : damage * 2;
           break;
         case "rs": // Resistant (x0.5, rounded down)
           finalDamage = Math.floor(damage * 0.5);
@@ -435,6 +462,12 @@ const CombatSim = () => {
         default:
           break;
       }
+    } else if (isGuarding) {
+      finalDamage = Math.floor(damage * 0.5);
+    }
+
+    if (isGuarding && damageType === "") {
+      finalDamage = Math.floor(damage * 0.5);
     }
 
     return finalDamage;
@@ -496,6 +529,55 @@ const CombatSim = () => {
 
     return attributeValue;
   }
+
+  // Handle Ultima Points
+  const handleIncreaseUltima = () => {
+    // update SelectedNPC and selectedNPCs
+    setSelectedNPC((prev) => ({
+      ...prev,
+      combatStats: {
+        ...prev.combatStats,
+        ultima: prev.combatStats.ultima + 1,
+      },
+    }));
+    setSelectedNPCs((prev) =>
+      prev.map((npc) =>
+        npc.combatId === selectedNPC.combatId
+          ? {
+              ...npc,
+              combatStats: {
+                ...npc.combatStats,
+                ultima: npc.combatStats.ultima + 1,
+              },
+            }
+          : npc
+      )
+    );
+  };
+
+  const handleDecreaseUltima = () => {
+    // update SelectedNPC and selectedNPCs
+    setSelectedNPC((prev) => ({
+      ...prev,
+      combatStats: {
+        ...prev.combatStats,
+        ultima: prev.combatStats.ultima - 1,
+      },
+    }));
+    setSelectedNPCs((prev) =>
+      prev.map((npc) =>
+        npc.combatId === selectedNPC.combatId
+          ? {
+              ...npc,
+              combatStats: {
+                ...npc.combatStats,
+                ultima: npc.combatStats.ultima - 1,
+              },
+            }
+          : npc
+      )
+    );
+  };
 
   // During loading state
   if (loading) {
@@ -605,6 +687,8 @@ const CombatSim = () => {
           selectedNPCs={selectedNPCs}
           setSelectedNPCs={setSelectedNPCs}
           calcAttr={calcAttr}
+          handleDecreaseUltima={handleDecreaseUltima}
+          handleIncreaseUltima={handleIncreaseUltima}
           isMobile={isMobile}
         />
       </Box>
@@ -677,6 +761,7 @@ const CombatSim = () => {
                   fullWidth
                   sx={{
                     mt: 2,
+                    mb: 1,
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2,
                       boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
@@ -726,34 +811,65 @@ const CombatSim = () => {
                     ))}
                   </Select>
                 </FormControl>
-                {npcClicked && damageType !== "" && value !== "" && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    Calculated:{" "}
-                    <strong
-                      style={{
-                        color: (() => {
+                {/* Guarding checkbox */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={isGuarding}
+                      onChange={(e) => {
+                        setIsGuarding(e.target.checked);
+                      }}
+                      sx={{
+                        mt: 0,
+                        "& .MuiSvgIcon-root": {
+                          fontSize: "1.5rem",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <IoShield
+                        size={20}
+                        color={isGuarding ? "green" : "gray"}
+                      />
+                      Is Guarding?
+                    </Box>
+                  }
+                />
+
+                {npcClicked &&
+                  (damageType !== "" || isGuarding) &&
+                  value !== "" && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Calculated:{" "}
+                      <strong
+                        style={{
+                          color: (() => {
+                            const calculated = calculateDamage(
+                              npcClicked,
+                              value,
+                              damageType,
+                              isGuarding
+                            );
+                            return calculated < 0 ? "green" : "#cc0000"; // Green for healing, Red for damage
+                          })(),
+                        }}
+                      >
+                        {(() => {
                           const calculated = calculateDamage(
                             npcClicked,
                             value,
-                            damageType
+                            damageType,
+                            isGuarding
                           );
-                          return calculated < 0 ? "green" : "#cc0000"; // Green for healing, Red for damage
-                        })(),
-                      }}
-                    >
-                      {(() => {
-                        const calculated = calculateDamage(
-                          npcClicked,
-                          value,
-                          damageType
-                        );
-                        return calculated < 0
-                          ? `${Math.abs(calculated)} ${damageType} healing`
-                          : `${calculated} ${damageType} damage`;
-                      })()}
-                    </strong>
-                  </Typography>
-                )}
+                          return calculated < 0
+                            ? `${Math.abs(calculated)} ${damageType} healing`
+                            : `${calculated} ${damageType} damage`;
+                        })()}
+                      </strong>
+                    </Typography>
+                  )}
               </>
             )}
           </DialogContent>

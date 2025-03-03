@@ -72,8 +72,10 @@ const HealthBar = ({
             fontWeight: "bold",
             color: "#fff",
             fontFamily: "'Press Start 2P', cursive",
-            letterSpacing: "5px",
+            letterSpacing: "3px",
             fontSize: `calc(0.60rem + 0.25vw)`,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
           }}
         >
           {`${currentValue} / ${maxValue}`}

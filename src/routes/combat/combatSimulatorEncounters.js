@@ -133,7 +133,6 @@ const CombatSimEncounters = () => {
           <Grid item xs={12} sm={6} md={4} key={encounter.id}>
             <Card
               sx={{
-                backgroundColor: "#f9f9f9",
                 borderRadius: 3,
                 boxShadow: 4,
                 transition: "0.3s",

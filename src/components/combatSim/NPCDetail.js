@@ -42,6 +42,8 @@ const NPCDetail = ({
   selectedNPCs,
   setSelectedNPCs,
   calcAttr,
+  handleDecreaseUltima,
+  handleIncreaseUltima,
   isMobile,
 }) => {
   if (!selectedNPC) return null;
@@ -136,6 +138,8 @@ const NPCDetail = ({
             calcMP={calcMP}
             handleOpen={handleOpen}
             toggleStatusEffect={toggleStatusEffect}
+            handleDecreaseUltima={handleDecreaseUltima}
+            handleIncreaseUltima={handleIncreaseUltima}
             isMobile={isMobile}
           />
         )}

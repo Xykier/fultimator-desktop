@@ -14,6 +14,8 @@ const StatsTab = ({
   calcMP,
   handleOpen,
   toggleStatusEffect,
+  handleDecreaseUltima,
+  handleIncreaseUltima,
   isMobile,
 }) => {
   return (
@@ -159,6 +161,44 @@ const StatsTab = ({
           </ToggleButtonGroup>
         ))}
       </Box>
+      {/* Ultima Points */}
+      {selectedNPC?.villain &&
+        selectedNPC?.combatStats?.ultima !== undefined && (
+          <Box
+            sx={{
+              marginTop: 3,
+              padding: 2,
+              display: "flex",
+              flexDirection: "row", // Set flexDirection to 'row' to align items horizontally
+              alignItems: "center", // Vertically center the items
+              justifyContent: "center", // Center the items horizontally
+              gap: 2, // Add space between elements
+            }}
+          >
+            {/* Decrease Button */}
+            <Button
+              variant="contained"
+              onClick={handleDecreaseUltima}
+              disabled={selectedNPC?.combatStats?.ultima <= 0}
+            >
+              -
+            </Button>
+
+            {/* Ultima value */}
+            <Typography variant="h4" sx={{ marginBottom: 0, fontWeight: "bold" }}>
+              Ultima Points: {selectedNPC?.combatStats?.ultima}
+            </Typography>
+
+            {/* Increase Button */}
+            <Button
+              variant="contained"
+              onClick={handleIncreaseUltima}
+              disabled={selectedNPC?.combatStats?.ultima >= 30}
+            >
+              +
+            </Button>
+          </Box>
+        )}
     </Box>
   );
 };
