@@ -122,7 +122,7 @@ const CombatSim = () => {
         combatId: npc.combatId,
         combatStats: npc.combatStats,
       })), // Only save ids and combatIds
-      currentTurn: encounter.currentTurn,
+      round: encounter.round,
     });
 
     // Log full state for debugging (showing only IDs and combatIds)
@@ -500,7 +500,7 @@ const CombatSim = () => {
   // During loading state
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
         <CircularProgress />
       </Box>
     );
@@ -509,7 +509,7 @@ const CombatSim = () => {
   // If encounter is not found
   if (!encounter) {
     return (
-      <Box sx={{ textAlign: "center", mt: 5 }}>
+      <Box sx={{ textAlign: "center", mt: 10 }}>
         <Typography variant="h5" color="error">
           Encounter not found!
         </Typography>

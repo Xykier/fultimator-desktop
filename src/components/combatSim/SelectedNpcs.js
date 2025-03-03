@@ -59,7 +59,11 @@ export default function SelectedNpcs({
   };
 
   // Calculate the highest initiative for the selected NPCs
-  const highestInit = Math.max(...selectedNPCs.map((npc) => calcInit(npc)));
+  const highestInit = Math.max(
+    ...selectedNPCs
+      .filter((npc) => npc.id !== undefined)
+      .map((npc) => calcInit(npc))
+  );
 
   return (
     <Box
@@ -144,7 +148,9 @@ export default function SelectedNpcs({
                 <ListItem
                   key={npc.combatId}
                   button
-                  onClick={(e) => handleListItemClick(e, npc.combatId)}
+                  onClick={(e) =>
+                    npc.id && handleListItemClick(e, npc.combatId)
+                  }
                   sx={{
                     border:
                       selectedNpcID && selectedNpcID === npc.combatId
@@ -216,57 +222,59 @@ export default function SelectedNpcs({
                       </Typography>
                     }
                     secondary={
-                      <>
-                        <Typography
-                          component="span"
-                          variant="h5"
-                          sx={{
-                            color:
-                              /* if HP is <= to half of max, make it red */ npc
-                                .combatStats?.currentHp <=
-                              Math.floor(calcHP(npc) / 2)
-                                ? "#D32F2F"
-                                : "#4CAF50",
-                            fontWeight: "bold",
-                            transition: "color 0.2s ease-in-out",
-                            "&:hover": {
-                              /* if HP is <= to half of max, make it dark red */
+                      npc.id && (
+                        <>
+                          <Typography
+                            component="span"
+                            variant="h5"
+                            sx={{
                               color:
-                                npc.combatStats?.currentHp <=
+                                /* if HP is <= to half of max, make it red */ npc
+                                  .combatStats?.currentHp <=
                                 Math.floor(calcHP(npc) / 2)
-                                  ? "#B71C1C"
-                                  : "#388E3C",
-                              textDecoration: "underline",
-                            },
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleHpMpClick("HP", npc);
-                          }}
-                        >
-                          {npc.combatStats?.currentHp}/{calcHP(npc)} HP
-                        </Typography>
-                        {" | "}
-                        <Typography
-                          component="span"
-                          variant="h5"
-                          sx={{
-                            color: "#2196F3",
-                            fontWeight: "bold",
-                            transition: "color 0.2s ease-in-out",
-                            "&:hover": {
-                              color: "#1976D2",
-                              textDecoration: "underline",
-                            },
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleHpMpClick("MP", npc);
-                          }}
-                        >
-                          {npc.combatStats?.currentMp}/{calcMP(npc)} MP
-                        </Typography>
-                      </>
+                                  ? "#D32F2F"
+                                  : "#4CAF50",
+                              fontWeight: "bold",
+                              transition: "color 0.2s ease-in-out",
+                              "&:hover": {
+                                /* if HP is <= to half of max, make it dark red */
+                                color:
+                                  npc.combatStats?.currentHp <=
+                                  Math.floor(calcHP(npc) / 2)
+                                    ? "#B71C1C"
+                                    : "#388E3C",
+                                textDecoration: "underline",
+                              },
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleHpMpClick("HP", npc);
+                            }}
+                          >
+                            {npc.combatStats?.currentHp}/{calcHP(npc)} HP
+                          </Typography>
+                          {" | "}
+                          <Typography
+                            component="span"
+                            variant="h5"
+                            sx={{
+                              color: "#2196F3",
+                              fontWeight: "bold",
+                              transition: "color 0.2s ease-in-out",
+                              "&:hover": {
+                                color: "#1976D2",
+                                textDecoration: "underline",
+                              },
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleHpMpClick("MP", npc);
+                            }}
+                          >
+                            {npc.combatStats?.currentMp}/{calcMP(npc)} MP
+                          </Typography>
+                        </>
+                      )
                     }
                     sx={{
                       flex: 1,
@@ -276,154 +284,9 @@ export default function SelectedNpcs({
                       overflow: "hidden",
                     }}
                   />
-
-                  {/* Actions */}
-                  <ListItemSecondaryAction
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                      minWidth: "120px",
-                      flexShrink: 0,
-                      zIndex: 5, // Prevent overlap with turn counter
-                    }}
-                  >
-                    {/* Turn Counter or Checkboxes */}
-                    {npc.combatStats.turns.length > 1 ? (
-                      <Button
-                        variant={
-                          npc.combatStats.turns.every((turn) => turn)
-                            ? "contained"
-                            : "outlined"
-                        }
-                        color={
-                          npc.combatStats.turns.every((turn) => turn)
-                            ? "success"
-                            : "inherit"
-                        }
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handlePopoverOpen(event, npc.combatId);
-                        }}
-                        sx={{
-                          zIndex: 10,
-                        }}
-                        size={isMobile ? "small" : "medium"}
-                      >
-                        {npc.combatStats.turns.filter((turn) => turn).length} /{" "}
-                        {npc.combatStats.turns.length}
-                      </Button>
-                    ) : (
-                      npc.combatStats.turns
-                        .slice(0, 3)
-                        .map((turnTaken, turnIndex) => (
-                          <Checkbox
-                            key={turnIndex}
-                            checked={turnTaken}
-                            onChange={(e) => {
-                              const newTurns = [...npc.combatStats.turns];
-                              newTurns[turnIndex] = e.target.checked;
-                              handleUpdateNpcTurns(npc.combatId, newTurns);
-                            }}
-                            color="success"
-                            sx={{ padding: "2px", zIndex: 10 }}
-                          />
-                        ))
-                    )}
-                    {isMobile ? (
-                      <>
-                        <IconButton
-                          edge="end"
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMenuOpen(e, npc.combatId);
-                          }}
-                          sx={{ padding: 1 }}
-                        >
-                          <MoreVert fontSize="small" />
-                        </IconButton>
-                        <Menu
-                          anchorEl={anchorMenu}
-                          open={
-                            Boolean(anchorMenu) &&
-                            selectedNpcMenu === npc.combatId
-                          }
-                          onClose={(e) => handleMenuClose(e)}
-                        >
-                          <MenuItem
-                            onClick={(e) => {
-                              handleMoveUp(npc.combatId);
-                              handleMenuClose(e);
-                            }}
-                            disabled={index === 0}
-                          >
-                            Move Up
-                          </MenuItem>
-                          <MenuItem
-                            onClick={(e) => {
-                              handleMoveDown(npc.combatId);
-                              handleMenuClose(e);
-                            }}
-                            disabled={index === selectedNPCs.length - 1}
-                          >
-                            Move Down
-                          </MenuItem>
-                          <MenuItem
-                            onClick={(e) => {
-                              handleRemoveNPC(npc.combatId);
-                              handleMenuClose(e);
-                            }}
-                            sx={{ color: "error.main" }}
-                          >
-                            Delete
-                          </MenuItem>
-                        </Menu>
-                      </>
-                    ) : (
-                      <>
-                        <IconButton
-                          edge="end"
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveUp(npc.combatId);
-                          }}
-                          disabled={index === 0}
-                          sx={{ padding: 1 }}
-                        >
-                          <ArrowUpward fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMoveDown(npc.combatId);
-                          }}
-                          disabled={index === selectedNPCs.length - 1}
-                          sx={{ padding: 1 }}
-                        >
-                          <ArrowDownward fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          color="error"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveNPC(npc.combatId);
-                          }}
-                          sx={{ padding: 1 }}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </>
-                    )}
-                  </ListItemSecondaryAction>
-
                   {/* Popover for extra turn checkboxes */}
                   <Popover
-                    open={anchorEl && popoverNpcId === npc.combatId}
+                    open={Boolean(anchorEl) && popoverNpcId === npc.combatId}
                     anchorEl={anchorEl}
                     onClose={handlePopoverClose}
                     anchorOrigin={{
@@ -455,6 +318,174 @@ export default function SelectedNpcs({
                       ))}
                     </Box>
                   </Popover>
+                  {/* Actions */}
+                  {npc.id ? (
+                    <ListItemSecondaryAction
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        minWidth: "120px",
+                        flexShrink: 0,
+                        zIndex: 5, // Prevent overlap with turn counter
+                      }}
+                    >
+                      {/* Turn Counter or Checkboxes */}
+                      {npc.combatStats.turns.length > 1 ? (
+                        <Button
+                          variant={
+                            npc.combatStats.turns.every((turn) => turn)
+                              ? "contained"
+                              : "outlined"
+                          }
+                          color={
+                            npc.combatStats.turns.every((turn) => turn)
+                              ? "success"
+                              : "inherit"
+                          }
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handlePopoverOpen(event, npc.combatId);
+                          }}
+                          sx={{
+                            zIndex: 10,
+                          }}
+                          size={isMobile ? "small" : "medium"}
+                        >
+                          {npc.combatStats.turns.filter((turn) => turn).length}{" "}
+                          / {npc.combatStats.turns.length}
+                        </Button>
+                      ) : (
+                        npc.combatStats.turns
+                          .slice(0, 3)
+                          .map((turnTaken, turnIndex) => (
+                            <Checkbox
+                              key={turnIndex}
+                              checked={turnTaken}
+                              onChange={(e) => {
+                                const newTurns = [...npc.combatStats.turns];
+                                newTurns[turnIndex] = e.target.checked;
+                                handleUpdateNpcTurns(npc.combatId, newTurns);
+                              }}
+                              color="success"
+                              sx={{ padding: "2px", zIndex: 10 }}
+                            />
+                          ))
+                      )}
+                      {isMobile ? (
+                        <>
+                          <IconButton
+                            edge="end"
+                            color="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMenuOpen(e, npc.combatId);
+                            }}
+                            sx={{ padding: 1 }}
+                          >
+                            <MoreVert fontSize="small" />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorMenu}
+                            open={
+                              Boolean(anchorMenu) &&
+                              selectedNpcMenu === npc.combatId
+                            }
+                            onClose={(e) => handleMenuClose(e)}
+                          >
+                            <MenuItem
+                              onClick={(e) => {
+                                handleMoveUp(npc.combatId);
+                                handleMenuClose(e);
+                              }}
+                              disabled={index === 0}
+                            >
+                              Move Up
+                            </MenuItem>
+                            <MenuItem
+                              onClick={(e) => {
+                                handleMoveDown(npc.combatId);
+                                handleMenuClose(e);
+                              }}
+                              disabled={index === selectedNPCs.length - 1}
+                            >
+                              Move Down
+                            </MenuItem>
+                            <MenuItem
+                              onClick={(e) => {
+                                handleRemoveNPC(npc.combatId);
+                                handleMenuClose(e);
+                              }}
+                              sx={{ color: "error.main" }}
+                            >
+                              Delete
+                            </MenuItem>
+                          </Menu>
+                        </>
+                      ) : (
+                        <>
+                          <IconButton
+                            edge="end"
+                            color="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveUp(npc.combatId);
+                            }}
+                            disabled={index === 0}
+                            sx={{ padding: 1 }}
+                          >
+                            <ArrowUpward fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            color="primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveDown(npc.combatId);
+                            }}
+                            disabled={index === selectedNPCs.length - 1}
+                            sx={{ padding: 1 }}
+                          >
+                            <ArrowDownward fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveNPC(npc.combatId);
+                            }}
+                            sx={{ padding: 1 }}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </>
+                      )}
+                    </ListItemSecondaryAction>
+                  ) : (
+                    <ListItemSecondaryAction
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        minWidth: "120px",
+                        flexShrink: 0,
+                        zIndex: 5, // Prevent overlap with turn counter
+                      }}
+                    >
+                      <IconButton
+                        edge="end"
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveNPC(npc.combatId);
+                        }}
+                        sx={{ padding: 1 }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  )}
                 </ListItem>
               );
             })}

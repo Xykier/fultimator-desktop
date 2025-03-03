@@ -173,10 +173,8 @@ export default function NpcSelector({
                         color="text.secondary"
                         sx={{ display: "flex", alignItems: "center" }}
                       >
-                        <span>
-                          Level: {npc.lvl}{" "}
-                          {npc.rank && " | " + rankText(npc.rank)}
-                        </span>
+                        Level: {npc.lvl}{" "}
+                        {npc.rank && " | " + rankText(npc.rank)}
                       </Typography>
                     </Box>
                   </Button>
@@ -296,13 +294,14 @@ export default function NpcSelector({
                           </Typography>
                         }
                         secondary={
-                          <>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ fontFamily: "Antonio" }}
-                            >
-                              <Tooltip title={npc.species}>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontFamily: "Antonio" }}
+                            component="span" // <-- Change this to span to avoid nested <p>
+                          >
+                            <Tooltip title={npc.species}>
+                              <span>
                                 {npc.species === "Beast" && <GiWolfHead />}
                                 {npc.species === "Construct" && (
                                   <GiRobotGolem />
@@ -313,12 +312,12 @@ export default function NpcSelector({
                                 {npc.species === "Undead" && <GiRaiseZombie />}
                                 {npc.species === "Plant" && <GiRose />}
                                 {npc.species === "Monster" && <GiGooeyDaemon />}
-                              </Tooltip>
-                              {" | "}
-                              Level: {npc.lvl}
-                              {npc.rank && " | " + rankText(npc.rank)}
-                            </Typography>
-                          </>
+                              </span>
+                            </Tooltip>
+                            {" | "}
+                            Level: {npc.lvl}
+                            {npc.rank && " | " + rankText(npc.rank)}
+                          </Typography>
                         }
                       />
                     </Box>
