@@ -8,6 +8,8 @@ const HealthBar = ({
   startColor,
   endColor,
   bgColor,
+  rightText,
+  rightTextColor = "#fff",
 }) => {
   const percentage = (currentValue / maxValue) * 100 || 0;
 
@@ -61,7 +63,7 @@ const HealthBar = ({
             },
           }}
         />
-        {/* Value inside the bar */}
+        {/* Value inside the bar (centered) */}
         <Typography
           variant="body2"
           sx={{
@@ -80,6 +82,29 @@ const HealthBar = ({
         >
           {`${currentValue} / ${maxValue}`}
         </Typography>
+
+        {/* Right-aligned text */}
+        {rightText && (
+          <Typography
+            variant="body2"
+            sx={{
+              position: "absolute",
+              top: "50%",
+              right: 8,
+              transform: "translateY(-50%)",
+              fontWeight: "bold",
+              color: rightTextColor,
+              fontFamily: "'Press Start 2P', cursive",
+              letterSpacing: "2px",
+              fontSize: `calc(0.60rem + 0.25vw)`,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+            }}
+          >
+            {rightText}
+          </Typography>
+        )}
       </Box>
     </Box>
   );

@@ -22,6 +22,7 @@ import {
 } from "@mui/icons-material";
 import { calcHP, calcMP, calcInit } from "../../libs/npcs";
 import { GiDeathSkull } from "react-icons/gi";
+import { IoIosWarning } from "react-icons/io";
 import { useTheme } from "@mui/material/styles";
 
 export default function SelectedNpcs({
@@ -229,15 +230,13 @@ export default function SelectedNpcs({
                             variant="h5"
                             sx={{
                               color:
-                                /* if HP is <= to half of max, make it red */ npc
-                                  .combatStats?.currentHp <=
+                                npc.combatStats?.currentHp <=
                                 Math.floor(calcHP(npc) / 2)
                                   ? "#D32F2F"
                                   : "#4CAF50",
                               fontWeight: "bold",
                               transition: "color 0.2s ease-in-out",
                               "&:hover": {
-                                /* if HP is <= to half of max, make it dark red */
                                 color:
                                   npc.combatStats?.currentHp <=
                                   Math.floor(calcHP(npc) / 2)
@@ -251,7 +250,17 @@ export default function SelectedNpcs({
                               handleHpMpClick("HP", npc);
                             }}
                           >
-                            {npc.combatStats?.currentHp}/{calcHP(npc)} HP
+                            {npc.combatStats?.currentHp}/{calcHP(npc)} HP{" "}
+                            {npc.combatStats?.currentHp <=
+                              Math.floor(calcHP(npc) / 2) && (
+                              <IoIosWarning
+                                style={{
+                                  fontSize: "1.2em",
+                                  textAlign: "center",
+                                  verticalAlign: "middle",
+                                }}
+                              />
+                            )}
                           </Typography>
                           {" | "}
                           <Typography

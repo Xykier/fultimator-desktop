@@ -706,7 +706,7 @@ const CombatSim = () => {
             pb: 1,
           }}
         >
-          {statType === "HP" ? "Modify HP" : "Modify MP"}
+          {statType === "HP" ? "Edit HP" : "Edit MP"}
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent

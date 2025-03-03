@@ -6,7 +6,8 @@ import {
   Typography,
 } from "@mui/material";
 import HealthBar from "./HealthBar";
-import { Edit } from "@mui/icons-material";
+import { GiHearts } from "react-icons/gi";
+import { FaStar } from "react-icons/fa";
 
 const StatsTab = ({
   selectedNPC,
@@ -18,6 +19,9 @@ const StatsTab = ({
   handleIncreaseUltima,
   isMobile,
 }) => {
+  const isCrisis =
+    selectedNPC?.combatStats?.currentHp <= Math.floor(calcHP(selectedNPC) / 2);
+
   return (
     <Box>
       {/* HP Section */}
@@ -26,66 +30,50 @@ const StatsTab = ({
           label="HP"
           currentValue={selectedNPC?.combatStats?.currentHp || 0}
           maxValue={calcHP(selectedNPC)}
-          startColor="#66bb6a"
-          endColor="#388e3c"
+          startColor={isCrisis ? "#D32F2F" : "#66bb6a"}
+          endColor={isCrisis ? "#B71C1C" : "#39823d"} //#39823d #388e3c
           bgColor="#333333"
+          rightText={isCrisis && "CRISIS"}
+          rightTextColor={isCrisis && "#ffff00" }
         />
-        {isMobile ? (
-          <Button
-            onClick={() => handleOpen("HP", selectedNPC)}
-            size="small"
-            sx={{ ml: 2 }}
-            variant="contained"
-            color="error"
-          >
-            <Edit />
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => handleOpen("HP", selectedNPC)}
-            endIcon={<Edit />}
-            size="small"
-            sx={{ ml: 2 }}
-          >
-            Edit
-          </Button>
-        )}
       </Box>
 
       {/* MP Section */}
-      <Box sx={{ marginTop: 2, display: "flex", alignItems: "center" }}>
+      <Box sx={{ marginTop: "-0.2rem", display: "flex", alignItems: "center" }}>
         <HealthBar
           label="MP"
           currentValue={selectedNPC?.combatStats?.currentMp || 0}
           maxValue={calcMP(selectedNPC)}
           startColor="#42a5f5"
-          endColor="#0288d1"
+          endColor="#02679e"
           bgColor="#333333"
         />
-        {isMobile ? (
-          <Button
-            onClick={() => handleOpen("MP", selectedNPC)}
-            size="small"
-            sx={{ ml: 2 }}
-            variant="contained"
-            color="primary"
-          >
-            <Edit />
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleOpen("MP", selectedNPC)}
-            endIcon={<Edit />}
-            size="small"
-            sx={{ ml: 2 }}
-          >
-            Edit
-          </Button>
-        )}
+      </Box>
+
+      <Box sx={{ marginTop: 1, display: "flex", alignItems: "center" }}>
+        <Button 
+          variant="contained"
+          color="primary"
+          onClick={() => handleOpen("HP", selectedNPC)}
+          size="small"
+          sx={{ bgcolor: isCrisis ? "#B71C1C" : "#388e3c", "&:hover": { bgcolor: isCrisis ? "#8b1515" : "#224d24" }, borderRadius: 0, fontWeight: "bold",
+          fontFamily: "'Press Start 2P', cursive", }}
+          fullWidth
+          startIcon={<GiHearts />}
+        >
+          Edit HP
+        </Button>
+        <Button 
+          variant="contained"
+          onClick={() => handleOpen("MP", selectedNPC)}
+          size="small"
+          sx={{ ml: 1, bgcolor: "#0288d1", "&:hover": { bgcolor: "#013652" }, borderRadius: 0, fontWeight: "bold",
+          fontFamily: "'Press Start 2P', cursive",}}
+          fullWidth
+          startIcon={<FaStar />}
+        >
+          Edit MP
+        </Button>
       </Box>
 
       {/* Status Effects */}
@@ -185,7 +173,10 @@ const StatsTab = ({
             </Button>
 
             {/* Ultima value */}
-            <Typography variant="h4" sx={{ marginBottom: 0, fontWeight: "bold" }}>
+            <Typography
+              variant="h4"
+              sx={{ marginBottom: 0, fontWeight: "bold" }}
+            >
               Ultima Points: {selectedNPC?.combatStats?.ultima}
             </Typography>
 

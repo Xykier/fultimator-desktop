@@ -120,6 +120,7 @@ export default function BattleHeader({
             color="primary"
             onClick={handleSaveState}
             startIcon={<Save />}
+            sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
           >
             Save
           </Button>
