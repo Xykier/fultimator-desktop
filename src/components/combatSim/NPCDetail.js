@@ -181,16 +181,23 @@ const NPCDetail = ({
           >
             {selectedNPC.name}
           </Typography>
-          <IconButton
-            size="small"
-            sx={{ padding: 0 }}
-            onClick={() => {
-              setSelectedNPC(null);
-              setTabIndex(0);
-            }}
+          <Tooltip
+            title={t("Close")}
+            placement="left"
+            enterDelay={500}
+            enterNextDelay={500}
           >
-            <Close />
-          </IconButton>
+            <IconButton
+              size="small"
+              sx={{ padding: 0 }}
+              onClick={() => {
+                setSelectedNPC(null);
+                setTabIndex(0);
+              }}
+            >
+              <Close />
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
 
@@ -299,7 +306,7 @@ const NPCDetail = ({
                             <strong>
                               <Diamond />【
                               {t("HR") + " + " + calcDamage(data, selectedNPC)}
-                              】{" "}
+                              】
                             </strong>
                             {data.type === "physical" ? (
                               <span>
@@ -307,7 +314,13 @@ const NPCDetail = ({
                                   allowedElements={["strong"]}
                                   unwrapDisallowed={true}
                                 >
-                                  {t(damageTypeLabels[data.type])}
+                                  {t(
+                                    damageTypeLabels[
+                                      type === "Attack"
+                                        ? data.type
+                                        : data.weapon.type
+                                    ]
+                                  )}
                                 </StyledMarkdown>
                               </span>
                             ) : (
@@ -316,7 +329,13 @@ const NPCDetail = ({
                                   allowedElements={["strong"]}
                                   unwrapDisallowed={true}
                                 >
-                                  {t(damageTypeLabels[data.type])}
+                                  {t(
+                                    damageTypeLabels[
+                                      type === "Attack"
+                                        ? data.type
+                                        : data.weapon.type
+                                    ]
+                                  )}
                                 </StyledMarkdown>
                               </span>
                             )}

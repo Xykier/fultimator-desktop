@@ -10,6 +10,7 @@ import {
   IconButton,
   Paper,
   CardActions,
+  Tooltip,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,7 +25,7 @@ import CustomHeaderAlt from "../../components/common/CustomHeaderAlt";
 import { SportsMartialArts, NavigateNext } from "@mui/icons-material";
 import { t } from "../../translation/translate";
 
-const MAX_ENCOUNTERS = 10;
+const MAX_ENCOUNTERS = 3;
 
 export default function CombatSimulatorEncounters() {
   return (
@@ -164,6 +165,7 @@ const CombatSimEncounters = () => {
               <CardActions
                 sx={{ justifyContent: "flex-end", padding: "10px 16px" }}
               >
+                <Tooltip title={t("Delete")} enterDelay={300} leaveDelay={200} enterNextDelay={300} >
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
@@ -173,6 +175,7 @@ const CombatSimEncounters = () => {
                 >
                   <DeleteIcon />
                 </IconButton>
+                </Tooltip>
               </CardActions>
 
               {/* Always visible indicator on the right, centered vertically */}

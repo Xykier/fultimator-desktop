@@ -221,23 +221,37 @@ export default function NpcSelector({
           }}
         >
           <Typography variant="h5">{t("combat_sim_npc_selector")}</Typography>
-          <IconButton
-            onClick={() => setIsExpanded(!isExpanded)}
-            sx={{ padding: 0 }}
+          <Tooltip
+            title={t("Collapse")}
+            placement="left"
+            enterDelay={500}
+            enterNextDelay={300}
           >
-            <KeyboardArrowLeft />
-          </IconButton>
+            <IconButton
+              onClick={() => setIsExpanded(!isExpanded)}
+              sx={{ padding: 0 }}
+            >
+              <KeyboardArrowLeft />
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
 
       {!isExpanded && (
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <IconButton
-            onClick={() => setIsExpanded(!isExpanded)}
-            sx={{ padding: 0 }}
+          <Tooltip
+            title={t("Expand")}
+            placement="bottom"
+            enterDelay={500}
+            enterNextDelay={300}
           >
-            <KeyboardArrowRight />
-          </IconButton>
+            <IconButton
+              onClick={() => setIsExpanded(!isExpanded)}
+              sx={{ padding: 0 }}
+            >
+              <KeyboardArrowRight />
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
 

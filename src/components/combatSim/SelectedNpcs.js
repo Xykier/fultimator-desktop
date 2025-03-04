@@ -12,6 +12,7 @@ import {
   Popover,
   Menu,
   MenuItem,
+  Tooltip,
 } from "@mui/material";
 import {
   Replay,
@@ -226,63 +227,77 @@ export default function SelectedNpcs({
                     secondary={
                       npc.id && (
                         <>
-                          <Typography
-                            component="span"
-                            variant="h5"
-                            sx={{
-                              color:
-                                npc.combatStats?.currentHp <=
-                                Math.floor(calcHP(npc) / 2)
-                                  ? "#D32F2F"
-                                  : "#4CAF50",
-                              fontWeight: "bold",
-                              transition: "color 0.2s ease-in-out",
-                              "&:hover": {
+                          <Tooltip
+                            title={t("combat_sim_edit_hp")}
+                            enterDelay={500}
+                            enterNextDelay={500}
+                          >
+                            <Typography
+                              component="span"
+                              variant="h5"
+                              sx={{
                                 color:
                                   npc.combatStats?.currentHp <=
                                   Math.floor(calcHP(npc) / 2)
-                                    ? "#B71C1C"
-                                    : "#388E3C",
-                                textDecoration: "underline",
-                              },
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleHpMpClick("HP", npc);
-                            }}
-                          >
-                            {npc.combatStats?.currentHp}/{calcHP(npc)} {t("HP")}{" "}
-                            {npc.combatStats?.currentHp <=
-                              Math.floor(calcHP(npc) / 2) && (
-                              <IoIosWarning
-                                style={{
-                                  fontSize: "1.2em",
-                                  textAlign: "center",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                            )}
-                          </Typography>
+                                    ? "#D32F2F"
+                                    : "#4CAF50",
+                                fontWeight: "bold",
+                                transition: "color 0.2s ease-in-out",
+                                "&:hover": {
+                                  color:
+                                    npc.combatStats?.currentHp <=
+                                    Math.floor(calcHP(npc) / 2)
+                                      ? "#B71C1C"
+                                      : "#388E3C",
+                                  textDecoration: "underline",
+                                },
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleHpMpClick("HP", npc);
+                              }}
+                            >
+                              {npc.combatStats?.currentHp}/{calcHP(npc)}{" "}
+                              {t("HP")}{" "}
+                              {npc.combatStats?.currentHp <=
+                                Math.floor(calcHP(npc) / 2) && (
+                                <IoIosWarning
+                                  style={{
+                                    fontSize: "1.2em",
+                                    textAlign: "center",
+                                    verticalAlign: "middle",
+                                  }}
+                                />
+                              )}
+                            </Typography>
+                          </Tooltip>
                           {" | "}
-                          <Typography
-                            component="span"
-                            variant="h5"
-                            sx={{
-                              color: "#2196F3",
-                              fontWeight: "bold",
-                              transition: "color 0.2s ease-in-out",
-                              "&:hover": {
-                                color: "#1976D2",
-                                textDecoration: "underline",
-                              },
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleHpMpClick("MP", npc);
-                            }}
+                          <Tooltip
+                            title={t("combat_sim_edit_mp")}
+                            enterDelay={500}
+                            enterNextDelay={500}
                           >
-                            {npc.combatStats?.currentMp}/{calcMP(npc)} {t("MP")}
-                          </Typography>
+                            <Typography
+                              component="span"
+                              variant="h5"
+                              sx={{
+                                color: "#2196F3",
+                                fontWeight: "bold",
+                                transition: "color 0.2s ease-in-out",
+                                "&:hover": {
+                                  color: "#1976D2",
+                                  textDecoration: "underline",
+                                },
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleHpMpClick("MP", npc);
+                              }}
+                            >
+                              {npc.combatStats?.currentMp}/{calcMP(npc)}{" "}
+                              {t("MP")}
+                            </Typography>
+                          </Tooltip>
                         </>
                       )
                     }
@@ -342,44 +357,59 @@ export default function SelectedNpcs({
                     >
                       {/* Turn Counter or Checkboxes */}
                       {npc.combatStats.turns.length > 1 ? (
-                        <Button
-                          variant={
-                            npc.combatStats.turns.every((turn) => turn)
-                              ? "contained"
-                              : "outlined"
-                          }
-                          color={
-                            npc.combatStats.turns.every((turn) => turn)
-                              ? "success"
-                              : "inherit"
-                          }
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handlePopoverOpen(event, npc.combatId);
-                          }}
-                          sx={{
-                            zIndex: 10,
-                          }}
-                          size={isMobile ? "small" : "medium"}
+                        <Tooltip
+                          title={t("combat_sim_check_turn")}
+                          enterDelay={500}
+                          enterNextDelay={500}
                         >
-                          {npc.combatStats.turns.filter((turn) => turn).length}{" "}
-                          / {npc.combatStats.turns.length}
-                        </Button>
+                          <Button
+                            variant={
+                              npc.combatStats.turns.every((turn) => turn)
+                                ? "contained"
+                                : "outlined"
+                            }
+                            color={
+                              npc.combatStats.turns.every((turn) => turn)
+                                ? "success"
+                                : "inherit"
+                            }
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handlePopoverOpen(event, npc.combatId);
+                            }}
+                            sx={{
+                              zIndex: 10,
+                            }}
+                            size={isMobile ? "small" : "medium"}
+                          >
+                            {
+                              npc.combatStats.turns.filter((turn) => turn)
+                                .length
+                            }{" "}
+                            / {npc.combatStats.turns.length}
+                          </Button>
+                        </Tooltip>
                       ) : (
                         npc.combatStats.turns
                           .slice(0, 3)
                           .map((turnTaken, turnIndex) => (
-                            <Checkbox
+                            <Tooltip
+                              title={t("combat_sim_check_turn")}
                               key={turnIndex}
-                              checked={turnTaken}
-                              onChange={(e) => {
-                                const newTurns = [...npc.combatStats.turns];
-                                newTurns[turnIndex] = e.target.checked;
-                                handleUpdateNpcTurns(npc.combatId, newTurns);
-                              }}
-                              color="success"
-                              sx={{ padding: "2px", zIndex: 10 }}
-                            />
+                              enterDelay={500}
+                              enterNextDelay={500}
+                            >
+                              <Checkbox
+                                checked={turnTaken}
+                                onChange={(e) => {
+                                  const newTurns = [...npc.combatStats.turns];
+                                  newTurns[turnIndex] = e.target.checked;
+                                  handleUpdateNpcTurns(npc.combatId, newTurns);
+                                }}
+                                color="success"
+                                sx={{ padding: "2px", zIndex: 10 }}
+                              />
+                            </Tooltip>
                           ))
                       )}
                       {isMobile ? (
@@ -410,7 +440,8 @@ export default function SelectedNpcs({
                               }}
                               disabled={index === 0}
                             >
-                              {t("combat_sim_move_up")}
+                              <ArrowUpward fontSize="small" />
+                              {" " + t("combat_sim_move_up")}
                             </MenuItem>
                             <MenuItem
                               onClick={(e) => {
@@ -419,7 +450,8 @@ export default function SelectedNpcs({
                               }}
                               disabled={index === selectedNPCs.length - 1}
                             >
-                              {t("combat_sim_move_down")}
+                              <ArrowDownward fontSize="small" />
+                              {" " + t("combat_sim_move_down")}
                             </MenuItem>
                             <MenuItem
                               onClick={(e) => {
@@ -428,7 +460,8 @@ export default function SelectedNpcs({
                               }}
                               sx={{ color: "error.main" }}
                             >
-                              {t("combat_sim_delete")}
+                              <Delete fontSize="small" />
+                              {" " + t("combat_sim_delete")}
                             </MenuItem>
                           </Menu>
                         </>
@@ -444,7 +477,13 @@ export default function SelectedNpcs({
                             disabled={index === 0}
                             sx={{ padding: 1 }}
                           >
-                            <ArrowUpward fontSize="small" />
+                            <Tooltip
+                              title={t("combat_sim_move_up")}
+                              enterDelay={500}
+                              enterNextDelay={500}
+                            >
+                              <ArrowUpward fontSize="small" />
+                            </Tooltip>
                           </IconButton>
                           <IconButton
                             edge="end"
@@ -456,7 +495,13 @@ export default function SelectedNpcs({
                             disabled={index === selectedNPCs.length - 1}
                             sx={{ padding: 1 }}
                           >
-                            <ArrowDownward fontSize="small" />
+                            <Tooltip
+                              title={t("combat_sim_move_down")}
+                              enterDelay={500}
+                              enterNextDelay={500}
+                            >
+                              <ArrowDownward fontSize="small" />
+                            </Tooltip>
                           </IconButton>
                           <IconButton
                             edge="end"
@@ -467,7 +512,13 @@ export default function SelectedNpcs({
                             }}
                             sx={{ padding: 1 }}
                           >
-                            <Delete fontSize="small" />
+                            <Tooltip
+                              title={t("combat_sim_delete")}
+                              enterDelay={500}
+                              enterNextDelay={500}
+                            >
+                              <Delete fontSize="small" />
+                            </Tooltip>
                           </IconButton>
                         </>
                       )}
