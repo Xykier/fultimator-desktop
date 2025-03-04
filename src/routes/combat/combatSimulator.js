@@ -145,8 +145,10 @@ const CombatSim = () => {
   };
 
   // Calculate time since last save
+  const minutes = Math.floor((new Date() - lastSaved) / 1000 / 60);
+
   const timeAgo = lastSaved
-    ? `${Math.floor((new Date() - lastSaved) / 1000 / 60)} ` + t("combat_sim_minutes_ago")
+    ? t("combat_sim_last_saved_before") + " " + minutes + " " + t("combat_sim_last_saved_after")
     : "Not saved yet";
 
   /* ENCOUNTER NAME EDITING */

@@ -102,7 +102,7 @@ export default function BattleHeader({
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         {timeAgo !== "Not saved yet" && !isMobile && (
-          <Typography variant="body2">{t("combat_sim_last_saved")}: {timeAgo}</Typography>
+          <Typography variant="body2">{timeAgo}</Typography>
         )}
         {isMobile ? (
           <IconButton
