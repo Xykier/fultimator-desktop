@@ -15,7 +15,7 @@ import {
   DialogActions,
   List,
   ListItem,
-  ListItemText,
+  Divider,
 } from "@mui/material";
 import {
   Close,
@@ -31,6 +31,7 @@ import NotesTab from "./NotesTab";
 import AttributeSection from "./AttributeSection";
 import CasinoIcon from "@mui/icons-material/Casino";
 import ReactMarkdown from "react-markdown";
+import { styled } from "@mui/system";
 import {
   DistanceIcon,
   MeleeIcon,
@@ -39,6 +40,7 @@ import {
 } from "../icons.js";
 import Diamond from "../Diamond";
 import { calcPrecision, calcDamage, calcMagic } from "../../libs/npcs";
+import { t } from "../../translation/translate";
 
 const NPCDetail = ({
   selectedNPC,
@@ -92,11 +94,33 @@ const NPCDetail = ({
 
     if (!attr1 || !attr2) return "Invalid Attack"; // Handle missing attributes
 
-    const translatedAttribute1 = `${attributeMap[attr1]} d${selectedNPC.attributes[attr1]}`;
-    const translatedAttribute2 = `${attributeMap[attr2]} d${selectedNPC.attributes[attr2]}`;
+    const translatedAttribute1 = `${t(attributeMap[attr1])} d${
+      selectedNPC.attributes[attr1]
+    }`;
+    const translatedAttribute2 = `${t(attributeMap[attr2])} d${
+      selectedNPC.attributes[attr2]
+    }`;
 
     return `【${translatedAttribute1} + ${translatedAttribute2}】`;
   };
+
+  const damageTypeLabels = {
+    physical: "physical_damage",
+    wind: "air_damage",
+    bolt: "bolt_damage",
+    dark: "dark_damage",
+    earth: "earth_damage",
+    fire: "fire_damage",
+    ice: "ice_damage",
+    light: "light_damage",
+    poison: "poison_damage",
+  };
+
+  const StyledMarkdown = styled(ReactMarkdown)({
+    whiteSpace: "pre-line",
+    display: "inline",
+    unwrapDisallowed: true,
+  });
 
   const handleTabChange = (_, newIndex) => setTabIndex(newIndex);
 
@@ -235,82 +259,132 @@ const NPCDetail = ({
             ].map(({ type, data, extra, icon }, index) => (
               <ListItem
                 key={index}
-                secondaryAction={
+                sx={{
+                  display: "flex",
+                  alignItems: "stretch", // Ensure all children stretch vertically
+                  borderBottom: "1px solid #ddd",
+                  py: 1,
+                  minHeight: 80,
+                }}
+              >
+                {/* Icon Section */}
+                <Box
+                  sx={{ display: "flex", alignItems: "center", minWidth: 25 }}
+                >
+                  {icon}
+                </Box>
+
+                {/* Divider */}
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{ mx: 1, my: -1 }}
+                />
+
+                {/* Text Section */}
+                <Box sx={{ flexGrow: 1, px: 2 }}>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    {data.name} {type === "Spell" && <OffensiveSpellIcon />}
+                  </Typography>
+                  <Typography variant="body2" sx={{ ml: -1 }}>
+                    <strong>{generateButtonLabel(data)}</strong>
+
+                    {/* Attacks & Weapon Attacks */}
+                    {(type === "Attack" || type === "Weapon Attack") && (
+                      <>
+                        {calcPrecision(data, selectedNPC) > 0 &&
+                          `+${calcPrecision(data, selectedNPC)} `}
+                        {data.type !== "nodmg" && (
+                          <>
+                            <strong>
+                              <Diamond />【
+                              {t("HR") + " + " + calcDamage(data, selectedNPC)}
+                              】{" "}
+                            </strong>
+                            {data.type === "physical" ? (
+                              <span>
+                                <StyledMarkdown
+                                  allowedElements={["strong"]}
+                                  unwrapDisallowed={true}
+                                >
+                                  {t(damageTypeLabels[data.type])}
+                                </StyledMarkdown>
+                              </span>
+                            ) : (
+                              <span style={{ textTransform: "lowercase" }}>
+                                <StyledMarkdown
+                                  allowedElements={["strong"]}
+                                  unwrapDisallowed={true}
+                                >
+                                  {t(damageTypeLabels[data.type])}
+                                </StyledMarkdown>
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
+
+                    {/* Spells */}
+                    {type === "Spell" && (
+                      <>
+                        {calcMagic(selectedNPC) > 0 &&
+                          `+${calcMagic(selectedNPC)} `}
+                        <Diamond /> {data.mp} MP <Diamond /> {data.target}{" "}
+                        <Diamond /> {data.duration}
+                      </>
+                    )}
+                  </Typography>
+
+                  {extra && (
+                    <Box sx={{ maxWidth: "80%", overflowWrap: "break-word" }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        component="div"
+                        sx={{ whiteSpace: "pre-wrap", my: -1 }}
+                      >
+                        <StyledMarkdown>{extra}</StyledMarkdown>
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Roll Button Section */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "stretch",
+                    my: -1,
+                    mx: -2,
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="primary"
-                    startIcon={<CasinoIcon />}
-                    onClick={() => console.log(`Rolling for ${data.name}`)}
-                    sx={{ color: "#fff" }}
+                    onClick={() => {
+                      if (window.electron) {
+                        window.electron.alert("Rolls still in development.");
+                      } else {
+                        alert("Rolls still in development.");
+                      }
+                      console.log(`Rolling for ${data.name}`);
+                    }}
+                    sx={{
+                      color: "#fff",
+                      minWidth: 40,
+                      width: 40,
+                      height: "100%", // Stretch vertically
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 0,
+                    }}
                   >
-                    Roll
+                    <CasinoIcon />
                   </Button>
-                }
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  borderBottom: "1px solid #ddd",
-                  py: 1.5,
-                }}
-              >
-                {icon && (
-                  <Box sx={{ mr: 1, display: "flex", alignItems: "center" }}>
-                    {icon}
-                  </Box>
-                )}
-                <ListItemText
-                  sx={{ ml: 1 }}
-                  primary={
-                    <>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {data.name} {type === "Spell" && <OffensiveSpellIcon />}
-                      </Typography>
-                    </>
-                  }
-                  secondary={
-                    <>
-                      <Typography variant="body2" sx={{ ml: -1 }}>
-                        {generateButtonLabel(data)}
-
-                        {/* Attacks & Weapon Attacks */}
-                        {(type === "Attack" || type === "Weapon Attack") && (
-                          <>
-                            {calcPrecision(data, selectedNPC) > 0 &&
-                              `+${calcPrecision(data, selectedNPC)} `}
-                            <Diamond color="primary" />
-                            {`【HR + ${calcDamage(data, selectedNPC)}】`}
-                          </>
-                        )}
-
-                        {/* Spells */}
-                        {type === "Spell" && (
-                          <>
-                            <Diamond />
-                            {calcMagic(selectedNPC) > 0 &&
-                              `+${calcMagic(selectedNPC)} `}
-                            {data.mp} MP <Diamond /> {data.target} <Diamond />{" "}
-                            {data.duration}
-                          </>
-                        )}
-                      </Typography>
-
-                      {extra && (
-                        <Box
-                          sx={{ maxWidth: "80%", overflowWrap: "break-word" }}
-                        >
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            component="div"
-                            sx={{ whiteSpace: "pre-wrap" }}
-                          >
-                            <ReactMarkdown>{extra}</ReactMarkdown>
-                          </Typography>
-                        </Box>
-                      )}
-                    </>
-                  }
-                />
+                </Box>
               </ListItem>
             ))}
           </List>

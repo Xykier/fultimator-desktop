@@ -786,7 +786,7 @@ const CombatSim = () => {
                         sx={{
                           display: "flex",
                           alignItems: "center", // Ensure horizontal alignment
-                          paddingY: "6px", // Adjust vertical padding if necessary
+                          paddingY: "6px",
                         }}
                       >
                         <Box
@@ -801,7 +801,7 @@ const CombatSim = () => {
                             sx={{
                               ml: 1,
                               marginBottom: 0,
-                              /*capitalize*/ textTransform: "capitalize",
+                              textTransform: "capitalize",
                             }}
                           >
                             {type}

@@ -102,6 +102,7 @@ export default function NpcSelector({
               onChange={(e) => setFilterText(e.target.value)}
               sx={{ marginBottom: 2 }}
               size="small"
+              inputProps={{ maxLength: 100 }}
             />
             <FormControl fullWidth>
               <InputLabel>Filter By</InputLabel>
