@@ -38,6 +38,8 @@ import NPCDetail from "../../components/combatSim/NPCDetail";
 import { typesList } from "../../libs/types";
 import { TypeIcon } from "../../components/types";
 import { IoShield } from "react-icons/io5";
+import { t } from "../../translation/translate";
+import ReactMarkdown from "react-markdown";
 
 export default function CombatSimulator() {
   return (
@@ -144,7 +146,7 @@ const CombatSim = () => {
 
   // Calculate time since last save
   const timeAgo = lastSaved
-    ? `${Math.floor((new Date() - lastSaved) / 1000 / 60)} minutes ago`
+    ? `${Math.floor((new Date() - lastSaved) / 1000 / 60)} ` + t("combat_sim_minutes_ago")
     : "Not saved yet";
 
   /* ENCOUNTER NAME EDITING */
@@ -271,9 +273,9 @@ const CombatSim = () => {
       ]);
     } else {
       if (window.electron) {
-        window.electron.alert("You cannot select more than 30 NPCs.");
+        window.electron.alert(t("combat_sim_too_many_npcs"));
       } else {
-        alert("You cannot select more than 30 NPCs.");
+        alert(t("combat_sim_too_many_npcs"));
       }
     }
   };
@@ -593,7 +595,7 @@ const CombatSim = () => {
     return (
       <Box sx={{ textAlign: "center", mt: 10 }}>
         <Typography variant="h5" color="error">
-          Encounter not found!
+          {t("combat_sim_encounter_not_found")}
         </Typography>
       </Box>
     );
@@ -706,7 +708,9 @@ const CombatSim = () => {
             pb: 1,
           }}
         >
-          {statType === "HP" ? "Edit HP" : "Edit MP"}
+          {statType === "HP"
+            ? t("combat_sim_edit_hp")
+            : t("combat_sim_edit_mp")}
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent
@@ -731,17 +735,17 @@ const CombatSim = () => {
               sx={{ mb: 2 }}
             >
               <ToggleButton value="heal" color="success">
-                Healing
+                {t("combat_sim_healing")}
               </ToggleButton>
               <ToggleButton value="damage" color="error">
-                Damage
+                {t("combat_sim_damage")}
               </ToggleButton>
             </ToggleButtonGroup>
 
             <TextField
               fullWidth
               type="text"
-              label="Amount"
+              label={t("combat_sim_amount")}
               value={value}
               onChange={handleChange}
               onBlur={() => setValue(value === "" ? "" : Number(value))}
@@ -768,16 +772,18 @@ const CombatSim = () => {
                     },
                   }}
                 >
-                  <InputLabel id="damage-type-label">Damage Type</InputLabel>
+                  <InputLabel id="damage-type-label">
+                    {t("combat_sim_damage_type")}
+                  </InputLabel>
                   <Select
-                    label="Damage Type"
+                    label={t("combat_sim_damage_type")}
                     value={damageType}
                     onChange={(e) => {
                       setDamageType(e.target.value);
                     }}
                   >
                     <MenuItem value="">
-                      <ListItemText>None</ListItemText>
+                      <ListItemText>{t("combat_sim_none")}</ListItemText>
                     </MenuItem>
                     {typesList.map((type) => (
                       <MenuItem
@@ -804,7 +810,7 @@ const CombatSim = () => {
                               textTransform: "capitalize",
                             }}
                           >
-                            {type}
+                            {t(type)}
                           </ListItemText>
                         </Box>
                       </MenuItem>
@@ -833,7 +839,7 @@ const CombatSim = () => {
                         size={20}
                         color={isGuarding ? "green" : "gray"}
                       />
-                      Is Guarding?
+                      {t("combat_sim_is_guarding")}?
                     </Box>
                   }
                 />
@@ -841,8 +847,11 @@ const CombatSim = () => {
                 {npcClicked &&
                   (damageType !== "" || isGuarding) &&
                   value !== "" && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      Calculated:{" "}
+                    <Typography
+                      variant="body2"
+                      sx={{ mt: 1, display: "inline" }}
+                    >
+                      {t("combat_sim_calculated_damage")}:{" "}
                       <strong
                         style={{
                           color: (() => {
@@ -856,17 +865,23 @@ const CombatSim = () => {
                           })(),
                         }}
                       >
-                        {(() => {
-                          const calculated = calculateDamage(
-                            npcClicked,
-                            value,
-                            damageType,
-                            isGuarding
-                          );
-                          return calculated < 0
-                            ? `${Math.abs(calculated)} ${damageType} healing`
-                            : `${calculated} ${damageType} damage`;
-                        })()}
+                        <ReactMarkdown components={{ p: "span" }}>
+                          {(() => {
+                            const calculated = calculateDamage(
+                              npcClicked,
+                              value,
+                              damageType,
+                              isGuarding
+                            );
+                            return calculated < 0
+                              ? `${Math.abs(calculated)} ${damageType} healing`
+                              : `${calculated} ${
+                                  damageType
+                                    ? t(damageType + "_damage")
+                                    : t("notype_damage")
+                                }`;
+                          })()}
+                        </ReactMarkdown>
                       </strong>
                     </Typography>
                   )}
@@ -879,7 +894,7 @@ const CombatSim = () => {
               color="primary"
               sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
             >
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button
               type="submit"
@@ -887,7 +902,7 @@ const CombatSim = () => {
               color="primary"
               sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
             >
-              OK
+              {t("OK")}
             </Button>
           </DialogActions>
         </form>

@@ -27,6 +27,7 @@ import {
   GiGooeyDaemon,
   GiRose,
 } from "react-icons/gi";
+import { t } from "../../translation/translate";
 
 function rankText(rank) {
   const rankMap = {
@@ -62,15 +63,19 @@ export default function NpcSelector({
 
     let value = "";
     if (filterField === "tags") {
-      // Safely handle the case where npc.tags might be undefined
+      // Translate each tag before filtering
       value = (npc.tags || [])
         .map((tag) => tag.name)
         .join(", ")
         .toLowerCase();
+    } else if (filterField === "rank") {
+      // Get the readable rank text and translate it
+      value = t(rankText(npc.rank));
     } else {
-      value = npc[filterField] ? npc[filterField].toString().toLowerCase() : "";
+      value = npc[filterField] ? t(npc[filterField].toString()) : "";
     }
-    return value.includes(filterText.toLowerCase());
+
+    return value.toLowerCase().includes(filterText.toLowerCase());
   });
 
   return isMobile ? (
@@ -80,7 +85,7 @@ export default function NpcSelector({
         size="small"
         onClick={() => setNpcDrawerOpen(true)}
       >
-        Select NPCs
+        {t("combat_sim_select_npcs")}
       </Button>
       <Drawer
         anchor="left"
@@ -89,13 +94,13 @@ export default function NpcSelector({
       >
         <Box sx={{ width: 250, padding: 2 }}>
           <Typography variant="h5" sx={{ marginBottom: 1 }}>
-            NPC Selector
+            {t("combat_sim_npc_selector")}
           </Typography>
 
           {/* Filter Controls */}
           <Box sx={{ marginBottom: 1 }}>
             <TextField
-              label="Search"
+              label={t("combat_sim_search")}
               variant="outlined"
               fullWidth
               value={filterText}
@@ -105,23 +110,23 @@ export default function NpcSelector({
               inputProps={{ maxLength: 100 }}
             />
             <FormControl fullWidth>
-              <InputLabel>Filter By</InputLabel>
+              <InputLabel>{t("combat_sim_filter_by")}</InputLabel>
               <Select
                 value={filterField}
                 onChange={(e) => setFilterField(e.target.value)}
-                label="Filter By"
+                label={t("combat_sim_filter_by")}
                 size="small"
               >
-                <MenuItem value="name">Name</MenuItem>
-                <MenuItem value="lvl">Level</MenuItem>
-                <MenuItem value="species">Species</MenuItem>
-                <MenuItem value="rank">Rank</MenuItem>
-                <MenuItem value="tags">Tags</MenuItem> {/* Add Tags filter */}
+                <MenuItem value="name">{t("Name")}</MenuItem>
+                <MenuItem value="lvl">{t("Level")}</MenuItem>
+                <MenuItem value="species">{t("Species")}</MenuItem>
+                <MenuItem value="rank">{t("Rank")}</MenuItem>
+                <MenuItem value="tags">{t("Personal Tags")}</MenuItem>
               </Select>
             </FormControl>
           </Box>
 
-          <Box sx={{ maxHeight: "75vh", overflowY: "auto" }}>
+          <Box sx={{ maxHeight: "81vh", overflowY: "auto" }}>
             {filteredNpcList.length > 0 ? (
               filteredNpcList.map((npc) => (
                 <React.Fragment key={npc.id}>
@@ -174,8 +179,8 @@ export default function NpcSelector({
                         color="text.secondary"
                         sx={{ display: "flex", alignItems: "center" }}
                       >
-                        Level: {npc.lvl}{" "}
-                        {npc.rank && " | " + rankText(npc.rank)}
+                        {t("Level")}: {npc.lvl}{" "}
+                        {npc.rank && " | " + t(rankText(npc.rank))}
                       </Typography>
                     </Box>
                   </Button>
@@ -187,7 +192,7 @@ export default function NpcSelector({
                 variant="body2"
                 sx={{ padding: 2, color: "text.secondary" }}
               >
-                No NPCs found.
+                {t("combat_sim_no_npc_found")}.
               </Typography>
             )}
           </Box>
@@ -215,7 +220,7 @@ export default function NpcSelector({
             paddingBottom: 1,
           }}
         >
-          <Typography variant="h5">NPC Selector</Typography>
+          <Typography variant="h5">{t("combat_sim_npc_selector")}</Typography>
           <IconButton
             onClick={() => setIsExpanded(!isExpanded)}
             sx={{ padding: 0 }}
@@ -248,7 +253,7 @@ export default function NpcSelector({
             }}
           >
             <TextField
-              label="Search"
+              label={t("combat_sim_search")}
               variant="outlined"
               size="small"
               value={filterText}
@@ -256,17 +261,17 @@ export default function NpcSelector({
               sx={{ width: "60%" }}
             />
             <FormControl size="small" sx={{ width: "35%" }}>
-              <InputLabel>Filter By</InputLabel>
+              <InputLabel>{t("combat_sim_filter_by")}</InputLabel>
               <Select
                 value={filterField}
                 onChange={(e) => setFilterField(e.target.value)}
-                label="Filter By"
+                label={t("combat_sim_filter_by")}
               >
-                <MenuItem value="name">Name</MenuItem>
-                <MenuItem value="lvl">Level</MenuItem>
-                <MenuItem value="species">Species</MenuItem>
-                <MenuItem value="rank">Rank</MenuItem>
-                <MenuItem value="tags">Tags</MenuItem> {/* Add Tags filter */}
+                <MenuItem value="name">{t("Name")}</MenuItem>
+                <MenuItem value="lvl">{t("Level")}</MenuItem>
+                <MenuItem value="species">{t("Species")}</MenuItem>
+                <MenuItem value="rank">{t("Rank")}</MenuItem>
+                <MenuItem value="tags">{t("Personal Tags")}</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -299,9 +304,9 @@ export default function NpcSelector({
                             variant="body2"
                             color="text.secondary"
                             sx={{ fontFamily: "Antonio" }}
-                            component="span" // <-- Change this to span to avoid nested <p>
+                            component="span"
                           >
-                            <Tooltip title={npc.species}>
+                            <Tooltip title={t(npc.species)}>
                               <span>
                                 {npc.species === "Beast" && <GiWolfHead />}
                                 {npc.species === "Construct" && (
@@ -316,8 +321,8 @@ export default function NpcSelector({
                               </span>
                             </Tooltip>
                             {" | "}
-                            Level: {npc.lvl}
-                            {npc.rank && " | " + rankText(npc.rank)}
+                            {t("Level")}: {npc.lvl}
+                            {npc.rank && " | " + t(rankText(npc.rank))}
                           </Typography>
                         }
                       />

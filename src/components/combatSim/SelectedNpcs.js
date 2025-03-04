@@ -24,6 +24,7 @@ import { calcHP, calcMP, calcInit } from "../../libs/npcs";
 import { GiDeathSkull } from "react-icons/gi";
 import { IoIosWarning } from "react-icons/io";
 import { useTheme } from "@mui/material/styles";
+import { t } from "../../translation/translate";
 
 export default function SelectedNpcs({
   selectedNPCs,
@@ -87,10 +88,10 @@ export default function SelectedNpcs({
           paddingBottom: 1,
         }}
       >
-        <Typography variant="h5">Selected NPCs</Typography>
+        <Typography variant="h5">{t("combat_sim_selected_npcs")}</Typography>
         {selectedNPCs.length > 0 && (
           <Typography variant="h5" color={primary}>
-            NPC Initiative: <strong>{highestInit}</strong>
+            {t("combat_sim_npc_initiative")}: <strong>{highestInit}</strong>
           </Typography>
         )}
         {isMobile ? (
@@ -111,7 +112,7 @@ export default function SelectedNpcs({
             onClick={handleResetTurns}
             endIcon={<Replay />}
           >
-            Next Round
+            {t("combat_sim_next_round")}
           </Button>
         )}
       </Box>
@@ -128,7 +129,7 @@ export default function SelectedNpcs({
               fontStyle: "italic",
             }}
           >
-            No NPC selected yet
+            {t("combat_sim_no_npc_selected")}
           </Typography>
         ) : (
           <List>
@@ -218,7 +219,7 @@ export default function SelectedNpcs({
                             npc.name
                           )
                         ) : (
-                          "DELETED NPC"
+                          t("combat_sim_deleted_npc")
                         )}
                       </Typography>
                     }
@@ -250,7 +251,7 @@ export default function SelectedNpcs({
                               handleHpMpClick("HP", npc);
                             }}
                           >
-                            {npc.combatStats?.currentHp}/{calcHP(npc)} HP{" "}
+                            {npc.combatStats?.currentHp}/{calcHP(npc)} {t("HP")}{" "}
                             {npc.combatStats?.currentHp <=
                               Math.floor(calcHP(npc) / 2) && (
                               <IoIosWarning
@@ -280,7 +281,7 @@ export default function SelectedNpcs({
                               handleHpMpClick("MP", npc);
                             }}
                           >
-                            {npc.combatStats?.currentMp}/{calcMP(npc)} MP
+                            {npc.combatStats?.currentMp}/{calcMP(npc)} {t("MP")}
                           </Typography>
                         </>
                       )
@@ -409,7 +410,7 @@ export default function SelectedNpcs({
                               }}
                               disabled={index === 0}
                             >
-                              Move Up
+                              {t("combat_sim_move_up")}
                             </MenuItem>
                             <MenuItem
                               onClick={(e) => {
@@ -418,7 +419,7 @@ export default function SelectedNpcs({
                               }}
                               disabled={index === selectedNPCs.length - 1}
                             >
-                              Move Down
+                              {t("combat_sim_move_down")}
                             </MenuItem>
                             <MenuItem
                               onClick={(e) => {
@@ -427,7 +428,7 @@ export default function SelectedNpcs({
                               }}
                               sx={{ color: "error.main" }}
                             >
-                              Delete
+                              {t("combat_sim_delete")}
                             </MenuItem>
                           </Menu>
                         </>

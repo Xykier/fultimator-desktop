@@ -134,25 +134,25 @@ const NPCDetail = ({
       <Tab
         iconPosition="start"
         icon={<Description fontSize="small" />}
-        label={!isMobile && "Sheet"}
+        label={!isMobile && t("combat_sim_sheet")}
         sx={{ minHeight: 40, padding: "4px 8px" }}
       />
       <Tab
         iconPosition="start"
         icon={<Favorite fontSize="small" />}
-        label={!isMobile && "Stats"}
+        label={!isMobile && t("combat_sim_stats")}
         sx={{ minHeight: 40, padding: "4px 8px" }}
       />
       <Tab
         iconPosition="start"
         icon={<Casino fontSize="small" />}
-        label={!isMobile && "Rolls"}
+        label={!isMobile && t("combat_sim_rolls")}
         sx={{ minHeight: 40, padding: "4px 8px" }}
       />
       <Tab
         iconPosition="start"
         icon={<Edit fontSize="small" />}
-        label={!isMobile && "Notes"}
+        label={!isMobile && t("combat_sim_notes")}
         sx={{ minHeight: 40, padding: "4px 8px" }}
       />
     </Tabs>
@@ -413,7 +413,7 @@ const NPCDetail = ({
             onChange={handleStudyChange}
             size="small"
           >
-            <MenuItem value={0}>Study</MenuItem>
+            <MenuItem value={0}>{t("combat_sim_study")}</MenuItem>
             <MenuItem value={1}>7+</MenuItem>
             <MenuItem value={2}>10+</MenuItem>
             <MenuItem value={3}>13+</MenuItem>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
+import { t } from "../../translation/translate";
 
 const AttributeSection = ({ selectedNPC, calcAttr }) => {
   const attributes = [
@@ -63,7 +64,7 @@ const AttributeSection = ({ selectedNPC, calcAttr }) => {
               fontSize: "1rem",
             }}
           >
-            {attr.label}
+            {t(attr.label)}
           </Box>
           {/* Value Part */}
           <Box

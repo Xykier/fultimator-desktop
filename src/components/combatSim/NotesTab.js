@@ -1,10 +1,11 @@
 import React from "react";
 import { TextField } from "@mui/material";
+import { t } from "../../translation/translate";
 
 const NotesTab = ({ selectedNPC, selectedNPCs, setSelectedNPCs }) => {
   return (
     <TextField
-      label="Notes"
+      label={t("Notes")}
       variant="outlined"
       fullWidth
       multiline

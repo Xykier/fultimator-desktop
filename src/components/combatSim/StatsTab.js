@@ -8,6 +8,7 @@ import {
 import HealthBar from "./HealthBar";
 import { GiHearts } from "react-icons/gi";
 import { FaStar } from "react-icons/fa";
+import { t } from "../../translation/translate";
 
 const StatsTab = ({
   selectedNPC,
@@ -27,13 +28,13 @@ const StatsTab = ({
       {/* HP Section */}
       <Box sx={{ marginTop: 2, display: "flex", alignItems: "center" }}>
         <HealthBar
-          label="HP"
+          label={t("HP")}
           currentValue={selectedNPC?.combatStats?.currentHp || 0}
           maxValue={calcHP(selectedNPC)}
           startColor={isCrisis ? "#D32F2F" : "#66bb6a"}
           endColor={isCrisis ? "#B71C1C" : "#39823d"} //#39823d #388e3c
           bgColor="#333333"
-          rightText={isCrisis && "CRISIS"}
+          rightText={isCrisis && t("CRISIS")}
           rightTextColor={isCrisis && "#ffff00" }
         />
       </Box>
@@ -41,7 +42,7 @@ const StatsTab = ({
       {/* MP Section */}
       <Box sx={{ marginTop: "-0.2rem", display: "flex", alignItems: "center" }}>
         <HealthBar
-          label="MP"
+          label={t("MP")}
           currentValue={selectedNPC?.combatStats?.currentMp || 0}
           maxValue={calcMP(selectedNPC)}
           startColor="#42a5f5"
@@ -61,7 +62,7 @@ const StatsTab = ({
           fullWidth
           startIcon={<GiHearts />}
         >
-          Edit HP
+          {t("combat_sim_edit_hp")}
         </Button>
         <Button 
           variant="contained"
@@ -72,7 +73,7 @@ const StatsTab = ({
           fullWidth
           startIcon={<FaStar />}
         >
-          Edit MP
+          {t("combat_sim_edit_mp")}
         </Button>
       </Box>
 
@@ -142,7 +143,7 @@ const StatsTab = ({
                     fontSize: { xs: "1rem", sm: "1.2rem" }, // Adjust typography size for small screens
                   }}
                 >
-                  {label}
+                  {t(label)}
                 </Typography>
               </ToggleButton>
             ))}

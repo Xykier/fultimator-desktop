@@ -8,6 +8,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { Edit, ArrowRight, ArrowLeft, Save } from "@mui/icons-material";
+import { t } from "../../translation/translate";
 
 export default function BattleHeader({
   encounterName,
@@ -45,7 +46,7 @@ export default function BattleHeader({
             variant="standard"
             error={encounterName.trim() === ""}
             helperText={
-              encounterName.trim() === "" ? "Name cannot be empty" : ""
+              encounterName.trim() === "" ? t("combat_sim_empty_name_warning") : ""
             }
             inputProps={{ maxLength: 100 }}
           />
@@ -88,7 +89,7 @@ export default function BattleHeader({
           variant={isMobile ? "h6" : "h3"}
           sx={{ marginX: 2, textTransform: "uppercase" }}
         >
-          {`Round: ${round}`}
+          {t("combat_sim_round") + `: ${round}`}
         </Typography>
         <IconButton
           onClick={handleIncreaseRound}
@@ -101,7 +102,7 @@ export default function BattleHeader({
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         {timeAgo !== "Not saved yet" && !isMobile && (
-          <Typography variant="body2">Last saved: {timeAgo}</Typography>
+          <Typography variant="body2">{t("combat_sim_last_saved")}: {timeAgo}</Typography>
         )}
         {isMobile ? (
           <IconButton
@@ -122,7 +123,7 @@ export default function BattleHeader({
             startIcon={<Save />}
             sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
           >
-            Save
+            {t("combat_sim_save")}
           </Button>
         )}
       </Box>

@@ -22,6 +22,7 @@ import Layout from "../../components/Layout";
 import { useTheme } from "@mui/material/styles";
 import CustomHeaderAlt from "../../components/common/CustomHeaderAlt";
 import { SportsMartialArts, NavigateNext } from "@mui/icons-material";
+import { t } from "../../translation/translate";
 
 const MAX_ENCOUNTERS = 10;
 
@@ -91,17 +92,17 @@ const CombatSimEncounters = () => {
         }}
       >
         <CustomHeaderAlt
-          headerText={"Combat Simulator"}
+          headerText={t("combat_sim_title")}
           icon={<SportsMartialArts fontSize="large" />}
         />
         <div style={{ paddingLeft: 10, paddingRight: 10 }}>
           <Typography variant="h6" gutterBottom>
-            Create a New Encounter
+            {t("combat_sim_new_encounter")}
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={8}>
               <TextField
-                label="Encounter Name"
+                label={t("combat_sim_encounter_name")}
                 variant="outlined"
                 fullWidth
                 value={encounterName}
@@ -118,12 +119,13 @@ const CombatSimEncounters = () => {
                 disabled={!encounterName || encounters.length >= MAX_ENCOUNTERS}
                 sx={{ height: "100%" }}
               >
-                Save Encounter
+                {t("combat_sim_save_encounter")}
               </Button>
             </Grid>
           </Grid>
           <Typography variant="h5" mt={2}>
-            Saved Encounters ({encounters.length}/{MAX_ENCOUNTERS})
+            {t("combat_sim_saved_encounters")} ({encounters.length}/
+            {MAX_ENCOUNTERS})
           </Typography>
         </div>
       </Paper>
@@ -151,10 +153,12 @@ const CombatSimEncounters = () => {
                   {encounter.name}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Created: {new Date(encounter.createdAt).toLocaleString()}
+                  {t("combat_sim_created")}:{" "}
+                  {new Date(encounter.createdAt).toLocaleString()}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  Last Updated: {new Date(encounter.updatedAt).toLocaleString()}
+                  {t("combat_sim_last_updated")}:{" "}
+                  {new Date(encounter.updatedAt).toLocaleString()}
                 </Typography>
               </CardContent>
               <CardActions
