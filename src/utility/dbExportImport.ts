@@ -7,20 +7,24 @@ import {
   deleteAllNpcs,
   deleteAllPcs,
   getEncounterList,
-  deleteAllEncounters
+  deleteAllEncounters,
 } from "./db";
 
 // Export function for both NPCs and PCs
 export const exportDatabase = async () => {
   try {
     // Fetch data from both stores
-    const [npcs, pcs, encounters] = await Promise.all([getNpcs(), getPcs(), getEncounterList()]);
+    const [npcs, pcs, encounters] = await Promise.all([
+      getNpcs() || [],
+      getPcs() || [],
+      getEncounterList() || [],
+    ]);
 
     // Create a combined object to export
     const data = {
       npcs,
       pcs,
-      encounters
+      encounters,
     };
 
     const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
@@ -36,48 +40,49 @@ export const exportDatabase = async () => {
   }
 };
 
-// Import function for both NPCs and PCs
+// Import function for NPCs, PCs and encounters
 export const importDatabase = async (file: File) => {
   try {
     const text = await file.text();
     const data = JSON.parse(text);
 
-    if (
-      !data.npcs ||
-      !Array.isArray(data.npcs) ||
-      !data.pcs ||
-      !Array.isArray(data.pcs) ||
-      !data.encounters ||
-      !Array.isArray(data.encounters)
-    ) {
-      throw new Error("Invalid file format");
-    }
+    // Ensure backward compatibility
+    const npcs = Array.isArray(data.npcs) ? data.npcs : [];
+    const pcs = Array.isArray(data.pcs) ? data.pcs : [];
+    const encounters = Array.isArray(data.encounters) ? data.encounters : []; // Handle missing encounters
 
     // Clear existing data from both stores
     await Promise.all([deleteAllNpcs(), deleteAllPcs(), deleteAllEncounters()]);
 
     // Add new data to both stores
     await Promise.all([
-      ...data.npcs.map((npc: any) => addNpc(npc)),
-      ...data.pcs.map((pc: any) => addPc(pc)),
-      ...data.encounters.map((encounter: any) => addEncounter(encounter)),
+      ...npcs.map((npc: any) => addNpc(npc)),
+      ...pcs.map((pc: any) => addPc(pc)),
+      ...encounters.map((encounter: any) => addEncounter(encounter)),
     ]);
+
+    console.log("Database successfully imported");
   } catch (error) {
     console.error("Failed to import database", error);
     throw error;
   }
 };
 
+
 export const handleExport = async (): Promise<string> => {
   try {
-    // Fetch data from both stores
-    const [npcs, pcs, encounters] = await Promise.all([getNpcs(), getPcs(), getEncounterList()]);
+    // Fetch data from all stores
+    const [npcs, pcs, encounters] = await Promise.all([
+      getNpcs(),
+      getPcs(),
+      getEncounterList(),
+    ]);
 
     // Create a combined object to export
     const data = {
       npcs,
       pcs,
-      encounters
+      encounters,
     };
 
     // Create a blob with the data
