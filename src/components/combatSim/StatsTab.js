@@ -9,6 +9,7 @@ import HealthBar from "./HealthBar";
 import { GiHearts } from "react-icons/gi";
 import { FaStar } from "react-icons/fa";
 import { t } from "../../translation/translate";
+import { useTheme } from "@mui/material/styles";
 
 const StatsTab = ({
   selectedNPC,
@@ -18,8 +19,10 @@ const StatsTab = ({
   toggleStatusEffect,
   handleDecreaseUltima,
   handleIncreaseUltima,
-  isMobile,
 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const isCrisis =
     selectedNPC?.combatStats?.currentHp <= Math.floor(calcHP(selectedNPC) / 2);
 
@@ -114,15 +117,15 @@ const StatsTab = ({
                   minWidth: "80px", // Minimum width for small screens
                   justifyContent: "center",
                   padding: "5px 0",
-                  backgroundColor: "#ECECEC",
-                  color: "black !important",
+                  backgroundColor: isDarkMode ? "#424242" : "#ECECEC", // Background color changes for dark mode
+                  color: isDarkMode ? "#fff !important" : "black !important", // Text color adjusts for dark mode
                   fontWeight: "bold",
                   letterSpacing: "1.5px",
                   fontSize: { xs: "1rem", sm: "1.2rem" }, // Adjust font size for smaller screens
                   transition: "all 0.3s ease-in-out",
                   "&:hover": {
-                    backgroundColor: "#D3D3D3 !important",
-                    color: "black !important",
+                    backgroundColor: isDarkMode ? "#616161 !important" : "#D3D3D3 !important", // Hover effect adjusts for dark mode
+                    color: isDarkMode ? "#fff !important" : "black !important", // Text color on hover
                   },
                   "&.Mui-selected": {
                     backgroundColor: color,
@@ -176,7 +179,11 @@ const StatsTab = ({
             {/* Ultima value */}
             <Typography
               variant="h4"
-              sx={{ marginBottom: 0, fontWeight: "bold" }}
+              sx={{
+                marginBottom: 0,
+                fontWeight: "bold",
+                color: isDarkMode ? "#fff" : "#000", // Text color adjusts for dark mode
+              }}
             >
               Ultima Points: {selectedNPC?.combatStats?.ultima}
             </Typography>

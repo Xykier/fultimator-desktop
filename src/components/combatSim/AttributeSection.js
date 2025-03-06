@@ -1,8 +1,12 @@
 import React from "react";
 import { Box } from "@mui/material";
 import { t } from "../../translation/translate";
+import { useTheme } from "@mui/material/styles";
 
 const AttributeSection = ({ selectedNPC, calcAttr }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const attributes = [
     {
       label: "DEX",
@@ -36,9 +40,9 @@ const AttributeSection = ({ selectedNPC, calcAttr }) => {
         display: "flex",
         justifyContent: "space-around",
         alignItems: "center",
-        borderTop: "1px solid #ccc",
+        borderTop: `1px solid ${isDarkMode ? "#444" : "#ccc"}`,
         paddingY: 1,
-        bgcolor: "#f5f5f5",
+        bgcolor: isDarkMode ? "#333333" : "#f5f5f5",
         width: "100%",
       }}
     >
@@ -50,7 +54,7 @@ const AttributeSection = ({ selectedNPC, calcAttr }) => {
             alignItems: "center",
             borderRadius: "16px",
             overflow: "hidden",
-            bgcolor: "#e0e0e0",
+            bgcolor: isDarkMode ? "#444" : "#e0e0e0",
           }}
         >
           {/* Label Part */}

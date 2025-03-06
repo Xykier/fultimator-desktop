@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { Edit, ArrowRight, ArrowLeft, Save } from "@mui/icons-material";
 import { t } from "../../translation/translate";
+import { useTheme } from "@mui/material/styles";
 
 export default function BattleHeader({
   encounterName,
@@ -24,13 +25,16 @@ export default function BattleHeader({
   handleDecreaseRound,
   isMobile,
 }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   return (
     <Box
       sx={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        bgcolor: "#fff",
+        bgcolor: isDarkMode ? "#333333" : "#ffffff",
         padding: 2,
         borderRadius: 3,
       }}
@@ -46,7 +50,9 @@ export default function BattleHeader({
             variant="standard"
             error={encounterName.trim() === ""}
             helperText={
-              encounterName.trim() === "" ? t("combat_sim_empty_name_warning") : ""
+              encounterName.trim() === ""
+                ? t("combat_sim_empty_name_warning")
+                : ""
             }
             inputProps={{ maxLength: 100 }}
           />
@@ -80,7 +86,7 @@ export default function BattleHeader({
       >
         <IconButton
           onClick={handleDecreaseRound}
-          color="primary"
+          color={isDarkMode ? "#fff" : "primary"}
           sx={{ padding: 1 }}
         >
           <ArrowLeft fontSize={isMobile ? "small" : "medium"} />
@@ -93,10 +99,10 @@ export default function BattleHeader({
         </Typography>
         <IconButton
           onClick={handleIncreaseRound}
-          color="primary"
+          color={isDarkMode ? "#fff" : "primary"}
           sx={{ padding: 1 }}
         >
-          <ArrowRight fontSize={isMobile ? "small" : "medium"}  />
+          <ArrowRight fontSize={isMobile ? "small" : "medium"} />
         </IconButton>
       </Box>
 

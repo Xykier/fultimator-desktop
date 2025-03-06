@@ -28,6 +28,7 @@ import {
   GiRose,
 } from "react-icons/gi";
 import { t } from "../../translation/translate";
+import { useTheme } from "@mui/material/styles";
 
 function rankText(rank) {
   const rankMap = {
@@ -53,6 +54,8 @@ export default function NpcSelector({
   npcDrawerOpen,
   setNpcDrawerOpen,
 }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const [filterText, setFilterText] = useState("");
   const [filterField, setFilterField] = useState("name");
   const [isExpanded, setIsExpanded] = useState(true);
@@ -146,28 +149,68 @@ export default function NpcSelector({
                   >
                     {/* Displaying NPC Icon based on species */}
                     {npc.species === "Beast" && (
-                      <GiWolfHead style={{ marginRight: 10 }} />
+                      <GiWolfHead
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Construct" && (
-                      <GiRobotGolem style={{ marginRight: 10 }} />
+                      <GiRobotGolem
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Demon" && (
-                      <GiEvilBat style={{ marginRight: 10 }} />
+                      <GiEvilBat
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Elemental" && (
-                      <GiFire style={{ marginRight: 10 }} />
+                      <GiFire
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Humanoid" && (
-                      <GiSwordwoman style={{ marginRight: 10 }} />
+                      <GiSwordwoman
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Undead" && (
-                      <GiRaiseZombie style={{ marginRight: 10 }} />
+                      <GiRaiseZombie
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Plant" && (
-                      <GiRose style={{ marginRight: 10 }} />
+                      <GiRose
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
                     {npc.species === "Monster" && (
-                      <GiGooeyDaemon style={{ marginRight: 10 }} />
+                      <GiGooeyDaemon
+                        style={{
+                          marginRight: 10,
+                          color: isDarkMode ? "white" : "black",
+                        }}
+                      />
                     )}
 
                     <Box>
@@ -203,7 +246,7 @@ export default function NpcSelector({
     <Box
       sx={{
         width: isExpanded ? "20%" : "60px", // Collapsed view
-        bgcolor: "#fff",
+        bgcolor: isDarkMode ? "#333333" : "#ffffff",
         padding: 2,
         height: "100%",
         transition: "width 0.3s ease-in-out", // Smooth transition

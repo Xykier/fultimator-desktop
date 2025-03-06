@@ -41,6 +41,7 @@ import {
 import Diamond from "../Diamond";
 import { calcPrecision, calcDamage, calcMagic } from "../../libs/npcs";
 import { t } from "../../translation/translate";
+import { useTheme } from "@mui/material/styles";
 
 const NPCDetail = ({
   selectedNPC,
@@ -61,6 +62,11 @@ const NPCDetail = ({
   handleIncreaseUltima,
   isMobile,
 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+  const primary = theme.palette.primary.main;
+  const secondary = theme.palette.secondary.main;
+
   if (!selectedNPC) return null;
 
   const generateButtonLabel = (attack) => {
@@ -129,7 +135,15 @@ const NPCDetail = ({
       value={tabIndex}
       onChange={handleTabChange}
       variant="fullWidth"
-      sx={{ minHeight: 40 }}
+      sx={{
+        minHeight: 40,
+        "& .Mui-selected": { // Selected tab
+          color: isDarkMode ? secondary : primary,
+        },
+        "& .MuiTab-root": { // Unselected tab
+          color: isDarkMode ? "white" : "black",
+        },
+      }}
     >
       <Tab
         iconPosition="start"
@@ -420,7 +434,7 @@ const NPCDetail = ({
       {tabIndex === 0 && (
         <Box
           sx={{
-            borderTop: "1px solid #ccc",
+            borderTop: "1px solid " + theme.palette.divider,
             paddingTop: 1,
             display: "flex",
             justifyContent: "center",
@@ -431,6 +445,12 @@ const NPCDetail = ({
             value={selectedStudy}
             onChange={handleStudyChange}
             size="small"
+            sx={{
+              // when selected, change border color
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: isDarkMode ? "#fff" : "primary",
+              },
+            }}
           >
             <MenuItem value={0}>{t("combat_sim_study")}</MenuItem>
             <MenuItem value={1}>7+</MenuItem>
@@ -439,7 +459,7 @@ const NPCDetail = ({
           </Select>
           <Tooltip title="Download Sheet" placement="bottom">
             <Button
-              color="primary"
+              color={isDarkMode ? "white" : "primary"}
               aria-label="download"
               onClick={downloadImage}
             >
@@ -489,7 +509,7 @@ const NPCDetail = ({
     <Box
       sx={{
         width: "30%",
-        bgcolor: "#fff",
+        bgcolor: isDarkMode ? "#333333" : "#ffffff",
         padding: 2,
         display: "flex",
         flexDirection: "column",

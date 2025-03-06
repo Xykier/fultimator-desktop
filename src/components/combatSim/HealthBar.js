@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 const HealthBar = ({
   label,
@@ -11,6 +12,9 @@ const HealthBar = ({
   rightText,
   rightTextColor = "#fff",
 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   const percentage = (currentValue / maxValue) * 100 || 0;
 
   // Create a gradient from startColor to endColor
@@ -22,14 +26,14 @@ const HealthBar = ({
         display: "flex",
         alignItems: "center",
         width: "100%",
-        border: "2px solid #e0e0e0", // Border around the label and progress bar
+        border: `2px solid ${isDarkMode ? "#444" : "#e0e0e0"}`, // Adjust border color for dark mode
       }}
     >
       {/* Label */}
       <Box
         sx={{
-          backgroundColor: "#f4f4f4",
-          borderRight: "1px solid #e0e0e0",
+          backgroundColor: isDarkMode ? "#333" : "#f4f4f4", // Adjust background color for label
+          borderRight: `1px solid ${isDarkMode ? "#444" : "#e0e0e0"}`, // Border for dark mode
           width: "10%",
           display: "flex",
           justifyContent: "center",
@@ -42,6 +46,7 @@ const HealthBar = ({
             fontWeight: "bold",
             fontFamily: "'Press Start 2P', cursive",
             fontSize: `calc(0.60rem + 0.25vw)`,
+            color: isDarkMode ? "#fff" : bgColor, // Text color for label
           }}
         >
           {label}
@@ -56,7 +61,7 @@ const HealthBar = ({
           sx={{
             height: 25,
             borderRadius: 0,
-            backgroundColor: bgColor || "#e0e0e0", // Use bgColor prop for background
+            backgroundColor: bgColor || (isDarkMode ? "#444" : "#e0e0e0"), // Adjust background for dark mode
             "& .MuiLinearProgress-bar": {
               borderRadius: 0,
               background: gradient, // Apply the gradient

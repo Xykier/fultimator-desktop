@@ -53,6 +53,7 @@ const CombatSim = () => {
   // Base states
   const { id } = useParams(); // Get the encounter ID from the URL
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true); // Loading state
   const inputRef = useRef(null);
@@ -783,6 +784,12 @@ const CombatSim = () => {
                     onChange={(e) => {
                       setDamageType(e.target.value);
                     }}
+                    sx={{
+                      // when selected, change border color
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: isDarkMode ? "#fff" : "primary",
+                      },
+                    }}
                   >
                     <MenuItem value="">
                       <ListItemText>{t("combat_sim_none")}</ListItemText>
@@ -831,6 +838,10 @@ const CombatSim = () => {
                         mt: 0,
                         "& .MuiSvgIcon-root": {
                           fontSize: "1.5rem",
+                        },
+                        "&.Mui-checked": {
+                          color: isDarkMode ? "white !important" : "primary !important",
+
                         },
                       }}
                     />
@@ -893,7 +904,7 @@ const CombatSim = () => {
           <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
             <Button
               onClick={handleClose}
-              color="primary"
+              color={isDarkMode ? "white" : "primary"}
               sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
             >
               {t("Cancel")}

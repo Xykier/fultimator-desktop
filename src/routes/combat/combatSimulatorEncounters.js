@@ -40,10 +40,9 @@ const CombatSimEncounters = () => {
   const [encounterName, setEncounterName] = useState("");
   const navigate = useNavigate();
   const theme = useTheme();
-  const secondary = theme.palette.secondary.main;
+  const isDarkMode = theme.palette.mode === "dark";
 
   useEffect(() => {
-    // Fetch data when the component mounts
     fetchData();
   }, []);
 
@@ -84,12 +83,12 @@ const CombatSimEncounters = () => {
   return (
     <Box sx={{ padding: 3, maxWidth: "1200px", margin: "auto" }}>
       <Paper
-        elevation={3}
+        elevation={isDarkMode ? 6 : 3} // Higher elevation in dark mode
         sx={{
           p: "14px",
           borderRadius: "8px",
-          border: "2px solid",
-          borderColor: secondary,
+          border: `2px solid ${theme.palette.secondary.main}`,
+          backgroundColor: theme.palette.background.paper,          
         }}
       >
         <CustomHeaderAlt
@@ -97,7 +96,7 @@ const CombatSimEncounters = () => {
           icon={<SportsMartialArts fontSize="large" />}
         />
         <div style={{ paddingLeft: 10, paddingRight: 10 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom color="text.primary">
             {t("combat_sim_new_encounter")}
           </Typography>
           <Grid container spacing={2}>
@@ -120,11 +119,11 @@ const CombatSimEncounters = () => {
                 disabled={!encounterName || encounters.length >= MAX_ENCOUNTERS}
                 sx={{ height: "100%" }}
               >
-                {t("combat_sim_save_encounter")}
+                {t("combat_sim_create_encounter")}
               </Button>
             </Grid>
           </Grid>
-          <Typography variant="h5" mt={2}>
+          <Typography variant="h5" mt={2} color="text.primary">
             {t("combat_sim_saved_encounters")} ({encounters.length}/
             {MAX_ENCOUNTERS})
           </Typography>
@@ -136,12 +135,17 @@ const CombatSimEncounters = () => {
           <Grid item xs={12} sm={6} md={4} key={encounter.id}>
             <Card
               sx={{
+                backgroundColor: isDarkMode ?  "#292929" : theme.palette.background.paper,
                 borderRadius: 3,
-                boxShadow: 4,
+                boxShadow: isDarkMode ? 6 : 4,
                 transition: "0.3s",
-                "&:hover": { boxShadow: 8, transform: "scale(1.03)" },
+                "&:hover": {
+                  boxShadow: isDarkMode ? 10 : 8,
+                  transform: "scale(1.03)",
+                },
                 cursor: "pointer",
-                position: "relative", // Ensure positioning context for the icon
+                color: theme.palette.text.primary,
+                position: "relative",
               }}
               onClick={() => handleNavigateToEncounter(encounter.id)}
             >
@@ -149,15 +153,15 @@ const CombatSimEncounters = () => {
                 <Typography
                   variant="h4"
                   gutterBottom
-                  sx={{ fontWeight: "bold" }}
+                  sx={{ fontWeight: "bold", color: "text.primary" }}
                 >
                   {encounter.name}
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
+                <Typography variant="body2" color="text.secondary">
                   {t("combat_sim_created")}:{" "}
                   {new Date(encounter.createdAt).toLocaleString()}
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
+                <Typography variant="body2" color="text.secondary">
                   {t("combat_sim_last_updated")}:{" "}
                   {new Date(encounter.updatedAt).toLocaleString()}
                 </Typography>
@@ -165,16 +169,21 @@ const CombatSimEncounters = () => {
               <CardActions
                 sx={{ justifyContent: "flex-end", padding: "10px 16px" }}
               >
-                <Tooltip title={t("Delete")} enterDelay={300} leaveDelay={200} enterNextDelay={300} >
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteEncounter(encounter.id);
-                  }}
-                  color="error"
+                <Tooltip
+                  title={t("Delete")}
+                  enterDelay={300}
+                  leaveDelay={200}
+                  enterNextDelay={300}
                 >
-                  <DeleteIcon />
-                </IconButton>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteEncounter(encounter.id);
+                    }}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </Tooltip>
               </CardActions>
 
@@ -182,10 +191,10 @@ const CombatSimEncounters = () => {
               <Box
                 sx={{
                   position: "absolute",
-                  right: 8, // Small distance from the right edge
+                  right: 8,
                   top: "50%",
-                  transform: "translateY(-50%)", // Centers vertically
-                  color: "rgba(0, 0, 0, 0.54)", // Subtle color
+                  transform: "translateY(-50%)",
+                  color: theme.palette.text.secondary,
                 }}
               >
                 <NavigateNext fontSize="medium" />

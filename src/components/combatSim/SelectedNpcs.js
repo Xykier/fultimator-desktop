@@ -48,6 +48,7 @@ export default function SelectedNpcs({
   const [selectedNpcMenu, setSelectedNpcMenu] = useState(null);
 
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const primary = theme.palette.primary.main;
 
   const handleMenuOpen = (event, npcId) => {
@@ -72,7 +73,7 @@ export default function SelectedNpcs({
     <Box
       sx={{
         flex: 1,
-        bgcolor: "#fff",
+        bgcolor: isDarkMode ? "#333333" : "#ffffff",
         padding: 2,
         display: "flex",
         flexDirection: "column",
@@ -91,7 +92,7 @@ export default function SelectedNpcs({
       >
         <Typography variant="h5">{t("combat_sim_selected_npcs")}</Typography>
         {selectedNPCs.length > 0 && (
-          <Typography variant="h5" color={primary}>
+          <Typography variant="h5" color={isDarkMode ? "#fff" : primary}>
             {t("combat_sim_npc_initiative")}: <strong>{highestInit}</strong>
           </Typography>
         )}
@@ -99,7 +100,7 @@ export default function SelectedNpcs({
           <IconButton
             size="small"
             sx={{ padding: 0 }}
-            color="primary"
+            color={isDarkMode ? "#fff" : "primary"}
             onClick={handleResetTurns}
           >
             <Replay />
@@ -108,7 +109,7 @@ export default function SelectedNpcs({
           <Button
             size="small"
             sx={{ padding: "0 0.5rem" }}
-            color="primary"
+            color={isDarkMode ? "white" : "primary"}
             variant="outlined"
             onClick={handleResetTurns}
             endIcon={<Replay />}
@@ -156,6 +157,11 @@ export default function SelectedNpcs({
                   }
                   sx={{
                     border:
+                    isDarkMode ?
+                      selectedNpcID && selectedNpcID === npc.combatId
+                        ? "1px solid #fff"
+                        : "1px solid #555"
+                    :
                       selectedNpcID && selectedNpcID === npc.combatId
                         ? "1px solid " + primary
                         : "1px solid #ddd",
@@ -165,9 +171,17 @@ export default function SelectedNpcs({
                     alignItems: "center",
                     justifyContent: "space-between",
                     backgroundColor:
+                      isDarkMode ?
+                      npc.combatStats?.currentHp === 0 ? "#5c1010" : "#333" 
+                      :
                       npc.combatStats?.currentHp === 0 ? "#ffe6e6" : "inherit",
                     "&:hover": {
                       backgroundColor:
+                      isDarkMode ?
+                      npc.combatStats?.currentHp === 0
+                        ? "#6f0000"
+                        : "#444"
+                      :
                         npc.combatStats?.currentHp === 0
                           ? "#ffcccc"
                           : "#f1f1f1",
@@ -191,7 +205,7 @@ export default function SelectedNpcs({
                   >
                     <Typography
                       variant="h6"
-                      sx={{ fontWeight: "bold", color: "#333" }}
+                      sx={{ fontWeight: "bold", color: isDarkMode ? "#fff" : "#333" }}
                     >
                       {index + 1}
                     </Typography>
