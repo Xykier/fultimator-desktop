@@ -24,50 +24,29 @@ import { t } from "../../translation/translate";
 // Define the mapping of tags to components
 const tagMap = {
   "{{physical-icon}}": (
-    <TypeIcon
-      type={"physical"}
-      sx={{ color: "red", verticalAlign: "middle" }}
-    />
+    <TypeIcon type={"physical"} sx={{ verticalAlign: "middle" }} />
   ),
-  "{{wind-icon}}": (
-    <TypeIcon type={"wind"} sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
-  "{{bolt-icon}}": (
-    <TypeIcon type={"bolt"} sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
-  "{{dark-icon}}": (
-    <TypeIcon type={"dark"} sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
+  "{{wind-icon}}": <TypeIcon type={"wind"} sx={{ verticalAlign: "middle" }} />,
+  "{{bolt-icon}}": <TypeIcon type={"bolt"} sx={{ verticalAlign: "middle" }} />,
+  "{{dark-icon}}": <TypeIcon type={"dark"} sx={{ verticalAlign: "middle" }} />,
   "{{earth-icon}}": (
-    <TypeIcon type={"earth"} sx={{ color: "red", verticalAlign: "middle" }} />
+    <TypeIcon type={"earth"} sx={{ verticalAlign: "middle" }} />
   ),
-  "{{fire-icon}}": (
-    <TypeIcon type={"fire"} sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
-  "{{ice-icon}}": (
-    <TypeIcon type={"ice"} sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
+  "{{fire-icon}}": <TypeIcon type={"fire"} sx={{ verticalAlign: "middle" }} />,
+  "{{ice-icon}}": <TypeIcon type={"ice"} sx={{ verticalAlign: "middle" }} />,
   "{{light-icon}}": (
-    <TypeIcon type={"light"} sx={{ color: "red", verticalAlign: "middle" }} />
+    <TypeIcon type={"light"} sx={{ verticalAlign: "middle" }} />
   ),
   "{{poison-icon}}": (
-    <TypeIcon type={"poison"} sx={{ color: "red", verticalAlign: "middle" }} />
+    <TypeIcon type={"poison"} sx={{ verticalAlign: "middle" }} />
   ),
-  "{{ranged-icon}}": (
-    <DistanceIcon sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
-  "{{melee-icon}}": (
-    <MeleeIcon sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
+  "{{ranged-icon}}": <DistanceIcon sx={{ verticalAlign: "middle" }} />,
+  "{{melee-icon}}": <MeleeIcon sx={{ verticalAlign: "middle" }} />,
   "{{offensive-spell-icon}}": (
-    <OffensiveSpellIcon sx={{ color: "red", verticalAlign: "middle" }} />
+    <OffensiveSpellIcon sx={{ verticalAlign: "middle" }} />
   ),
-  "{{spell-icon}}": (
-    <SpellIcon sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
-  "{{fainted-icon}}": (
-    <GiDeathSkull sx={{ color: "red", verticalAlign: "middle" }} />
-  ),
+  "{{spell-icon}}": <SpellIcon sx={{ verticalAlign: "middle" }} />,
+  "{{fainted-icon}}": <GiDeathSkull sx={{ verticalAlign: "middle" }} />,
   "{{value1}}": (value1) => <b>{value1}</b>,
   "{{value2}}": (value2) => <b>{value2}</b>,
   "{{value3}}": (value3) => <b>{value3}</b>,
@@ -75,26 +54,28 @@ const tagMap = {
 
 function replaceTagsWithComponents(text, value1, value2, value3) {
   // Use a regular expression to replace tags with the corresponding component
-  return t(text).split(/(\{\{.*?\}\})/).map((part) => {
-    // If the part matches the value placeholders, replace with actual values
-    if (part === "{{value1}}") {
-      return <b>{value1}</b>; // Return value1 wrapped in <b> tags
-    }
-    if (part === "{{value2}}") {
-      return <b>{value2}</b>; // Return value2 wrapped in <b> tags
-    }
-    if (part === "{{value3}}") {
-      return <b>{value3}</b>; // Return value3 wrapped in <b> tags
-    }
+  return t(text)
+    .split(/(\{\{.*?\}\})/)
+    .map((part) => {
+      // If the part matches the value placeholders, replace with actual values
+      if (part === "{{value1}}") {
+        return <b>{value1}</b>; // Return value1 wrapped in <b> tags
+      }
+      if (part === "{{value2}}") {
+        return <b>{value2}</b>; // Return value2 wrapped in <b> tags
+      }
+      if (part === "{{value3}}") {
+        return <b>{t(value3)}</b>; // Return value3 wrapped in <b> tags
+      }
 
-    // Otherwise, check if it's a tag that maps to an icon or other component
-    if (tagMap[part]) {
-      return tagMap[part]; // Replace with the corresponding component if tag matches
-    }
+      // Otherwise, check if it's a tag that maps to an icon or other component
+      if (tagMap[part]) {
+        return tagMap[part]; // Replace with the corresponding component if tag matches
+      }
 
-    // Return the part as it is if no match
-    return part;
-  });
+      // Return the part as it is if no match
+      return part;
+    });
 }
 
 export default function CombatLog({

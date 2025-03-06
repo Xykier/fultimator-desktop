@@ -254,6 +254,17 @@ const CombatSim = () => {
           : npc
       )
     );
+    
+    // Add log entry if new turns have been checked so oldTurns < newTurns
+    const npc = selectedNPCs.find((npc) => npc.combatId === combatId);
+    if (npc) {
+      const oldTurns = npc.combatStats.turns;
+      const newTurnsCount = newTurns.filter((turn) => turn).length;
+      const oldTurnsCount = oldTurns.filter((turn) => turn).length;
+      if (newTurnsCount > oldTurnsCount) {
+        addLog("combat_sim_log_turn_checked", npc.name, newTurnsCount );
+      }
+    }
   };
 
   // Handle Turns Popover open
@@ -470,6 +481,17 @@ const CombatSim = () => {
     }
 
     handleClose();
+
+
+    // log for damage
+    if (adjustedValue < 0 && statType === "HP") {
+      addLog("combat_sim_log_npc_damage", npcClicked.name, Math.abs(adjustedValue), damageType);
+    } else if (adjustedValue < 0 && statType === "MP") {
+      addLog("combat_sim_log_npc_used_mp", npcClicked.name, Math.abs(adjustedValue));
+    } 
+    else if (adjustedValue > 0) {
+      addLog("combat_sim_log_npc_heal", npcClicked.name, Math.abs(adjustedValue), statType );
+    };
   };
 
   // Calculate damage with affinities
