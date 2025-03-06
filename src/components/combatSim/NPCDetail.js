@@ -60,6 +60,7 @@ const NPCDetail = ({
   calcAttr,
   handleDecreaseUltima,
   handleIncreaseUltima,
+  npcRef,
   isMobile,
 }) => {
   const theme = useTheme();
@@ -224,6 +225,7 @@ const NPCDetail = ({
             npcImage={selectedNPC.imgurl}
             collapse={true}
             study={selectedStudy}
+            ref={npcRef}
           />
         )}
         {tabIndex === 1 && (

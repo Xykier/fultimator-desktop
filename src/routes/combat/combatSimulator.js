@@ -12,21 +12,6 @@ import {
   Box,
   CircularProgress,
   useMediaQuery,
-  Button,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  ToggleButton,
-  ToggleButtonGroup,
-  Select,
-  MenuItem,
-  FormControl,
-  FormControlLabel,
-  Checkbox,
-  InputLabel,
-  ListItemText,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import BattleHeader from "../../components/combatSim/BattleHeader";
@@ -36,10 +21,8 @@ import SelectedNpcs from "../../components/combatSim/SelectedNpcs";
 import useDownloadImage from "../../hooks/useDownloadImage";
 import NPCDetail from "../../components/combatSim/NPCDetail";
 import { typesList } from "../../libs/types";
-import { TypeIcon } from "../../components/types";
-import { IoShield } from "react-icons/io5";
 import { t } from "../../translation/translate";
-import ReactMarkdown from "react-markdown";
+import DamageHealDialog from "../../components/combatSim/DamageHealDialog";
 
 export default function CombatSimulator() {
   return (
@@ -53,7 +36,6 @@ const CombatSim = () => {
   // Base states
   const { id } = useParams(); // Get the encounter ID from the URL
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true); // Loading state
   const inputRef = useRef(null);
@@ -149,7 +131,11 @@ const CombatSim = () => {
   const minutes = Math.floor((new Date() - lastSaved) / 1000 / 60);
 
   const timeAgo = lastSaved
-    ? t("combat_sim_last_saved_before") + " " + minutes + " " + t("combat_sim_last_saved_after")
+    ? t("combat_sim_last_saved_before") +
+      " " +
+      minutes +
+      " " +
+      t("combat_sim_last_saved_after")
     : "Not saved yet";
 
   /* ENCOUNTER NAME EDITING */
@@ -429,14 +415,6 @@ const CombatSim = () => {
     handleClose();
   };
 
-  // Handle Input Change in HP/MP Dialog
-  const handleChange = (e) => {
-    const inputValue = e.target.value;
-    if (/^\d*$/.test(inputValue)) {
-      setValue(inputValue);
-    }
-  };
-
   // Calculate damage with affinities
   function calculateDamage(
     npc,
@@ -477,6 +455,14 @@ const CombatSim = () => {
 
     return finalDamage;
   }
+
+  // Handle Input Change in HP/MP Dialog
+  const handleChange = (e) => {
+    const inputValue = e.target.value;
+    if (/^\d*$/.test(inputValue)) {
+      setValue(inputValue);
+    }
+  };
 
   // Handle Submit in HP/MP Dialog
   const handleSubmit = (e) => {
@@ -694,232 +680,28 @@ const CombatSim = () => {
           calcAttr={calcAttr}
           handleDecreaseUltima={handleDecreaseUltima}
           handleIncreaseUltima={handleIncreaseUltima}
+          npcRef={ref}
           isMobile={isMobile}
         />
       </Box>
-      <Dialog
+      <DamageHealDialog
         open={open}
-        onClose={handleClose}
-        sx={{ "& .MuiDialog-paper": { borderRadius: 3, padding: 2 } }}
-      >
-        <DialogTitle
-          variant="h4"
-          sx={{
-            fontWeight: "bold",
-            textAlign: "center",
-            borderBottom: "1px solid #ddd",
-            pb: 1,
-          }}
-        >
-          {statType === "HP"
-            ? t("combat_sim_edit_hp")
-            : t("combat_sim_edit_mp")}
-        </DialogTitle>
-        <form onSubmit={handleSubmit}>
-          <DialogContent
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              mt: 1,
-            }}
-          >
-            <Typography variant="h6" sx={{ mb: 1, mt: -2 }}>
-              {npcClicked?.name}
-            </Typography>
-            <ToggleButtonGroup
-              value={isHealing ? "heal" : "damage"}
-              exclusive
-              onChange={(event, newValue) => {
-                if (newValue !== null) {
-                  setIsHealing(newValue === "heal");
-                }
-              }}
-              sx={{ mb: 2 }}
-            >
-              <ToggleButton value="heal" color="success">
-                {t("combat_sim_healing")}
-              </ToggleButton>
-              <ToggleButton value="damage" color="error">
-                {t("combat_sim_damage")}
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            <TextField
-              fullWidth
-              type="text"
-              label={t("combat_sim_amount")}
-              value={value}
-              onChange={handleChange}
-              onBlur={() => setValue(value === "" ? "" : Number(value))}
-              margin="normal"
-              inputRef={inputRef} // Auto-focus when dialog opens
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                },
-              }}
-            />
-            {/* Damage type selector (from typesList) only for hp damage */}
-            {statType === "HP" && !isHealing && (
-              <>
-                <FormControl
-                  fullWidth
-                  sx={{
-                    mt: 2,
-                    mb: 1,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-                    },
-                  }}
-                >
-                  <InputLabel id="damage-type-label">
-                    {t("combat_sim_damage_type")}
-                  </InputLabel>
-                  <Select
-                    label={t("combat_sim_damage_type")}
-                    value={damageType}
-                    onChange={(e) => {
-                      setDamageType(e.target.value);
-                    }}
-                    sx={{
-                      // when selected, change border color
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: isDarkMode ? "#fff" : "primary",
-                      },
-                    }}
-                  >
-                    <MenuItem value="">
-                      <ListItemText>{t("combat_sim_none")}</ListItemText>
-                    </MenuItem>
-                    {typesList.map((type) => (
-                      <MenuItem
-                        key={type}
-                        value={type}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center", // Ensure horizontal alignment
-                          paddingY: "6px",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            minWidth: 70,
-                          }}
-                        >
-                          <TypeIcon type={type} />
-                          <ListItemText
-                            sx={{
-                              ml: 1,
-                              marginBottom: 0,
-                              textTransform: "capitalize",
-                            }}
-                          >
-                            {t(type)}
-                          </ListItemText>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {/* Guarding checkbox */}
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={isGuarding}
-                      onChange={(e) => {
-                        setIsGuarding(e.target.checked);
-                      }}
-                      sx={{
-                        mt: 0,
-                        "& .MuiSvgIcon-root": {
-                          fontSize: "1.5rem",
-                        },
-                        "&.Mui-checked": {
-                          color: isDarkMode ? "white !important" : "primary !important",
-
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <IoShield
-                        size={20}
-                        color={isGuarding ? "green" : "gray"}
-                      />
-                      {t("combat_sim_is_guarding")}?
-                    </Box>
-                  }
-                />
-
-                {npcClicked &&
-                  (damageType !== "" || isGuarding) &&
-                  value !== "" && (
-                    <Typography
-                      variant="body2"
-                      sx={{ mt: 1, display: "inline" }}
-                    >
-                      {t("combat_sim_calculated_damage")}:{" "}
-                      <strong
-                        style={{
-                          color: (() => {
-                            const calculated = calculateDamage(
-                              npcClicked,
-                              value,
-                              damageType,
-                              isGuarding
-                            );
-                            return calculated < 0 ? "green" : "#cc0000"; // Green for healing, Red for damage
-                          })(),
-                        }}
-                      >
-                        <ReactMarkdown components={{ p: "span" }}>
-                          {(() => {
-                            const calculated = calculateDamage(
-                              npcClicked,
-                              value,
-                              damageType,
-                              isGuarding
-                            );
-                            return calculated < 0
-                              ? `${Math.abs(calculated)} ${damageType} healing`
-                              : `${calculated} ${
-                                  damageType
-                                    ? t(damageType + "_damage")
-                                    : t("notype_damage")
-                                }`;
-                          })()}
-                        </ReactMarkdown>
-                      </strong>
-                    </Typography>
-                  )}
-              </>
-            )}
-          </DialogContent>
-          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-            <Button
-              onClick={handleClose}
-              color={isDarkMode ? "white" : "primary"}
-              sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
-            >
-              {t("Cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
-            >
-              {t("OK")}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+        handleClose={handleClose}
+        handleSubmit={(e) => handleSubmit(e)}
+        handleChange={(e) => handleChange(e)}
+        statType={statType}
+        npcClicked={npcClicked}
+        typesList={typesList}
+        value={value}
+        setValue={setValue}
+        isHealing={isHealing}
+        setIsHealing={setIsHealing}
+        damageType={damageType}
+        setDamageType={setDamageType}
+        isGuarding={isGuarding}
+        setIsGuarding={setIsGuarding}
+        inputRef={inputRef}
+      />
     </Box>
   );
 };
