@@ -70,16 +70,7 @@ export default function SelectedNpcs({
   );
 
   return (
-    <Box
-      sx={{
-        flex: 1,
-        bgcolor: isDarkMode ? "#333333" : "#ffffff",
-        padding: 2,
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-      }}
-    >
+<>
       <Box
         sx={{
           display: "flex",
@@ -567,6 +558,6 @@ export default function SelectedNpcs({
           </List>
         )}
       </Box>
-    </Box>
+    </>
   );
 }

@@ -23,6 +23,7 @@ import NPCDetail from "../../components/combatSim/NPCDetail";
 import { typesList } from "../../libs/types";
 import { t } from "../../translation/translate";
 import DamageHealDialog from "../../components/combatSim/DamageHealDialog";
+import CombatLog from "../../components/combatSim/CombatLog";
 
 export default function CombatSimulator() {
   return (
@@ -39,6 +40,7 @@ const CombatSim = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true); // Loading state
   const inputRef = useRef(null);
+  const isDarkMode = theme.palette.mode === "dark";
 
   // Encounter states
   const [encounter, setEncounter] = useState(null); // State for the current encounter
@@ -65,6 +67,29 @@ const CombatSim = () => {
   const ref = useRef(); // Reference for the NPC sheet image download
   const [downloadImage] = useDownloadImage(selectedNPC?.name, ref); // Download image hook
 
+  // Logs states
+  const [logs, setLogs] = useState([]);
+  const [logOpen, setLogOpen] = useState(false);
+  const handleLogToggle = (newState) => {
+    setLogOpen(newState);
+  };
+
+  function addLog(logText) {
+    /* max of 50 logs */
+    if (logs.length >= 50) {
+      // remove the oldest log: {text, timestamp} sorted by {timestamp} and add the new one
+      const sortedLogs = [...logs].sort((a, b) => a.timestamp - b.timestamp);
+      const newLogs = sortedLogs.slice(1);
+      newLogs.push({ text: logText, timestamp: Date.now() });
+      setLogs(newLogs);
+    } else {
+      setLogs((prevLogs) => [
+        ...prevLogs,
+        { text: logText, timestamp: Date.now() },
+      ]);
+    }
+  }
+
   // Fetch encounter and NPCs on initial load
   useEffect(() => {
     const fetchEncounter = async () => {
@@ -72,6 +97,7 @@ const CombatSim = () => {
       const foundEncounter = encounters.find((e) => e.id + "" === id);
       setEncounter(foundEncounter);
       setEncounterName(foundEncounter?.name || ""); // Set initial name
+      setLogs(foundEncounter?.logs || []);
       setLoading(false);
 
       // Load NPCs using only IDs and combatIds
@@ -112,6 +138,7 @@ const CombatSim = () => {
         combatStats: npc.combatStats,
       })), // Only save ids and combatIds
       round: encounter.round,
+      logs: logs,
     });
 
     // Log full state for debugging (showing only IDs and combatIds)
@@ -124,6 +151,7 @@ const CombatSim = () => {
       })),
       round: encounter.round,
       lastSaved: currentTime,
+      logs: logs,
     });
   };
 
@@ -260,6 +288,9 @@ const CombatSim = () => {
           combatStats: combatStats,
         },
       ]);
+
+      // Add log entry to logs array
+      addLog("NPC added to combat: " + npc.name);
     } else {
       if (window.electron) {
         window.electron.alert(t("combat_sim_too_many_npcs"));
@@ -643,25 +674,42 @@ const CombatSim = () => {
             handleSelectNPC={handleSelectNPC}
           />
         )}
-        {/* Selected NPCs */}
-        <SelectedNpcs
-          selectedNPCs={selectedNPCs}
-          handleResetTurns={handleResetTurns}
-          handleMoveUp={handleMoveUp}
-          handleMoveDown={handleMoveDown}
-          handleRemoveNPC={handleRemoveNPC}
-          handleUpdateNpcTurns={handleUpdateNpcTurns}
-          handlePopoverOpen={handlePopoverOpen}
-          handlePopoverClose={handlePopoverClose}
-          anchorEl={anchorEl}
-          popoverNpcId={popoverNpcId}
-          getTurnCount={getTurnCount}
-          handleNpcClick={handleNpcClick}
-          handleHpMpClick={(type, npc) => handleOpen(type, npc)}
-          isMobile={isMobile}
-          selectedNpcID={selectedNPC?.combatId}
-        />
-
+        <Box
+          sx={{
+            flex: 1,
+            bgcolor: isDarkMode ? "#333333" : "#ffffff",
+            padding: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+          }}
+        >
+          {/* Selected NPCs */}
+          <SelectedNpcs
+            selectedNPCs={selectedNPCs}
+            handleResetTurns={handleResetTurns}
+            handleMoveUp={handleMoveUp}
+            handleMoveDown={handleMoveDown}
+            handleRemoveNPC={handleRemoveNPC}
+            handleUpdateNpcTurns={handleUpdateNpcTurns}
+            handlePopoverOpen={handlePopoverOpen}
+            handlePopoverClose={handlePopoverClose}
+            anchorEl={anchorEl}
+            popoverNpcId={popoverNpcId}
+            getTurnCount={getTurnCount}
+            handleNpcClick={handleNpcClick}
+            handleHpMpClick={(type, npc) => handleOpen(type, npc)}
+            isMobile={isMobile}
+            selectedNpcID={selectedNPC?.combatId}
+          />
+          {/* Combat Log */}
+          <CombatLog
+            isMobile={false}
+            logs={logs}
+            open={logOpen}
+            onToggle={handleLogToggle}
+          />
+        </Box>
         {/* NPC Sheet */}
         <NPCDetail
           selectedNPC={selectedNPC}
