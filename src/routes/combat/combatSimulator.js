@@ -74,7 +74,7 @@ const CombatSim = () => {
     setLogOpen(newState);
   };
 
-  function addLog(logText) {
+  function addLog(logText, value1 = null, value2 = null, value3 = null) {
     /* max of 50 logs */
     if (logs.length >= 50) {
       // remove the oldest log: {text, timestamp} sorted by {timestamp} and add the new one
@@ -85,10 +85,15 @@ const CombatSim = () => {
     } else {
       setLogs((prevLogs) => [
         ...prevLogs,
-        { text: logText, timestamp: Date.now() },
+        { text: logText, timestamp: Date.now(), value1: value1, value2: value2, value3: value3 },
       ]);
     }
   }
+
+  const clearLogs = () => {
+    // Function to clear logs
+    setLogs([]);
+  };
 
   // Fetch encounter and NPCs on initial load
   useEffect(() => {
@@ -141,6 +146,9 @@ const CombatSim = () => {
       logs: logs,
     });
 
+    // Add log entry
+    addLog("combat_sim_log_encounter_saved");
+
     // Log full state for debugging (showing only IDs and combatIds)
     console.log("Saved Encounter State", {
       name: encounterName,
@@ -178,6 +186,9 @@ const CombatSim = () => {
       return;
     }
     setIsEditing(false);
+
+    // Add log entry
+    addLog("combat_sim_log_encounter_name_updated");
   };
 
   // Handle Enter key press and blur for saving encounter name
@@ -203,6 +214,9 @@ const CombatSim = () => {
     // Increment the round
     encounter.round += 1;
     setEncounter({ ...encounter }); // Trigger re-render or state update
+
+    // Add log entry
+    addLog("combat_sim_log_round_increase", encounter.round);
   };
 
   // Handle Round Decrease
@@ -210,6 +224,9 @@ const CombatSim = () => {
     // Decrease the round and prevent negative values
     encounter.round = Math.max(1, encounter.round - 1);
     setEncounter({ ...encounter }); // Trigger re-render or state update
+
+    // Add log entry
+    addLog("combat_sim_log_round_decrease", encounter.round);
   };
 
   // Handle Reset Turns
@@ -223,6 +240,9 @@ const CombatSim = () => {
     // Increment the round
     encounter.round += 1;
     setEncounter({ ...encounter }); // Trigger re-render or state update
+
+    // Add log entry
+    addLog("combat_sim_log_new_round", encounter.round);
   };
 
   // Handle Update NPC Turns
@@ -290,7 +310,7 @@ const CombatSim = () => {
       ]);
 
       // Add log entry to logs array
-      addLog("NPC added to combat: " + npc.name);
+      addLog("combat_sim_log_npc_added", npc.name);
     } else {
       if (window.electron) {
         window.electron.alert(t("combat_sim_too_many_npcs"));
@@ -308,6 +328,12 @@ const CombatSim = () => {
     // if selectedNPC is the one removed, set selectedNPC to null
     if (selectedNPC?.combatId === npcCombatId) {
       setSelectedNPC(null);
+    }
+
+    // Add log entry to logs array
+    const npc = selectedNPCs.find((npc) => npc.combatId === npcCombatId);
+    if (npc) {
+      addLog("combat_sim_log_npc_removed", npc.name);
     }
   };
 
@@ -708,6 +734,7 @@ const CombatSim = () => {
             logs={logs}
             open={logOpen}
             onToggle={handleLogToggle}
+            clearLogs={clearLogs}
           />
         </Box>
         {/* NPC Sheet */}

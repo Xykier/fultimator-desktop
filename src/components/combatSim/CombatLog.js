@@ -10,12 +10,99 @@ import {
 import { format, isToday } from "date-fns";
 import { useTheme } from "@mui/material/styles";
 import DragHandleIcon from "@mui/icons-material/DragHandle"; // Handle icon
+import { TypeIcon } from "../../components/types";
+import {
+  DistanceIcon,
+  MeleeIcon,
+  OffensiveSpellIcon,
+  SpellIcon,
+} from "../icons.js";
+import { GiDeathSkull } from "react-icons/gi";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import { t } from "../../translation/translate";
+
+// Define the mapping of tags to components
+const tagMap = {
+  "{{physical-icon}}": (
+    <TypeIcon
+      type={"physical"}
+      sx={{ color: "red", verticalAlign: "middle" }}
+    />
+  ),
+  "{{wind-icon}}": (
+    <TypeIcon type={"wind"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{bolt-icon}}": (
+    <TypeIcon type={"bolt"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{dark-icon}}": (
+    <TypeIcon type={"dark"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{earth-icon}}": (
+    <TypeIcon type={"earth"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{fire-icon}}": (
+    <TypeIcon type={"fire"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{ice-icon}}": (
+    <TypeIcon type={"ice"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{light-icon}}": (
+    <TypeIcon type={"light"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{poison-icon}}": (
+    <TypeIcon type={"poison"} sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{ranged-icon}}": (
+    <DistanceIcon sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{melee-icon}}": (
+    <MeleeIcon sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{offensive-spell-icon}}": (
+    <OffensiveSpellIcon sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{spell-icon}}": (
+    <SpellIcon sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{fainted-icon}}": (
+    <GiDeathSkull sx={{ color: "red", verticalAlign: "middle" }} />
+  ),
+  "{{value1}}": (value1) => <b>{value1}</b>,
+  "{{value2}}": (value2) => <b>{value2}</b>,
+  "{{value3}}": (value3) => <b>{value3}</b>,
+};
+
+function replaceTagsWithComponents(text, value1, value2, value3) {
+  // Use a regular expression to replace tags with the corresponding component
+  return t(text).split(/(\{\{.*?\}\})/).map((part) => {
+    // If the part matches the value placeholders, replace with actual values
+    if (part === "{{value1}}") {
+      return <b>{value1}</b>; // Return value1 wrapped in <b> tags
+    }
+    if (part === "{{value2}}") {
+      return <b>{value2}</b>; // Return value2 wrapped in <b> tags
+    }
+    if (part === "{{value3}}") {
+      return <b>{value3}</b>; // Return value3 wrapped in <b> tags
+    }
+
+    // Otherwise, check if it's a tag that maps to an icon or other component
+    if (tagMap[part]) {
+      return tagMap[part]; // Replace with the corresponding component if tag matches
+    }
+
+    // Return the part as it is if no match
+    return part;
+  });
+}
 
 export default function CombatLog({
   isMobile,
   logs = [],
   open: controlledOpen = false,
   onToggle = () => {},
+  clearLogs,
 }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -55,7 +142,10 @@ export default function CombatLog({
     if (!isResizing.current || isSmallScreen) return;
 
     const deltaY = e.clientY - startY.current;
-    const newHeight = Math.max(100, Math.min(400, startHeight.current - deltaY));
+    const newHeight = Math.max(
+      100,
+      Math.min(400, startHeight.current - deltaY)
+    );
     setHeight(newHeight);
   };
 
@@ -76,14 +166,32 @@ export default function CombatLog({
 
   return (
     <Box sx={{ mt: 2, width: "100%", mx: "auto" }}>
-      <Button
-        variant="outlined"
-        fullWidth
-        onClick={toggleLog}
-        size={isMobile ? "small" : "medium"}
-      >
-        {open ? "Hide Combat Log" : "Show Combat Log"}
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Button
+          variant="outlined"
+          onClick={toggleLog}
+          size={isMobile ? "small" : "medium"}
+          fullWidth
+        >
+          {open ? "Hide Combat Log" : "Show Combat Log"}
+        </Button>
+
+        {/* Clear Logs Button (Only visible if expanded) */}
+        {open && (
+          <Button
+            onClick={clearLogs}
+            size="small"
+            sx={{
+              minWidth: "auto",
+              padding: 0,
+              marginLeft: 1,
+              color: isDarkMode ? "#ddd" : "#555",
+            }}
+          >
+            <DeleteSweepIcon />
+          </Button>
+        )}
+      </Box>
 
       <Collapse in={open}>
         {/* Resize Handle (Hidden on Mobile) */}
@@ -103,7 +211,10 @@ export default function CombatLog({
             }}
             onMouseDown={handleMouseDown}
           >
-            <DragHandleIcon fontSize="small" sx={{ color: isDarkMode ? "#ddd" : "#555", m: -1 }} />
+            <DragHandleIcon
+              fontSize="small"
+              sx={{ color: isDarkMode ? "#ddd" : "#555", m: -1 }}
+            />
           </Box>
         )}
 
@@ -131,7 +242,21 @@ export default function CombatLog({
                   ? format(log.timestamp, "HH:mm:ss")
                   : format(log.timestamp, "PP HH:mm:ss")}
               </Typography>
-              <Typography variant="body2">{log.text}</Typography>
+              <Typography variant="body2">
+                {/* Replace tags in log.text with actual components */}
+                {replaceTagsWithComponents(
+                  log.text,
+                  log.value1,
+                  log.value2,
+                  log.value3
+                ).map((part, idx) =>
+                  typeof part === "string" ? (
+                    <span key={idx}>{part}</span>
+                  ) : (
+                    <span key={idx}>{part}</span>
+                  )
+                )}
+              </Typography>
             </Box>
           ))}
           {sortedLogs.length === 0 && (
