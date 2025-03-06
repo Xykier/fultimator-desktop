@@ -484,9 +484,12 @@ const CombatSim = () => {
 
 
     // log for damage
-    if (adjustedValue < 0 && statType === "HP") {
+    if (adjustedValue < 0 && statType === "HP" && damageType !== "") {
       addLog("combat_sim_log_npc_damage", npcClicked.name, Math.abs(adjustedValue), damageType);
-    } else if (adjustedValue < 0 && statType === "MP") {
+    } else if (adjustedValue < 0 && statType === "HP") {
+      addLog("combat_sim_log_npc_damage_no_type", npcClicked.name, Math.abs(adjustedValue));
+    }
+    else if (adjustedValue < 0 && statType === "MP") {
       addLog("combat_sim_log_npc_used_mp", npcClicked.name, Math.abs(adjustedValue));
     } 
     else if (adjustedValue > 0) {
