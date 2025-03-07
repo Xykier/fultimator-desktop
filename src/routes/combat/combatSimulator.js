@@ -74,7 +74,7 @@ const CombatSim = () => {
     setLogOpen(newState);
   };
 
-  function addLog(logText, value1 = null, value2 = null, value3 = null) {
+  function addLog(logText, value1 = null, value2 = null, value3 = null, value4 = null, value5 = null) {
     /* max of 50 logs */
     if (logs.length >= 50) {
       // remove the oldest log: {text, timestamp} sorted by {timestamp} and add the new one
@@ -85,7 +85,15 @@ const CombatSim = () => {
     } else {
       setLogs((prevLogs) => [
         ...prevLogs,
-        { text: logText, timestamp: Date.now(), value1: value1, value2: value2, value3: value3 },
+        {
+          text: logText,
+          timestamp: Date.now(),
+          value1: value1,
+          value2: value2,
+          value3: value3,
+          value4: value4,
+          value5: value5,
+        },
       ]);
     }
   }
@@ -254,7 +262,7 @@ const CombatSim = () => {
           : npc
       )
     );
-    
+
     // Add log entry if new turns have been checked so oldTurns < newTurns
     const npc = selectedNPCs.find((npc) => npc.combatId === combatId);
     if (npc) {
@@ -262,7 +270,7 @@ const CombatSim = () => {
       const newTurnsCount = newTurns.filter((turn) => turn).length;
       const oldTurnsCount = oldTurns.filter((turn) => turn).length;
       if (newTurnsCount > oldTurnsCount) {
-        addLog("combat_sim_log_turn_checked", npc.name, newTurnsCount );
+        addLog("combat_sim_log_turn_checked", npc.name, newTurnsCount);
       }
     }
   };
@@ -482,19 +490,45 @@ const CombatSim = () => {
 
     handleClose();
 
-
     // log for damage
     if (adjustedValue < 0 && statType === "HP" && damageType !== "") {
-      addLog("combat_sim_log_npc_damage", npcClicked.name, Math.abs(adjustedValue), damageType);
+      addLog(
+        "combat_sim_log_npc_damage",
+        npcClicked.name,
+        Math.abs(adjustedValue),
+        damageType
+      );
     } else if (adjustedValue < 0 && statType === "HP") {
-      addLog("combat_sim_log_npc_damage_no_type", npcClicked.name, Math.abs(adjustedValue));
+      addLog(
+        "combat_sim_log_npc_damage_no_type",
+        npcClicked.name,
+        Math.abs(adjustedValue)
+      );
+    } else if (adjustedValue < 0 && statType === "MP") {
+      addLog(
+        "combat_sim_log_npc_used_mp",
+        npcClicked.name,
+        Math.abs(adjustedValue)
+      );
+    } else if (adjustedValue > 0) {
+      addLog(
+        "combat_sim_log_npc_heal",
+        npcClicked.name,
+        Math.abs(adjustedValue),
+        statType
+      );
     }
-    else if (adjustedValue < 0 && statType === "MP") {
-      addLog("combat_sim_log_npc_used_mp", npcClicked.name, Math.abs(adjustedValue));
-    } 
-    else if (adjustedValue > 0) {
-      addLog("combat_sim_log_npc_heal", npcClicked.name, Math.abs(adjustedValue), statType );
-    };
+
+    // Add log if npc fainted after damage (0.5 seconds delay)
+    if (
+      npcClicked.combatStats.currentHp +
+        (statType === "HP" ? adjustedValue : 0) <=
+      0
+    ) {
+      setTimeout(() => {
+        addLog("combat_sim_log_npc_fainted", npcClicked.name);
+      }, 500);
+    }
   };
 
   // Calculate damage with affinities
@@ -582,6 +616,13 @@ const CombatSim = () => {
         npc.combatId === updatedNPC.combatId ? updatedNPC : npc
       )
     );
+
+    // Add log entry if status effect is added or removed
+    if (updatedStatusEffects.includes(status)) {
+      addLog("combat_sim_log_status_effect_added", npc.name, null, status);
+    } else {
+      addLog("combat_sim_log_status_effect_removed", npc.name, null, status);
+    }
   };
 
   // Calculate Current Attribute Value based on Status Effects
@@ -650,6 +691,9 @@ const CombatSim = () => {
           : npc
       )
     );
+
+    // Add log entry
+    addLog("combat_sim_log_used_ultima_point", selectedNPC.name);
   };
 
   // During loading state
@@ -782,6 +826,8 @@ const CombatSim = () => {
           handleIncreaseUltima={handleIncreaseUltima}
           npcRef={ref}
           isMobile={isMobile}
+          addLog={addLog}
+          openLogs={() => setLogOpen(true)}
         />
       </Box>
       <DamageHealDialog

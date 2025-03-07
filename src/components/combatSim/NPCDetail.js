@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -16,6 +17,7 @@ import {
   List,
   ListItem,
   Divider,
+  FormHelperText,
 } from "@mui/material";
 import {
   Close,
@@ -62,11 +64,19 @@ const NPCDetail = ({
   handleIncreaseUltima,
   npcRef,
   isMobile,
+  addLog,
+  openLogs,
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
+
+  const [open, setOpen] = useState(false);
+  const [numTargets, setNumTargets] = useState(1);
+  const [error, setError] = useState("");
+  const [useMp, setUseMp] = useState(true);
+  const [clickedData, setClickedData] = useState({});
 
   if (!selectedNPC) return null;
 
@@ -123,6 +133,269 @@ const NPCDetail = ({
     poison: "poison_damage",
   };
 
+  const attributes = {
+    dexterity: calcAttr("Slow", "Enraged", "dexterity", selectedNPC),
+    insight: calcAttr("Dazed", "Enraged", "insight", selectedNPC),
+    might: calcAttr("Weak", "Poisoned", "might", selectedNPC),
+    will: calcAttr("Shaken", "Poisoned", "will", selectedNPC),
+  };
+
+  const maxTargets =
+    clickedData.maxTargets && clickedData.maxTargets > 0
+      ? clickedData.maxTargets
+      : 1;
+
+  const handleConfirmSpell = () => {
+    const finalMpCost = clickedData.mp * numTargets;
+
+    if (useMp && finalMpCost > selectedNPC?.combatStats?.currentMp) {
+      setError("Not enough MP!");
+      return;
+    }
+
+    setOpen(false);
+    setError("");
+
+    if (useMp) {
+      handleUseMP(finalMpCost);
+    }
+    if (clickedData.type === "offensive") {
+      // Roll the attack
+      const {
+        diceResults,
+        totalHitScore,
+        damage,
+        isCriticalFailure,
+        isCriticalSuccess,
+      } = rollAttack(clickedData, "spell");
+      // log the spell
+      console.log(
+        selectedNPC.name +
+          " used " +
+          clickedData.name +
+          "!" +
+          " It rolled [" +
+          diceResults.attribute1 +
+          " + " +
+          diceResults.attribute2 +
+          "] + " +
+          calcMagic(selectedNPC) +
+          " = " +
+          totalHitScore +
+          " magic check! HR = " +
+          damage
+      );
+      addLog(
+        "combat_sim_log_spell_offensive_roll",
+        selectedNPC.name,
+        clickedData.name,
+        numTargets,
+        "[" +
+          diceResults.attribute1 +
+          " + " +
+          diceResults.attribute2 +
+          "] + " +
+          calcMagic(selectedNPC) +
+          " = " +
+          totalHitScore,
+        damage + ""
+      );
+
+      if (isCriticalFailure) {
+        setTimeout(() => {
+          addLog("combat_sim_log_crit_failure", selectedNPC.name);
+        }, 100);
+      }
+
+      if (isCriticalSuccess) {
+        setTimeout(() => {
+          addLog("combat_sim_log_crit_success", selectedNPC.name);
+        }, 100);
+      }
+
+      openLogs();
+    } else {
+      addLog(
+        "combat_sim_log_spell_use",
+        selectedNPC.name,
+        clickedData.name,
+        numTargets
+      );
+
+      openLogs();
+    }
+  };
+
+  const handleAttack = (attack, attackType) => {
+    // Roll the attack
+    const {
+      diceResults,
+      totalHitScore,
+      damage,
+      hr,
+      isCriticalFailure,
+      isCriticalSuccess,
+    } = rollAttack(attack, attackType);
+
+    // log the attack
+    console.log(
+      selectedNPC.name +
+        " used " +
+        attack.name +
+        "!" +
+        " It rolled [" +
+        diceResults.attribute1 +
+        " + " +
+        diceResults.attribute2 +
+        "] + " +
+        calcPrecision(attack, selectedNPC) +
+        " = " +
+        totalHitScore +
+        " accuracy check! The attack did " +
+        damage +
+        " " +
+        damageTypeLabels[
+          attackType === "attack" ? attack.type : attack.weapon.type
+        ] +
+        " {{" +
+        (attackType === "attack" ? attack.type : attack.weapon.type) +
+        "-icon}}"
+    );
+
+    // Add the attack to the log
+    /*addLog(
+      "{{value1}} used {{value2}}! It rolled {{value4}} accuracy check! The attack did {{value5}} {{value3}} {{attack-type-icon}} damage!",
+      selectedNPC.name,
+      attack.name,
+      
+        attackType === "attack" ? attack.type : attack.weapon.type
+      ,
+      "[" +
+        diceResults.attribute1 +
+        " + " +
+        diceResults.attribute2 +
+        "] + " +
+        calcPrecision(attack, selectedNPC) +
+        " = " +
+        totalHitScore,
+      damage
+    );*/
+
+    addLog(
+      "combat_sim_log_attack",
+      "--isAttack--",
+      {
+        npcName: selectedNPC.name,
+        attackName: attack.name,
+        range: attackType === "attack" ? attack.range : attack.weapon.range,
+        damageType: attackType === "attack" ? attack.type : attack.weapon.type,
+        dice1: diceResults.attribute1,
+        dice2: diceResults.attribute2,
+        prec: calcPrecision(attack, selectedNPC) !== 0 ?
+            " + " + calcPrecision(attack, selectedNPC) : "",
+        totalHitScore,        
+        hr,
+        extraDamage: calcDamage(attack, selectedNPC),
+        damage,
+      }
+    );
+
+    openLogs();
+  };
+
+  function handleUseMP(mpCost) {
+    // Update the selectedNPC and selectedNPCs
+    setSelectedNPC((prev) => ({
+      ...prev,
+      combatStats: {
+        ...prev.combatStats,
+        currentMp: prev.combatStats.currentMp - mpCost,
+      },
+    }));
+    setSelectedNPCs((prev) =>
+      prev.map((npc) =>
+        npc.combatId === selectedNPC.combatId
+          ? {
+              ...npc,
+              combatStats: {
+                ...npc.combatStats,
+                currentMp: npc.combatStats.currentMp - mpCost,
+              },
+            }
+          : npc
+      )
+    );
+  }
+
+  const rollAttack = (attack, attackType) => {
+    const message = `Rolling ${attack.name}.`;
+    console.log(message);
+
+    let attribute1, attribute2, extraDamage, extraPrecision, type;
+
+    if (attackType === "weapon") {
+      // For weapon attacks
+      const { att1, att2 } = attack.weapon;
+      attribute1 = attributes[att1];
+      attribute2 = attributes[att2];
+      extraDamage = calcDamage(attack, selectedNPC);
+      extraPrecision = calcPrecision(attack, selectedNPC);
+      type = attack.weapon.type;
+    } else if (attackType === "spell") {
+      // For spells
+      const { attr1, attr2 } = attack;
+      attribute1 = attributes[attr1];
+      attribute2 = attributes[attr2];
+      extraDamage = 0;
+      extraPrecision = calcMagic(selectedNPC);
+      type = "spell";
+    } else {
+      // For base attacks
+      const { attr1, attr2 } = attack;
+      attribute1 = attributes[attr1];
+      attribute2 = attributes[attr2];
+      extraDamage = calcDamage(attack, selectedNPC);
+      extraPrecision = calcPrecision(attack, selectedNPC);
+      type = attack.type;
+    }
+
+    if (attribute1 === undefined || attribute2 === undefined) {
+      // Handle the case where attributes are not defined
+      console.error("Attributes not defined");
+      return;
+    }
+
+    // Simulate rolling the dice for each attribute
+    const rollDice = (attribute) => Math.floor(Math.random() * attribute) + 1;
+    const roll1 = rollDice(attribute1);
+    const roll2 = rollDice(attribute2);
+
+    // Check for critical success / failure
+    const isCriticalSuccess = roll1 === roll2 && roll1 >= 6 && roll2 >= 6;
+    const isCriticalFailure = roll1 === 1 && roll2 === 1;
+
+    // Update dice results state
+    const diceResults = { attribute1: roll1, attribute2: roll2 };
+
+    // Calculate results
+    const totalHitScore = roll1 + roll2 + extraPrecision;
+    let baseDamage = Math.max(roll1, roll2);
+
+    let damage = 0;
+    if (type !== "nodmg") {
+      damage = baseDamage + extraDamage;
+    }
+
+    return {
+      diceResults,
+      totalHitScore,
+      damage,
+      hr: baseDamage,
+      isCriticalSuccess,
+      isCriticalFailure,
+    };
+  };
+
   const StyledMarkdown = styled(ReactMarkdown)({
     whiteSpace: "pre-line",
     display: "inline",
@@ -138,10 +411,12 @@ const NPCDetail = ({
       variant="fullWidth"
       sx={{
         minHeight: 40,
-        "& .Mui-selected": { // Selected tab
+        "& .Mui-selected": {
+          // Selected tab
           color: isDarkMode ? secondary : primary,
         },
-        "& .MuiTab-root": { // Unselected tab
+        "& .MuiTab-root": {
+          // Unselected tab
           color: isDarkMode ? "white" : "black",
         },
       }}
@@ -269,11 +544,7 @@ const NPCDetail = ({
                     <MeleeIcon />
                   ),
               })),
-              ...(
-                selectedNPC?.spells?.filter(
-                  (spell) => spell.type === "offensive"
-                ) || []
-              ).map((spell) => ({
+              ...(selectedNPC?.spells || []).map((spell) => ({
                 type: "Spell",
                 data: spell,
                 extra: spell.effect || null,
@@ -307,14 +578,22 @@ const NPCDetail = ({
                 {/* Text Section */}
                 <Box sx={{ flexGrow: 1, px: 2 }}>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    {data.name} {type === "Spell" && <OffensiveSpellIcon />}
+                    {data.name}{" "}
+                    {type === "Spell" && data.type === "offensive" && (
+                      <OffensiveSpellIcon />
+                    )}
                   </Typography>
-                  <Typography variant="body2" sx={{ ml: -1 }}>
-                    <strong>{generateButtonLabel(data)}</strong>
-
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      ml:
+                        type === "Spell" && data.type !== "offensive" ? 0 : -1,
+                    }}
+                  >
                     {/* Attacks & Weapon Attacks */}
                     {(type === "Attack" || type === "Weapon Attack") && (
                       <>
+                        <strong>{generateButtonLabel(data)}</strong>
                         {calcPrecision(data, selectedNPC) > 0 &&
                           `+${calcPrecision(data, selectedNPC)} `}
                         {data.type !== "nodmg" && (
@@ -363,10 +642,16 @@ const NPCDetail = ({
                     {/* Spells */}
                     {type === "Spell" && (
                       <>
-                        {calcMagic(selectedNPC) > 0 &&
-                          `+${calcMagic(selectedNPC)} `}
-                        <Diamond /> {data.mp} MP <Diamond /> {data.target}{" "}
-                        <Diamond /> {data.duration}
+                        {data.type === "offensive" && (
+                          <>
+                            <strong>{generateButtonLabel(data)}</strong>
+                            {calcMagic(selectedNPC) > 0 &&
+                              `+${calcMagic(selectedNPC)} `}
+                            <Diamond />
+                          </>
+                        )}{" "}
+                        {data.mp} MP <Diamond /> {data.target} <Diamond />{" "}
+                        {data.duration}
                       </>
                     )}
                   </Typography>
@@ -399,18 +684,26 @@ const NPCDetail = ({
                     variant="contained"
                     color="primary"
                     onClick={() => {
-                      if (window.electron) {
-                        window.electron.alert("Rolls still in development.");
+                      if (type === "Spell" && data.maxTargets >= 0) {
+                        setClickedData(data);
+                        setOpen(true);
                       } else {
-                        alert("Rolls still in development.");
+                        // Roll directly if there's no target selection
+                        handleAttack(
+                          data,
+                          type === "Attack"
+                            ? "attack"
+                            : type === "Weapon Attack"
+                            ? "weapon"
+                            : "spell"
+                        );
                       }
-                      console.log(`Rolling for ${data.name}`);
                     }}
                     sx={{
                       color: "#fff",
                       minWidth: 40,
                       width: 40,
-                      height: "100%", // Stretch vertically
+                      height: "100%",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
@@ -474,6 +767,81 @@ const NPCDetail = ({
       {!isMobile && (
         <AttributeSection selectedNPC={selectedNPC} calcAttr={calcAttr} />
       )}
+
+      {/* Target Selection Dialog */}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        sx={{ "& .MuiDialog-paper": { borderRadius: 3, padding: 2 } }}
+      >
+        <DialogTitle
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            borderBottom: "1px solid #ddd",
+            pb: 1,
+          }}
+        >
+          Select Number of Targets
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 1,
+          }}
+        >
+          <Select
+            fullWidth
+            value={numTargets}
+            onChange={(e) => setNumTargets(e.target.value)}
+            error={!!error}
+            sx={{
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: isDarkMode ? "#fff" : "primary",
+              },
+            }}
+          >
+            {[...Array(maxTargets)].map((_, i) => {
+              const targetCount = i + 1;
+              const cost = targetCount * clickedData.mp;
+              return (
+                <MenuItem
+                  key={targetCount}
+                  value={targetCount}
+                  disabled={cost > selectedNPC?.combatStats?.currentMp}
+                >
+                  Target x {targetCount} (MP: {cost})
+                </MenuItem>
+              );
+            })}
+          </Select>
+          {error && <FormHelperText error>{error}</FormHelperText>}
+        </DialogContent>
+        <DialogActions sx={{ width: "100%", justifyContent: "center" }}>
+          <Button
+            onClick={() => {
+              setOpen(false);
+              setError("");
+            }}
+            variant="outlined"
+            color={isDarkMode ? "white" : "primary"}
+            sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
+          >
+            {t("Cancel")}
+          </Button>
+          <Button
+            onClick={handleConfirmSpell}
+            variant="contained"
+            color="primary"
+            sx={{ borderRadius: 2, textTransform: "uppercase", px: 3 }}
+          >
+            {t("Roll")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 

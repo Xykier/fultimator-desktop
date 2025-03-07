@@ -4,6 +4,7 @@ import {
   Button,
   Collapse,
   Paper,
+  Tooltip,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -20,6 +21,7 @@ import {
 import { GiDeathSkull } from "react-icons/gi";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { t } from "../../translation/translate";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 // Define the mapping of tags to components
 const tagMap = {
@@ -47,35 +49,109 @@ const tagMap = {
   ),
   "{{spell-icon}}": <SpellIcon sx={{ verticalAlign: "middle" }} />,
   "{{fainted-icon}}": <GiDeathSkull sx={{ verticalAlign: "middle" }} />,
-  "{{value1}}": (value1) => <b>{value1}</b>,
-  "{{value2}}": (value2) => <b>{value2}</b>,
-  "{{value3}}": (value3) => <b>{value3}</b>,
+  "{{crit-failure}}": <b style={{ color: "red" }}>{t("Critical Failure")}</b>,
+  "{{crit-success}}": <b style={{ color: "green" }}>{t("Critical Success")}</b>,
 };
 
-function replaceTagsWithComponents(text, value1, value2, value3) {
-  // Use a regular expression to replace tags with the corresponding component
-  return t(text)
-    .split(/(\{\{.*?\}\})/)
-    .map((part) => {
-      // If the part matches the value placeholders, replace with actual values
-      if (part === "{{value1}}") {
-        return <b>{value1}</b>; // Return value1 wrapped in <b> tags
-      }
-      if (part === "{{value2}}") {
-        return <b>{value2}</b>; // Return value2 wrapped in <b> tags
-      }
-      if (part === "{{value3}}") {
-        return <b>{t(value3)}</b>; // Return value3 wrapped in <b> tags
-      }
+function replaceTagsWithComponents(
+  text,
+  value1,
+  value2,
+  value3,
+  value4,
+  value5
+) {
+  if (value1 === "--isAttack--") {
+    return t(text)
+      .split(/(\{\{.*?\}\})/)
+      .map((part) => {
+        if (part === "{{npc-name}}") {
+          return <b>{value2.npcName}</b>; // Return npcName wrapped in <b> tags
+        }
+        if (part === "{{attack-name}}") {
+          return <b>{value2.attackName}</b>; // Return attackName wrapped in <b> tags
+        }
+        if (part === "{{dice1}}") {
+          return <b>{value2.dice1}</b>;
+        }
+        if (part === "{{dice2}}") {
+          return <b>{value2.dice2}</b>;
+        }
+        if (part === "{{prec}}") {
+          return <b>{value2.prec}</b>;
+        }
+        if (part === "{{total-hit-score}}") {
+          return <b>{value2.totalHitScore}</b>;
+        }
+        if (part === "{{hr}}") {
+          return <b>{value2.hr}</b>; // Return hr wrapped in <b> tags
+        }
+        if (part === "{{extra-damage}}") {
+          return <b>{value2.extraDamage}</b>; // Return extra damage wrapped in <b> tags
+        }
+        if (part === "{{damage}}") {
+          return <b>{value2.damage}</b>; // Return damage wrapped in <b> tags
+        }
+        if (part === "{{attack-range-icon}}") {
+          if (value2.range === "melee") {
+            return <MeleeIcon sx={{ verticalAlign: "middle" }} />;
+          } else {
+            return <DistanceIcon sx={{ verticalAlign: "middle" }} />;
+          }
+        }
+        if (part === "{{damage-type-icon}}") {
+          return (
+            <TypeIcon
+              type={value2.damageType}
+              sx={{ verticalAlign: "middle" }}
+            />
+          );
+        }
+        if (part === "{{damage-type}}") {
+          return <b>{t(value2.damageType)}</b>;
+        }
 
-      // Otherwise, check if it's a tag that maps to an icon or other component
-      if (tagMap[part]) {
-        return tagMap[part]; // Replace with the corresponding component if tag matches
-      }
+        // Return the part as it is if no match
+        return part;
+      });
+  } else {
+    // Use a regular expression to replace tags with the corresponding component
+    return t(text)
+      .split(/(\{\{.*?\}\})/)
+      .map((part) => {
+        // If the part matches the value placeholders, replace with actual values
+        if (part === "{{value1}}") {
+          return <b>{value1}</b>; // Return value1 wrapped in <b> tags
+        }
+        if (part === "{{value2}}") {
+          return <b>{value2}</b>; // Return value2 wrapped in <b> tags
+        }
+        if (part === "{{value3}}") {
+          return <b>{t(value3)}</b>; // Return translated value3 wrapped in <b> tags
+        }
+        if (part === "{{value4}}") {
+          return <b>{value4}</b>; // Return value4 wrapped in <b> tags
+        }
+        if (part === "{{value5}}") {
+          return <b>{value5}</b>; // Return value5 wrapped in <b> tags
+        }
+        if (part === "{{attack-range-icon}}" && value2) {
+          return <TypeIcon type={value2} sx={{ verticalAlign: "middle" }} />;
+        }
 
-      // Return the part as it is if no match
-      return part;
-    });
+        if (part === "{{attack-type-icon}}" && value3) {
+          return <TypeIcon type={value3} sx={{ verticalAlign: "middle" }} />;
+        }
+
+        // Otherwise, check if it's a tag that maps to an icon or other component
+        if (tagMap[part]) {
+          return tagMap[part]; // Replace with the corresponding component if tag matches
+        }
+
+        // Return the part as it is if no match
+        return part;
+      });
+  }
 }
 
 export default function CombatLog({
@@ -153,24 +229,27 @@ export default function CombatLog({
           onClick={toggleLog}
           size={isMobile ? "small" : "medium"}
           fullWidth
+          startIcon={open ? <ExpandMore /> : <ExpandLess />}
         >
-          {open ? "Hide Combat Log" : "Show Combat Log"}
+          {open ? t("combat_sim_log_hide") : t("combat_sim_log_show")}
         </Button>
 
         {/* Clear Logs Button (Only visible if expanded) */}
         {open && (
-          <Button
-            onClick={clearLogs}
-            size="small"
-            sx={{
-              minWidth: "auto",
-              padding: 0,
-              marginLeft: 1,
-              color: isDarkMode ? "#ddd" : "#555",
-            }}
-          >
-            <DeleteSweepIcon />
-          </Button>
+          <Tooltip title={t("combat_sim_log_clear")} placement="top">
+            <Button
+              onClick={clearLogs}
+              size="small"
+              sx={{
+                minWidth: "auto",
+                padding: 0,
+                marginLeft: 1,
+                color: isDarkMode ? "#ddd" : "#555",
+              }}
+            >
+              <DeleteSweepIcon />
+            </Button>
+          </Tooltip>
         )}
       </Box>
 
@@ -229,7 +308,9 @@ export default function CombatLog({
                   log.text,
                   log.value1,
                   log.value2,
-                  log.value3
+                  log.value3,
+                  log.value4,
+                  log.value5
                 ).map((part, idx) =>
                   typeof part === "string" ? (
                     <span key={idx}>{part}</span>
@@ -242,7 +323,7 @@ export default function CombatLog({
           ))}
           {sortedLogs.length === 0 && (
             <Typography variant="body2" color="textSecondary">
-              No combat logs to show
+              {t("combat_sim_log_empty")}
             </Typography>
           )}
         </Paper>
