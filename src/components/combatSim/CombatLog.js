@@ -114,6 +114,41 @@ function replaceTagsWithComponents(
         // Return the part as it is if no match
         return part;
       });
+  } else if (value1 === "--isSpell--") {
+    return t(text)
+      .split(/(\{\{.*?\}\})/)
+      .map((part) => {
+        if (part === "{{npc-name}}") {
+          return <b>{value2.npcName}</b>; // Return npcName wrapped in <b> tags
+        }
+        if (part === "{{spell-name}}") {
+          return <b>{value2.spellName}</b>;
+        }
+        if (part === "{{dice1}}") {
+          return <b>{value2.dice1}</b>;
+        }
+        if (part === "{{dice2}}") {
+          return <b>{value2.dice2}</b>;
+        }
+        if (part === "{{extra-magic}}") {
+          return <b>{value2.extraMagic}</b>;
+        }
+        if (part === "{{total-hit-score}}") {
+          return <b>{value2.totalHitScore}</b>;
+        }
+        if (part === "{{hr}}") {
+          return <b>{value2.hr}</b>; // Return hr wrapped in <b> tags
+        }
+        if (part === "{{offensive-spell-icon}}") {
+          return <OffensiveSpellIcon sx={{ verticalAlign: "middle" }} />;
+        }
+        if (part === "{{targets}}") {
+          return <b>{value2.targets}</b>;
+        }
+
+        // Return the part as it is if no match
+        return part;
+      });
   } else {
     // Use a regular expression to replace tags with the corresponding component
     return t(text)

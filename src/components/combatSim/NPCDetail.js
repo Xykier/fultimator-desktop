@@ -169,37 +169,20 @@ const NPCDetail = ({
         isCriticalSuccess,
       } = rollAttack(clickedData, "spell");
       // log the spell
-      console.log(
-        selectedNPC.name +
-          " used " +
-          clickedData.name +
-          "!" +
-          " It rolled [" +
-          diceResults.attribute1 +
-          " + " +
-          diceResults.attribute2 +
-          "] + " +
-          calcMagic(selectedNPC) +
-          " = " +
-          totalHitScore +
-          " magic check! HR = " +
-          damage
-      );
       addLog(
         "combat_sim_log_spell_offensive_roll",
-        selectedNPC.name,
-        clickedData.name,
-        numTargets,
-        "[" +
-          diceResults.attribute1 +
-          " + " +
-          diceResults.attribute2 +
-          "] + " +
-          calcMagic(selectedNPC) +
-          " = " +
-          totalHitScore,
-        damage + ""
-      );
+        "--isSpell--", 
+        {
+          npcName: selectedNPC.name,
+          spellName: clickedData.name,
+          targets: numTargets,
+          dice1: diceResults.attribute1,
+          dice2: diceResults.attribute2,
+          extraMagic: calcMagic(selectedNPC) !== 0 ? " + " +calcMagic(selectedNPC) : "",
+          totalHitScore: totalHitScore,
+          hr: damage
+        }
+      )
 
       if (isCriticalFailure) {
         setTimeout(() => {
@@ -237,50 +220,7 @@ const NPCDetail = ({
       isCriticalSuccess,
     } = rollAttack(attack, attackType);
 
-    // log the attack
-    console.log(
-      selectedNPC.name +
-        " used " +
-        attack.name +
-        "!" +
-        " It rolled [" +
-        diceResults.attribute1 +
-        " + " +
-        diceResults.attribute2 +
-        "] + " +
-        calcPrecision(attack, selectedNPC) +
-        " = " +
-        totalHitScore +
-        " accuracy check! The attack did " +
-        damage +
-        " " +
-        damageTypeLabels[
-          attackType === "attack" ? attack.type : attack.weapon.type
-        ] +
-        " {{" +
-        (attackType === "attack" ? attack.type : attack.weapon.type) +
-        "-icon}}"
-    );
-
     // Add the attack to the log
-    /*addLog(
-      "{{value1}} used {{value2}}! It rolled {{value4}} accuracy check! The attack did {{value5}} {{value3}} {{attack-type-icon}} damage!",
-      selectedNPC.name,
-      attack.name,
-      
-        attackType === "attack" ? attack.type : attack.weapon.type
-      ,
-      "[" +
-        diceResults.attribute1 +
-        " + " +
-        diceResults.attribute2 +
-        "] + " +
-        calcPrecision(attack, selectedNPC) +
-        " = " +
-        totalHitScore,
-      damage
-    );*/
-
     addLog(
       "combat_sim_log_attack",
       "--isAttack--",
@@ -299,6 +239,18 @@ const NPCDetail = ({
         damage,
       }
     );
+
+    if (isCriticalFailure) {
+      setTimeout(() => {
+        addLog("combat_sim_log_crit_failure", selectedNPC.name);
+      }, 100);
+    }
+
+    if (isCriticalSuccess) {    
+      setTimeout(() => {
+        addLog("combat_sim_log_crit_success", selectedNPC.name);
+      }, 100);
+    }
 
     openLogs();
   };
@@ -783,7 +735,7 @@ const NPCDetail = ({
             pb: 1,
           }}
         >
-          Select Number of Targets
+          {t("combat_sim_select_n_targets")}
         </DialogTitle>
         <DialogContent
           sx={{
@@ -813,7 +765,7 @@ const NPCDetail = ({
                   value={targetCount}
                   disabled={cost > selectedNPC?.combatStats?.currentMp}
                 >
-                  Target x {targetCount} (MP: {cost})
+                  {t("Target")} x {targetCount} / {t("MP") +": "+ cost}
                 </MenuItem>
               );
             })}

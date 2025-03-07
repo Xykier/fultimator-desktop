@@ -74,13 +74,28 @@ const CombatSim = () => {
     setLogOpen(newState);
   };
 
-  function addLog(logText, value1 = null, value2 = null, value3 = null, value4 = null, value5 = null) {
+  function addLog(
+    logText,
+    value1 = null,
+    value2 = null,
+    value3 = null,
+    value4 = null,
+    value5 = null
+  ) {
     /* max of 50 logs */
     if (logs.length >= 50) {
       // remove the oldest log: {text, timestamp} sorted by {timestamp} and add the new one
       const sortedLogs = [...logs].sort((a, b) => a.timestamp - b.timestamp);
       const newLogs = sortedLogs.slice(1);
-      newLogs.push({ text: logText, timestamp: Date.now() });
+      newLogs.push({
+        text: logText,
+        timestamp: Date.now(),
+        value1: value1,
+        value2: value2,
+        value3: value3,
+        value4: value4,
+        value5: value5,
+      });
       setLogs(newLogs);
     } else {
       setLogs((prevLogs) => [
