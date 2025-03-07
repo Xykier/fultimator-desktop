@@ -149,7 +149,34 @@ function replaceTagsWithComponents(
         // Return the part as it is if no match
         return part;
       });
-  } else {
+  } else if (value1 === "--isStandardRoll--") {
+    return t(text)
+      .split(/(\{\{.*?\}\})/)
+      .map((part) => {
+        if (part === "{{npc-name}}") {
+          return <b>{value2.npcName}</b>; // Return npcName wrapped in <b> tags
+        }
+        if (part === "{{dice1}}") {
+          return <b>{value2.dice1}</b>;
+        }
+        if (part === "{{dice2}}") {
+          return <b>{value2.dice2}</b>;
+        }
+        if (part === "{{dice1-label}}") {
+          return <b>{t(value2.dice1Label)}</b>;
+        }
+        if (part === "{{dice2-label}}") {
+          return <b>{t(value2.dice2Label)}</b>;
+        }
+        if (part === "{{total-hit-score}}") {
+          return <b>{value2.totalHitScore}</b>;
+        }
+
+        // Return the part as it is if no match
+        return part;
+      });
+  }
+   else {
     // Use a regular expression to replace tags with the corresponding component
     return t(text)
       .split(/(\{\{.*?\}\})/)
