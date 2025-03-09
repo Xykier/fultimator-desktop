@@ -50,6 +50,7 @@ export default function SelectedNpcs({
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const primary = theme.palette.primary.main;
+  const secondary = theme.palette.secondary.main;
 
   const handleMenuOpen = (event, npcId) => {
     setAnchorMenu(event.currentTarget);
@@ -70,7 +71,7 @@ export default function SelectedNpcs({
   );
 
   return (
-<>
+    <>
       <Box
         sx={{
           display: "flex",
@@ -147,35 +148,33 @@ export default function SelectedNpcs({
                     npc.id && handleListItemClick(e, npc.combatId)
                   }
                   sx={{
-                    border:
-                    isDarkMode ?
-                      selectedNpcID && selectedNpcID === npc.combatId
+                    border: isDarkMode
+                      ? selectedNpcID && selectedNpcID === npc.combatId
                         ? "1px solid #fff"
                         : "1px solid #555"
-                    :
-                      selectedNpcID && selectedNpcID === npc.combatId
-                        ? "1px solid " + primary
-                        : "1px solid #ddd",
+                      : selectedNpcID && selectedNpcID === npc.combatId
+                      ? "1px solid " + primary
+                      : "1px solid #ddd",
                     marginY: 1,
                     borderRadius: 1,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    backgroundColor:
-                      isDarkMode ?
-                      npc.combatStats?.currentHp === 0 ? "#5c1010" : "#333" 
-                      :
-                      npc.combatStats?.currentHp === 0 ? "#ffe6e6" : "inherit",
+                    backgroundColor: isDarkMode
+                      ? npc.combatStats?.currentHp === 0
+                        ? "#5c1010"
+                        : "#333"
+                      : npc.combatStats?.currentHp === 0
+                      ? "#ffe6e6"
+                      : "inherit",
                     "&:hover": {
-                      backgroundColor:
-                      isDarkMode ?
-                      npc.combatStats?.currentHp === 0
-                        ? "#6f0000"
-                        : "#444"
-                      :
-                        npc.combatStats?.currentHp === 0
-                          ? "#ffcccc"
-                          : "#f1f1f1",
+                      backgroundColor: isDarkMode
+                        ? npc.combatStats?.currentHp === 0
+                          ? "#6f0000"
+                          : "#444"
+                        : npc.combatStats?.currentHp === 0
+                        ? "#ffcccc"
+                        : "#f1f1f1",
                     },
                     paddingY: 1,
                     flexDirection: "row",
@@ -196,7 +195,10 @@ export default function SelectedNpcs({
                   >
                     <Typography
                       variant="h6"
-                      sx={{ fontWeight: "bold", color: isDarkMode ? "#fff" : "#333" }}
+                      sx={{
+                        fontWeight: "bold",
+                        color: isDarkMode ? "#fff" : "#333",
+                      }}
                     >
                       {index + 1}
                     </Typography>
@@ -226,6 +228,20 @@ export default function SelectedNpcs({
                           )
                         ) : (
                           t("combat_sim_deleted_npc")
+                        )}
+                        {npc.id && npc.combatStats?.combatNotes?.length > 0 && (
+                          <Typography
+                            component="span"
+                            variant="h5"
+                            sx={{
+                              ml: 1,
+                              // something that differentiates the notes from the NPC name
+                              color: isDarkMode ? secondary : primary,
+                              fontWeight: "bold",                              
+                            }}
+                          >
+                            {"( " + npc.combatStats.combatNotes + " )"}
+                          </Typography>
                         )}
                       </Typography>
                     }
@@ -314,6 +330,7 @@ export default function SelectedNpcs({
                       overflow: "hidden",
                     }}
                   />
+
                   {/* Popover for extra turn checkboxes */}
                   <Popover
                     open={Boolean(anchorEl) && popoverNpcId === npc.combatId}

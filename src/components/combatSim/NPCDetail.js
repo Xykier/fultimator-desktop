@@ -348,7 +348,7 @@ const NPCDetail = ({
         minHeight: 40,
         "& .Mui-selected": {
           // Selected tab
-          color: isDarkMode ? secondary : primary,
+          color: (isDarkMode ? secondary : primary) + " !important",
         },
         "& .MuiTab-root": {
           // Unselected tab
