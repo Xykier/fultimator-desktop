@@ -11,6 +11,12 @@ import {
   Paper,
   CardActions,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,13 +25,14 @@ import {
   deleteEncounter,
 } from "../../utility/db";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SettingsIcon from "@mui/icons-material/Settings";
 import Layout from "../../components/Layout";
 import { useTheme } from "@mui/material/styles";
 import CustomHeaderAlt from "../../components/common/CustomHeaderAlt";
 import { SportsMartialArts, NavigateNext } from "@mui/icons-material";
 import { t } from "../../translation/translate";
 
-const MAX_ENCOUNTERS = 3;
+const MAX_ENCOUNTERS = 10;
 
 export default function CombatSimulatorEncounters() {
   return (
@@ -38,13 +45,48 @@ export default function CombatSimulatorEncounters() {
 const CombatSimEncounters = () => {
   const [encounters, setEncounters] = useState([]);
   const [encounterName, setEncounterName] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false); // State for settings dialog
   const navigate = useNavigate();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
+  const [autoUseMP, setAutoUseMP] = useState(() => {
+    const storedSetting = localStorage.getItem("combatSimAutoUseMP");
+    return storedSetting === null ? true : storedSetting === "true";
+  });
+
+  const [autoOpenLogs, setAutoOpenLogs] = useState(() => {
+    const storedSetting = localStorage.getItem("combatSimAutoOpenLogs");
+    return storedSetting === null ? true : storedSetting === "true";
+  });
+
+  useEffect(() => {
+    const storedSetting = localStorage.getItem("combatSimAutoUseMP");
+    if (storedSetting === null) {
+      localStorage.setItem("combatSimAutoUseMP", "true"); // Set default value in localStorage
+    }
+
+    const storedSetting2 = localStorage.getItem("combatSimAutoOpenLogs");
+    if (storedSetting2 === null) {
+      localStorage.setItem("combatSimAutoOpenLogs", "true"); // Set default value in localStorage
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleSaveSettings = () => {
+    localStorage.setItem("combatSimAutoUseMP", autoUseMP);
+    localStorage.setItem("combatSimAutoOpenLogs", autoOpenLogs);
+    setSettingsOpen(false);
+  };
+
+  const handleCloseSettings = () => {
+    setSettingsOpen(false);
+    setAutoUseMP(localStorage.getItem("combatSimAutoUseMP") === "true");
+    setAutoOpenLogs(localStorage.getItem("combatSimAutoOpenLogs") === "true");
+  };
 
   const fetchData = async () => {
     const encounterList = await getEncounterList();
@@ -83,18 +125,24 @@ const CombatSimEncounters = () => {
   return (
     <Box sx={{ padding: 3, maxWidth: "1200px", margin: "auto" }}>
       <Paper
-        elevation={isDarkMode ? 6 : 3} // Higher elevation in dark mode
+        elevation={isDarkMode ? 6 : 3}
         sx={{
           p: "14px",
           borderRadius: "8px",
           border: `2px solid ${theme.palette.secondary.main}`,
-          backgroundColor: theme.palette.background.paper,          
+          backgroundColor: theme.palette.background.paper,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
         }}
       >
+        {/* Header with Settings Button */}
+
         <CustomHeaderAlt
           headerText={t("combat_sim_title")}
           icon={<SportsMartialArts fontSize="large" />}
         />
+
         <div style={{ paddingLeft: 10, paddingRight: 10 }}>
           <Typography variant="h6" gutterBottom color="text.primary">
             {t("combat_sim_new_encounter")}
@@ -123,10 +171,27 @@ const CombatSimEncounters = () => {
               </Button>
             </Grid>
           </Grid>
-          <Typography variant="h5" mt={2} color="text.primary">
-            {t("combat_sim_saved_encounters")} ({encounters.length}/
-            {MAX_ENCOUNTERS})
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+            mt={2}
+          >
+            <Typography variant="h5" color="text.primary">
+              {t("combat_sim_saved_encounters")} ({encounters.length}/
+              {MAX_ENCOUNTERS})
+            </Typography>
+            <Tooltip title={t("Settings")}>
+              <IconButton
+                color={isDarkMode ? "white" : "primary"}
+                onClick={() => setSettingsOpen(true)}
+              >
+                <SettingsIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </div>
       </Paper>
 
@@ -135,7 +200,9 @@ const CombatSimEncounters = () => {
           <Grid item xs={12} sm={6} md={4} key={encounter.id}>
             <Card
               sx={{
-                backgroundColor: isDarkMode ?  "#292929" : theme.palette.background.paper,
+                backgroundColor: isDarkMode
+                  ? "#292929"
+                  : theme.palette.background.paper,
                 borderRadius: 3,
                 boxShadow: isDarkMode ? 6 : 4,
                 transition: "0.3s",
@@ -186,8 +253,6 @@ const CombatSimEncounters = () => {
                   </IconButton>
                 </Tooltip>
               </CardActions>
-
-              {/* Always visible indicator on the right, centered vertically */}
               <Box
                 sx={{
                   position: "absolute",
@@ -203,6 +268,85 @@ const CombatSimEncounters = () => {
           </Grid>
         ))}
       </Grid>
+
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        sx={{ "& .MuiDialog-paper": { borderRadius: 3, padding: 2 } }}
+      >
+        <DialogTitle
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            borderBottom: "1px solid #ddd",
+            pb: 1,
+          }}
+        >
+          {t("combat_sim_settings")}
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "left",
+            mt: 1,
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={autoUseMP}
+                onChange={(e) => setAutoUseMP(e.target.checked)}
+                sx={{
+                  mt: 0,
+                  "& .MuiSvgIcon-root": { fontSize: "1.5rem" },
+                  "&.Mui-checked": {
+                    color: isDarkMode ? "white !important" : "primary !important",
+                  },
+                }}
+              />
+            }
+            label={t("combat_sim_auto_use_mp")}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={autoOpenLogs}
+                onChange={(e) => setAutoOpenLogs(e.target.checked)}
+                sx={{
+                  mt: 0,
+                  "& .MuiSvgIcon-root": { fontSize: "1.5rem" },
+                  "&.Mui-checked": {
+                    color: isDarkMode ? "white !important" : "primary !important",
+                  },
+                }}
+              />
+            }
+            label={t(
+              "combat_sim_auto_open_logs"
+            )}
+          />
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+          <Button
+            onClick={() => handleCloseSettings()}
+            color={isDarkMode ? "white" : "primary"}
+            sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
+          >
+            {t("Close")}
+          </Button>
+          <Button
+            onClick={handleSaveSettings}
+            variant="contained"
+            color="primary"
+            sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
+          >
+            {t("Save Changes")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

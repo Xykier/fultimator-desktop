@@ -64,8 +64,12 @@ const NPCDetail = ({
   const [open, setOpen] = useState(false);
   const [numTargets, setNumTargets] = useState(1);
   const [error, setError] = useState("");
-  const [useMp, setUseMp] = useState(true);
   const [clickedData, setClickedData] = useState({});
+
+  const autoUseMP = localStorage.getItem("combatSimAutoUseMP") === "true";
+  const autoOpenLogs = localStorage.getItem("combatSimAutoOpenLogs") === "true";
+
+  console.log(autoUseMP);
 
   if (!selectedNPC) return null;
 
@@ -84,7 +88,7 @@ const NPCDetail = ({
   const handleConfirmSpell = () => {
     const finalMpCost = clickedData.mp * numTargets;
 
-    if (useMp && finalMpCost > selectedNPC?.combatStats?.currentMp) {
+    if (autoUseMP && finalMpCost > selectedNPC?.combatStats?.currentMp) {
       setError("Not enough MP!");
       return;
     }
@@ -92,7 +96,7 @@ const NPCDetail = ({
     setOpen(false);
     setError("");
 
-    if (useMp) {
+    if (autoUseMP) {
       handleUseMP(finalMpCost);
     }
     if (clickedData.type === "offensive") {
@@ -136,7 +140,9 @@ const NPCDetail = ({
         numTargets
       );
     }
-    openLogs();
+    if (autoOpenLogs) {
+      openLogs();
+    }
     if (isMobile) {
       /* close dialog */
       setSelectedNPC(null);
@@ -184,7 +190,9 @@ const NPCDetail = ({
       }, 100);
     }
 
-    openLogs();
+    if (autoOpenLogs) {
+      openLogs();
+    }
 
     if (isMobile) {
       /* close dialog */
@@ -324,7 +332,9 @@ const NPCDetail = ({
       }, 100);
     }
 
-    openLogs();
+    if (autoOpenLogs) {
+      openLogs();
+    }
   };
 
   const handleTabChange = (_, newIndex) => setTabIndex(newIndex);

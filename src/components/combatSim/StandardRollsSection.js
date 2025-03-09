@@ -48,7 +48,13 @@ const StandardRollsSection = ({ selectedNPC, calcAttr, handleRoll }) => {
           value={selectedAttr1}
           onChange={(e) => setSelectedAttr1(e.target.value)}
           size="small"
-          sx={{ minWidth: 100, mx: 1 }}
+          sx={{
+            minWidth: 100,
+            mx: 1,
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "#fff" : "primary",
+            },
+          }}
         >
           {attributes.map((attr) => (
             <MenuItem key={attr.label} value={attr.label}>
@@ -61,7 +67,13 @@ const StandardRollsSection = ({ selectedNPC, calcAttr, handleRoll }) => {
           value={selectedAttr2}
           onChange={(e) => setSelectedAttr2(e.target.value)}
           size="small"
-          sx={{ minWidth: 100, mx: 1 }}
+          sx={{
+            minWidth: 100,
+            mx: 1,
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: isDarkMode ? "#fff" : "primary",
+            },
+          }}
         >
           {attributes.map((attr) => (
             <MenuItem key={attr.label} value={attr.label}>
