@@ -38,7 +38,7 @@ const StatsTab = ({
           endColor={isCrisis ? "#B71C1C" : "#39823d"} //#39823d #388e3c
           bgColor="#333333"
           rightText={isCrisis && t("CRISIS")}
-          rightTextColor={isCrisis && "#ffff00" }
+          rightTextColor={isCrisis && "#ffff00"}
         />
       </Box>
 
@@ -55,24 +55,47 @@ const StatsTab = ({
       </Box>
 
       <Box sx={{ marginTop: 1, display: "flex", alignItems: "center" }}>
-        <Button 
+        <Button
           variant="contained"
           color="primary"
           onClick={() => handleOpen("HP", selectedNPC)}
           size="small"
-          sx={{ bgcolor: isCrisis ? "#B71C1C" : "#388e3c", "&:hover": { bgcolor: isCrisis ? "#8b1515" : "#224d24" }, borderRadius: 0, fontWeight: "bold",
-          fontFamily: "'Press Start 2P', cursive", }}
+          sx={{
+            bgcolor: isCrisis ? "#B71C1C" : "#388e3c",
+            "&:hover": { bgcolor: isCrisis ? "#8b1515" : "#224d24" },
+            borderRadius: 0,
+            fontWeight: "bold",
+            fontFamily: "'Press Start 2P', cursive",
+            fontSize: {
+              xs: "0.5rem",
+              sm: "0.6rem",
+              md: "0.7rem",
+              lg: "0.8rem",
+            },
+          }}
           fullWidth
           startIcon={<GiHearts />}
         >
           {t("combat_sim_edit_hp")}
         </Button>
-        <Button 
+        <Button
           variant="contained"
           onClick={() => handleOpen("MP", selectedNPC)}
           size="small"
-          sx={{ ml: 1, bgcolor: "#0288d1", "&:hover": { bgcolor: "#013652" }, borderRadius: 0, fontWeight: "bold",
-          fontFamily: "'Press Start 2P', cursive",}}
+          sx={{
+            ml: 1,
+            bgcolor: "#0288d1",
+            "&:hover": { bgcolor: "#013652" },
+            borderRadius: 0,
+            fontWeight: "bold",
+            fontFamily: "'Press Start 2P', cursive",
+            fontSize: {
+              xs: "0.5rem",
+              sm: "0.6rem",
+              md: "0.7rem",
+              lg: "0.8rem",
+            },
+          }}
           fullWidth
           startIcon={<FaStar />}
         >
@@ -121,10 +144,17 @@ const StatsTab = ({
                   color: isDarkMode ? "#fff !important" : "black !important", // Text color adjusts for dark mode
                   fontWeight: "bold",
                   letterSpacing: "1.5px",
-                  fontSize: { xs: "1rem", sm: "1.2rem" }, // Adjust font size for smaller screens
+                  fontSize: {
+                    xs: "0.6rem",
+                    sm: "0.75rem",
+                    md: "0.9rem",
+                    lg: "1.2rem",
+                  }, // Adjust font size for smaller screens
                   transition: "all 0.3s ease-in-out",
                   "&:hover": {
-                    backgroundColor: isDarkMode ? "#616161 !important" : "#D3D3D3 !important", // Hover effect adjusts for dark mode
+                    backgroundColor: isDarkMode
+                      ? "#616161 !important"
+                      : "#D3D3D3 !important", // Hover effect adjusts for dark mode
                     color: isDarkMode ? "#fff !important" : "black !important", // Text color on hover
                   },
                   "&.Mui-selected": {

@@ -211,6 +211,7 @@ export default function SelectedNpcs({
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.9rem", lg: "1rem" },
                           maxWidth:
                             npc.combatStats.turns.length > 1
                               ? "calc(100% - 88px)"

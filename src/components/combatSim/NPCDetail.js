@@ -308,7 +308,7 @@ const NPCDetail = ({
 
     console.log(
       `Rolling ${attr1label} (${roll1}) + ${attr2label} (${roll2}) = ${totalHitScore}`
-    )
+    );
 
     // log the roll
     addLog("combat_sim_log_standard_roll", "--isStandardRoll--", {
@@ -360,25 +360,45 @@ const NPCDetail = ({
         iconPosition="start"
         icon={<Description fontSize="small" />}
         label={!isMobile && t("combat_sim_sheet")}
-        sx={{ minHeight: 40, padding: "4px 8px" }}
+        sx={{
+          minHeight: 40,
+          fontSize: { md: "0.8rem" },
+          padding: { xs: "4px 4px", sm: "4px 6px", md: "4px 8px" },
+          minWidth: 0,
+        }}
       />
       <Tab
         iconPosition="start"
         icon={<Favorite fontSize="small" />}
         label={!isMobile && t("combat_sim_stats")}
-        sx={{ minHeight: 40, padding: "4px 8px" }}
+        sx={{
+          minHeight: 40,
+          fontSize: { md: "0.8rem" },
+          padding: { xs: "4px 4px", sm: "4px 6px", md: "4px 8px" },
+          minWidth: 0,
+        }}
       />
       <Tab
         iconPosition="start"
         icon={<Casino fontSize="small" />}
         label={!isMobile && t("combat_sim_rolls")}
-        sx={{ minHeight: 40, padding: "4px 8px" }}
+        sx={{
+          minHeight: 40,
+          fontSize: { md: "0.8rem" },
+          padding: { xs: "4px 4px", sm: "4px 6px", md: "4px 8px" },
+          minWidth: 0,
+        }}
       />
       <Tab
         iconPosition="start"
         icon={<Edit fontSize="small" />}
         label={!isMobile && t("combat_sim_notes")}
-        sx={{ minHeight: 40, padding: "4px 8px" }}
+        sx={{
+          minHeight: 40,
+          fontSize: { md: "0.8rem" },
+          padding: { xs: "4px 4px", sm: "4px 6px", md: "4px 8px" },
+          minWidth: 0,
+        }}
       />
     </Tabs>
   );

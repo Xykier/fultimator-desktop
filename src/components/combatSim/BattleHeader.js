@@ -92,8 +92,8 @@ export default function BattleHeader({
           <ArrowLeft fontSize={isMobile ? "small" : "medium"} />
         </IconButton>
         <Typography
-          variant={isMobile ? "h6" : "h3"}
-          sx={{ marginX: 2, textTransform: "uppercase" }}
+          variant="h5"
+          sx={{ marginX: 2, textTransform: "uppercase", fontSize: { sm: "0.8rem", md: "0.9rem", lg: "1rem"} }}
         >
           {t("combat_sim_round") + `: ${round}`}
         </Typography>
@@ -127,7 +127,7 @@ export default function BattleHeader({
             color="primary"
             onClick={handleSaveState}
             startIcon={<Save />}
-            sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+            sx={{ fontWeight: "bold", fontSize: { sm:"0.7rem", md:"0.8rem", lg:"0.9rem"} }}
           >
             {t("combat_sim_save")}
           </Button>
