@@ -1,22 +1,23 @@
 import { openDB } from 'idb';
 
 const DB_NAME = 'fultimatorDB';
+const DB_VERSION = 2;
 const NPC_STORE_NAME = 'npcPersonal';
 const PC_STORE_NAME = 'pcPersonal';
+const ENCOUNTER_STORE_NAME = 'encounterStore';
 
-const dbPromise = openDB(DB_NAME, 1, {
-  upgrade(db) {
-    if (!db.objectStoreNames.contains(NPC_STORE_NAME)) {
-      db.createObjectStore(NPC_STORE_NAME, {
-        keyPath: 'id',
-        autoIncrement: true,
-      });
+const dbPromise = openDB(DB_NAME, DB_VERSION, {
+  upgrade(db, oldVersion, newVersion, transaction) {
+    console.log(`Upgrading DB from version ${oldVersion} to ${newVersion}`);
+
+    if (oldVersion < 1) {
+      db.createObjectStore("npcPersonal", { keyPath: "id", autoIncrement: true });
+      db.createObjectStore("pcPersonal", { keyPath: "id", autoIncrement: true });
     }
-    if (!db.objectStoreNames.contains(PC_STORE_NAME)) {
-      db.createObjectStore(PC_STORE_NAME, {
-        keyPath: 'id',
-        autoIncrement: true,
-      });
+    if (oldVersion < 2) {
+      if (!db.objectStoreNames.contains("encounterStore")) {
+        db.createObjectStore("encounterStore", { keyPath: "id", autoIncrement: true });
+      }
     }
   },
 });
@@ -30,6 +31,11 @@ export const addNpc = async (npc) => {
 export const getNpcs = async () => {
   const db = await dbPromise;
   return db.getAll(NPC_STORE_NAME);
+};
+
+export const getNpc = async (id) => {
+  const db = await dbPromise;
+  return db.get(NPC_STORE_NAME, id);
 };
 
 export const deleteNpc = async (id) => {
@@ -80,6 +86,49 @@ export const deleteAllPcs = async () => {
   const db = await dbPromise;
   const transaction = db.transaction(PC_STORE_NAME, 'readwrite');
   const store = transaction.objectStore(PC_STORE_NAME);
+  await store.clear();
+  await transaction.done;
+};
+
+// Battle Tracker - Encounter Functions
+
+export const addEncounter = async (encounter) => {
+  const db = await dbPromise;
+  const timestamp = new Date().toISOString();
+  await db.add(ENCOUNTER_STORE_NAME, {
+    ...encounter,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  });
+};
+
+export const getEncounterList = async () => {
+  const db = await dbPromise;
+  return db.getAll(ENCOUNTER_STORE_NAME);
+};
+
+export const getEncounter = async (id) => {
+  const db = await dbPromise;
+  return db.get(ENCOUNTER_STORE_NAME, id);
+};
+
+export const updateEncounter = async (encounter) => {
+  const db = await dbPromise;
+  await db.put(ENCOUNTER_STORE_NAME, {
+    ...encounter,
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+export const deleteEncounter = async (id) => {
+  const db = await dbPromise;
+  await db.delete(ENCOUNTER_STORE_NAME, id);
+};
+
+export const deleteAllEncounters = async () => {
+  const db = await dbPromise;
+  const transaction = db.transaction(ENCOUNTER_STORE_NAME, 'readwrite');
+  const store = transaction.objectStore(ENCOUNTER_STORE_NAME);
   await store.clear();
   await transaction.done;
 };

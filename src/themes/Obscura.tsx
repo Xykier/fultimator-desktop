@@ -101,7 +101,7 @@ const darkObscura = createTheme({
     },
     background: {
       default: "#1a1a1a",
-      paper: "#121212",
+      paper: "#1e1e1e",
     },
     red: {
       main: "#d1232a",

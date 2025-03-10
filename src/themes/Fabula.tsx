@@ -101,7 +101,7 @@ const darkFabula = createTheme({
     },
     background: {
       default: "#1a1a1a",
-      paper: "#121212",
+      paper: "#1e1e1e",
     },
     red: {
       main: "#A71C22",
@@ -197,6 +197,13 @@ const darkFabula = createTheme({
               borderColor: "#ffffff",
             },
           },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1e1e1e",
         },
       },
     },
