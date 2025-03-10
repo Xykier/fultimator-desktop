@@ -10,7 +10,6 @@ import {
   Alert,
 } from "@mui/material";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import { useTranslate } from "../../../translation/translate";
 import CustomHeaderClasses from "../../common/CustomHeaderClasses";
 import CustomHeader2 from "../../common/CustomHeader2";
@@ -47,9 +46,26 @@ export default function PlayerClassCard({
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
 
-  const StyledMarkdown = styled(ReactMarkdown)({
-    whiteSpace: "pre-line",
-  });
+const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 0 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   const [openAddSkillModal, setOpenAddSkillModal] = useState(false);
   const [openEditBenefitsModal, setOpenEditBenefitsModal] = useState(false);

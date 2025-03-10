@@ -5,7 +5,6 @@ import { useTranslate } from "../../../translation/translate";
 import CustomHeader2 from "../../common/CustomHeader2";
 import CustomHeader3 from "../../common/CustomHeader3";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";
 
 export default function PlayerClasses({ player, isCharacterSheet }) {
@@ -15,9 +14,26 @@ export default function PlayerClasses({ player, isCharacterSheet }) {
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
 
-  const StyledMarkdown = styled(ReactMarkdown)({
-    whiteSpace: "pre-line",
-  });
+const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   return (
     <>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Grid, List, ListItemButton, ListItemText, Typography, IconButton, Select, MenuItem, Divider, Box } from '@mui/material';
-import { styled } from "@mui/system";
 import { useTranslate } from "../../translation/translate";
 import ReactMarkdown from 'react-markdown';
 import { Close } from "@mui/icons-material";
@@ -66,10 +65,26 @@ const EditCompendiumModal = ({ open, onClose, typeName, onSave }) => {
     setSelectedItem(item);
   };
 
-  const StyledMarkdown = styled(ReactMarkdown)({
-    whiteSpace: "pre-line",
-    display: "inline",
-  });
+ const StyledMarkdown = ({ children, ...props }) => {
+     return (
+       <div style={{ whiteSpace: "pre-line", margin: 0, padding: 0 }}>
+         <ReactMarkdown
+           {...props}
+           components={{
+             p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+             ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+             li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+             strong: (props) => (
+               <strong style={{ fontWeight: "bold" }} {...props} />
+             ),
+             em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+           }}
+         >
+           {children}
+         </ReactMarkdown>
+       </div>
+     );
+   };
 
   const handleTypeChange = (event) => {
     setSelectedType(event.target.value);

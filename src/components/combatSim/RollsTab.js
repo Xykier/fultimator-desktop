@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import CasinoIcon from "@mui/icons-material/Casino";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import {
   DistanceIcon,
   MeleeIcon,
@@ -75,11 +74,26 @@ const RollsTab = ({ selectedNPC, setClickedData, setOpen, handleAttack }) => {
         poison: "poison_damage",
       };
 
-    const StyledMarkdown = styled(ReactMarkdown)({
-        whiteSpace: "pre-line",
-        display: "inline",
-        unwrapDisallowed: true,
-      });
+const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
     
   return (
     <List sx={{ width: "100%", bgcolor: "background.paper" }}>

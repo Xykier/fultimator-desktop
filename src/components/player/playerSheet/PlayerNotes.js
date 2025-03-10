@@ -3,7 +3,6 @@ import { Paper, Grid, Typography, Divider, IconButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslate } from "../../../translation/translate";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import Clock from "./Clock";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";
@@ -15,28 +14,30 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
 
-  const StyledMarkdown = styled(ReactMarkdown)(({ theme }) => ({
-    "& ul, & ol": {
-      paddingLeft: theme.spacing(2),
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-      lineHeight: 1.2,
-    },
-    "& li": {
-      marginLeft: 0,
-      paddingLeft: theme.spacing(1),
-      lineHeight: 1,
-      marginBottom: theme.spacing(0.5),
-    },
-    "& p": {
-      margin: 0,
-      lineHeight: 1,
-    },
-    "& h1, & h2, & h3, & h4, & h5, & h6": {
-      marginTop: theme.spacing(1),
-      marginBottom: theme.spacing(1),
-    },
-  }));
+  const StyledMarkdown = ({ children, ...props }) => {
+      return (
+        <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
+          <ReactMarkdown
+            {...props}
+            components={{
+              p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+              ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+              li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+              ol: (props) => <ol style={{ margin: 0, padding: 0 }} {...props} />,
+              strong: (props) => (
+                <strong style={{ fontWeight: "bold" }} {...props} />
+              ),
+              em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+              span: (props) => (
+                <span style={{ margin: 0, padding: 0 }} {...props} />
+              ),
+            }}
+          >
+            {children}
+          </ReactMarkdown>
+        </div>
+      );
+    };
 
   const handleClockStateChange = (noteIndex, clockIndex, newState) => {
     setPlayer((prevPlayer) => {

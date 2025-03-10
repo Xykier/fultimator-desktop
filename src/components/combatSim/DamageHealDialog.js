@@ -41,14 +41,10 @@ const DamageHealDialog = ({
   setDamageType,
   isGuarding,
   setIsGuarding,
-  inputRef
+  inputRef,
 }) => {
-
-      const theme = useTheme();
-      const isDarkMode = theme.palette.mode === "dark";
-
-
-
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   // Calculate damage with affinities
   function calculateDamage(
@@ -92,7 +88,11 @@ const DamageHealDialog = ({
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} sx={{ "& .MuiDialog-paper": { borderRadius: 3, padding: 2 } }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      sx={{ "& .MuiDialog-paper": { borderRadius: 3, padding: 2 } }}
+    >
       <DialogTitle
         variant="h4"
         sx={{
@@ -105,7 +105,14 @@ const DamageHealDialog = ({
         {statType === "HP" ? t("combat_sim_edit_hp") : t("combat_sim_edit_mp")}
       </DialogTitle>
       <form onSubmit={handleSubmit}>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 1 }}>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 1,
+          }}
+        >
           <Typography variant="h6" sx={{ mb: 1, mt: -2 }}>
             {npcClicked?.name}
           </Typography>
@@ -156,7 +163,9 @@ const DamageHealDialog = ({
                   },
                 }}
               >
-                <InputLabel id="damage-type-label">{t("combat_sim_damage_type")}</InputLabel>
+                <InputLabel id="damage-type-label">
+                  {t("combat_sim_damage_type")}
+                </InputLabel>
                 <Select
                   label={t("combat_sim_damage_type")}
                   value={damageType}
@@ -182,9 +191,21 @@ const DamageHealDialog = ({
                         paddingY: "6px",
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", minWidth: 70 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          minWidth: 70,
+                        }}
+                      >
                         <TypeIcon type={type} />
-                        <ListItemText sx={{ ml: 1, marginBottom: 0, textTransform: "capitalize" }}>
+                        <ListItemText
+                          sx={{
+                            ml: 1,
+                            marginBottom: 0,
+                            textTransform: "capitalize",
+                          }}
+                        >
                           {t(type)}
                         </ListItemText>
                       </Box>
@@ -203,7 +224,9 @@ const DamageHealDialog = ({
                       mt: 0,
                       "& .MuiSvgIcon-root": { fontSize: "1.5rem" },
                       "&.Mui-checked": {
-                        color: isDarkMode ? "white !important" : "primary !important",
+                        color: isDarkMode
+                          ? "white !important"
+                          : "primary !important",
                       },
                     }}
                   />
@@ -223,17 +246,33 @@ const DamageHealDialog = ({
                     <strong
                       style={{
                         color: (() => {
-                          const calculated = calculateDamage(npcClicked, value, damageType, isGuarding);
+                          const calculated = calculateDamage(
+                            npcClicked,
+                            value,
+                            damageType,
+                            isGuarding
+                          );
                           return calculated < 0 ? "green" : "#cc0000";
                         })(),
                       }}
                     >
-                      <ReactMarkdown components={{ p: "span" }}>
+                      <ReactMarkdown
+                        components={{ p: (props) => <span {...props} /> }}
+                      >
                         {(() => {
-                          const calculated = calculateDamage(npcClicked, value, damageType, isGuarding);
+                          const calculated = calculateDamage(
+                            npcClicked,
+                            value,
+                            damageType,
+                            isGuarding
+                          );
                           return calculated < 0
                             ? `${Math.abs(calculated)} ${damageType} healing`
-                            : `${calculated} ${damageType ? t(damageType + "_damage") : t("notype_damage")}`;
+                            : `${calculated} ${
+                                damageType
+                                  ? t(damageType + "_damage")
+                                  : t("notype_damage")
+                              }`;
                         })()}
                       </ReactMarkdown>
                     </strong>

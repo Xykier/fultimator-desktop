@@ -11,7 +11,6 @@ import {
 import { Martial } from "../../../components/icons";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import attributes from "../../../libs/attributes";
 import types from "../../../libs/types";
 import { OpenBracket, CloseBracket } from "../../../components/Bracket";
@@ -26,8 +25,6 @@ import { useCustomTheme } from "../../../hooks/useCustomTheme";
 
 function Pretty({ base, custom }) {
   const theme = useCustomTheme();
-  console.debug("base", base);
-  console.debug("custom", custom);
   return (
     <ThemeProvider theme={theme}>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -45,32 +42,46 @@ function PrettySingle({ weapon, showActions }) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
 
-  const background = theme.mode === 'dark'
-  ? `linear-gradient(90deg, ${theme.ternary}, rgba(24, 26, 27, 0) 100%)` // Dark mode gradient with black end
-  : `linear-gradient(90deg, ${theme.ternary} 0%, #ffffff 100%)`; // Light mode gradient
+  const background =
+    theme.mode === "dark"
+      ? `linear-gradient(90deg, ${theme.ternary}, rgba(24, 26, 27, 0) 100%)`
+      : `linear-gradient(90deg, ${theme.ternary} 0%, #ffffff 100%)`;
 
-  const background2 = theme.mode === 'dark'
-  ? `black`
-  : `white`;
+  const background2 = theme.mode === "dark" ? `black` : `white`;
 
-  const cardBackground = theme.mode === 'dark'
-  ? `backgroundColor: "#181a1b", background: "#181a1b"`
-  : `backgroundColor: "white", background: "white"`
+  const cardBackground =
+    theme.mode === "dark"
+      ? `backgroundColor: "#181a1b", background: "#181a1b"`
+      : `backgroundColor: "white", background: "white"`;
 
   const ref = useRef();
   const [downloadImage] = useDownloadImage(weapon.name, ref);
 
-  const StyledMarkdown = styled(ReactMarkdown)({
-    whiteSpace: "pre-line",
-  });
+  const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", margin: 0, padding: 0 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   return (
     <>
       <Card>
-        <div
-          ref={ref}
-          style={{ cardBackground }}
-        >
+        <div ref={ref} style={{ cardBackground }}>
           <Stack>
             <Grid
               container
@@ -133,7 +144,11 @@ function PrettySingle({ weapon, showActions }) {
                     padding: "5px",
                   }}
                 >
-                  <Grid item xs={3} sx={{ display: "flex", alignItems: "center" }}>
+                  <Grid
+                    item
+                    xs={3}
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
                     <Typography fontWeight="bold" sx={{ marginRight: "4px" }}>
                       {t(weapon.name)}
                     </Typography>
@@ -145,8 +160,9 @@ function PrettySingle({ weapon, showActions }) {
                   <Grid item xs={4}>
                     <Typography fontWeight="bold" textAlign="center">
                       <OpenBracket />
-                      {`${attributes[weapon.att1].shortcaps} + ${attributes[weapon.att2].shortcaps
-                        }`}
+                      {`${attributes[weapon.att1].shortcaps} + ${
+                        attributes[weapon.att2].shortcaps
+                      }`}
                       <CloseBracket />
                       {weapon.prec !== 0 ? `+${weapon.prec}` : ""}
                     </Typography>
@@ -173,7 +189,9 @@ function PrettySingle({ weapon, showActions }) {
                   }}
                 >
                   <Grid item xs={3}>
-                    <Typography fontWeight="bold">{t(weapon.category)}</Typography>
+                    <Typography fontWeight="bold">
+                      {t(weapon.category)}
+                    </Typography>
                   </Grid>
                   <Grid item xs={1}>
                     <Diamond color={theme.primary} />
@@ -205,7 +223,16 @@ function PrettySingle({ weapon, showActions }) {
               }}
             >
               {!weapon.quality && t("No Qualities")}{" "}
-              <StyledMarkdown allowedElements={["strong", "em"]} unwrapDisallowed={true}>
+              <StyledMarkdown
+                components={{
+                  strong: (props) => (
+                    <strong style={{ fontWeight: "bold" }} {...props} />
+                  ),
+                  em: (props) => (
+                    <em style={{ fontStyle: "italic" }} {...props} />
+                  ),
+                }}
+              >
                 {weapon.quality}
               </StyledMarkdown>
             </Typography>

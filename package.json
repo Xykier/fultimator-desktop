@@ -16,35 +16,36 @@
     "package": "node DownloadTranslations.js && npm run build && npm run dist"
   },
   "dependencies": {
-    "@emotion/react": "^11.5.0",
-    "@emotion/styled": "^11.3.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^5.14.5",
     "@mui/material": "^5.14.5",
-    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/react": "^18.2.42",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "date-fns": "^2.29.3",
     "deep-equal": "^2.2.3",
-    "eslint": "^8.55.0",
-    "googleapis": "^140.0.1",
+    "googleapis": "^146.0.0",
     "html2canvas": "^1.4.1",
-    "idb": "^8.0.0",
-    "papaparse": "^5.4.1",
+    "idb": "^8.0.2",
+    "papaparse": "^5.5.2",
     "react": "^18.2.0",
-    "react-confetti": "^6.1.0",
+    "react-confetti": "^6.4.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.3.1",
-    "react-markdown": "^7.1.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^6.0.0",
     "react-scripts": "^5.0.1",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^4.2.4"
   },
   "devDependencies": {
     "dependency-cruiser": "^11.2.1",
     "electron": "^31.3.1",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "eslint": "^8.57.1",
+    "eslint-config-react-app": "^7.0.1"
   },
   "eslintConfig": {
     "extends": [

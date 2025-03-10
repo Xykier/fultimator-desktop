@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import EditableImage from "../../../components/EditableImage";
 import useDownloadImage from "../../../hooks/useDownloadImage";
 import Export from "../../../components/Export";
@@ -32,32 +31,46 @@ function PrettySingle({ accessory, showActions }) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
 
-  const background = theme.mode === 'dark'
-  ? `linear-gradient(90deg, ${theme.ternary}, rgba(24, 26, 27, 0) 100%)` // Dark mode gradient with black end
-  : `linear-gradient(90deg, ${theme.ternary} 0%, #ffffff 100%)`; // Light mode gradient
+  const background =
+    theme.mode === "dark"
+      ? `linear-gradient(90deg, ${theme.ternary}, rgba(24, 26, 27, 0) 100%)` // Dark mode gradient with black end
+      : `linear-gradient(90deg, ${theme.ternary} 0%, #ffffff 100%)`; // Light mode gradient
 
-  const background2 = theme.mode === 'dark'
-  ? `black`
-  : `white`;
+  const background2 = theme.mode === "dark" ? `black` : `white`;
 
-  const cardBackground = theme.mode === 'dark'
-  ? `backgroundColor: "#181a1b", background: "#181a1b"`
-  : `backgroundColor: "white", background: "white"`
+  const cardBackground =
+    theme.mode === "dark"
+      ? `backgroundColor: "#181a1b", background: "#181a1b"`
+      : `backgroundColor: "white", background: "white"`;
 
   const ref = useRef();
   const [downloadImage] = useDownloadImage(accessory.name, ref);
 
-  const StyledMarkdown = styled(ReactMarkdown)({
-    whiteSpace: "pre-line",
-  });
+  const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", margin: 0, padding: 0 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   return (
     <>
       <Card>
-        <div
-          ref={ref}
-          style={{ cardBackground }}
-        >
+        <div ref={ref} style={{ cardBackground }}>
           <Stack>
             <Grid
               container
@@ -129,7 +142,16 @@ function PrettySingle({ accessory, showActions }) {
                 >
                   <Typography>
                     {!accessory.quality && t("No Qualities")}{" "}
-                    <StyledMarkdown allowedElements={["strong", "em"]} unwrapDisallowed={true}>
+                    <StyledMarkdown
+                      acomponents={{
+                        strong: (props) => (
+                          <strong style={{ fontWeight: "bold" }} {...props} />
+                        ),
+                        em: (props) => (
+                          <em style={{ fontStyle: "italic" }} {...props} />
+                        ),
+                      }}
+                    >
                       {accessory.quality}
                     </StyledMarkdown>
                   </Typography>
@@ -146,7 +168,11 @@ function PrettySingle({ accessory, showActions }) {
               <Download />
             </IconButton>
           </Tooltip>
-          <Export name={`${accessory.name}`} dataType="accessory" data={accessory} />
+          <Export
+            name={`${accessory.name}`}
+            dataType="accessory"
+            data={accessory}
+          />
         </div>
       )}
     </>

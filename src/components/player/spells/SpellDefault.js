@@ -9,16 +9,32 @@ import {
 } from "@mui/material";
 import { Edit, VisibilityOff, SettingsSuggest } from "@mui/icons-material";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import { OffensiveSpellIcon } from "../../icons"; // Ensure this path is correct
 import attributes from "../../../libs/attributes";
 import { CloseBracket, OpenBracket } from "../../Bracket";
 import { useTranslate } from "../../../translation/translate";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";
 
-const StyledMarkdown = styled(ReactMarkdown)({
-  whiteSpace: "pre-line",
-});
+const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
 function ThemedSpellDefault({
   spellName,

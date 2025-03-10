@@ -9,7 +9,6 @@ import {
   Icon,
 } from "@mui/material";
 import ReactMarkdown from "react-markdown";
-import { styled } from "@mui/system";
 import { useTranslate } from "../../../translation/translate";
 import Edit from "@mui/icons-material/Edit";
 import { VisibilityOff } from "@mui/icons-material";
@@ -22,9 +21,26 @@ export default function SpellArcanist({ arcana, rework, onEdit, isEditMode }) {
   const backgroundColor = isDarkMode ? '#1f1f1f' : '#fff';
   const iconColor = isDarkMode ? '#ffffff' : '#000000';
   const gradientColor = isDarkMode ? '#1f1f1f' : '#fff';
-  const StyledMarkdown = styled(ReactMarkdown)({
-    whiteSpace: "pre-line",
-  });
+const StyledMarkdown = ({ children, ...props }) => {
+    return (
+      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
+            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
+            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
+            strong: (props) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </div>
+    );
+  };
 
   const showInPlayerSheet =
     arcana.showInPlayerSheet || arcana.showInPlayerSheet === undefined;
