@@ -14,7 +14,7 @@ const StandardRollsSection = ({ selectedNPC, calcAttr, handleRoll }) => {
       value: calcAttr("Slow", "Enraged", "dexterity", selectedNPC),
     },
     {
-      label: "INT",
+      label: "INS",
       value: calcAttr("Dazed", "Enraged", "insight", selectedNPC),
     },
     {

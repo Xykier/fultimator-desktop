@@ -380,7 +380,7 @@ export default function PlayerCardShort({
               </Grid>
               <Grid container item xs={3} justifyContent="center">
                 <Typography variant="h2" align="center">
-                  {t("INT") + ": d" + player.attributes.insight}
+                  {t("INS") + ": d" + player.attributes.insight}
                 </Typography>
               </Grid>
               <Grid container item xs={3} justifyContent="center">

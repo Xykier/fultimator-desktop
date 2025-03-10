@@ -15,7 +15,7 @@ const AttributeSection = ({ selectedNPC, calcAttr }) => {
       originalValue: selectedNPC.attributes?.dexterity,
     },
     {
-      label: "INT",
+      label: "INS",
       value: calcAttr("Dazed", "Enraged", "insight", selectedNPC),
       color: "#ab47bc",
       originalValue: selectedNPC.attributes?.insight,
