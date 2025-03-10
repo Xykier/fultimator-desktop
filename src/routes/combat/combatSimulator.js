@@ -430,7 +430,7 @@ const CombatSim = () => {
   const handleConfirm = () => {
     let adjustedValue = 0;
 
-    if (damageType !== "" && !isHealing && statType === "HP") {
+    if (!isHealing && statType === "HP") {
       adjustedValue = -Number(
         calculateDamage(npcClicked, value, damageType, isGuarding)
       );
