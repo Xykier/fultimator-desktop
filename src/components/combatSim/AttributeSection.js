@@ -43,7 +43,6 @@ const AttributeSection = ({ selectedNPC, calcAttr }) => {
         borderTop: `1px solid ${isDarkMode ? "#444" : "#ccc"}`,
         paddingY: 1,
         bgcolor: isDarkMode ? "#333333" : "#f5f5f5",
-        width: "100%",
       }}
     >
       {attributes.map((attr) => (

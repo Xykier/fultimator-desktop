@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogActions,
   FormHelperText,
+  Grid,
 } from "@mui/material";
 import {
   Close,
@@ -486,7 +487,7 @@ const NPCDetail = ({
         )}
       </Box>
 
-      {tabIndex === 0 && (
+      {tabIndex === 0 && !isMobile && (
         <Box
           sx={{
             borderTop: "1px solid " + theme.palette.divider,
@@ -523,12 +524,18 @@ const NPCDetail = ({
           </Tooltip>
         </Box>
       )}
-      {tabIndex === 2 && (
-        <StandardRollsSection
-          selectedNPC={selectedNPC}
-          calcAttr={calcAttr}
-          handleRoll={handleRoll}
-        />
+      {tabIndex === 2 && !isMobile && (
+        <Box
+          sx={{
+            borderTop: "1px solid " + theme.palette.divider,
+          }}
+        >
+          <StandardRollsSection
+            selectedNPC={selectedNPC}
+            calcAttr={calcAttr}
+            handleRoll={handleRoll}
+          />
+        </Box>
       )}
 
       {!isMobile && (
@@ -636,10 +643,60 @@ const NPCDetail = ({
       </DialogTitle>
       {renderTabs}
       <DialogContent dividers>{content}</DialogContent>
-      <DialogActions
-        sx={{ width: "100%", justifyContent: "center", padding: 0 }}
-      >
-        <AttributeSection selectedNPC={selectedNPC} calcAttr={calcAttr} />
+      <DialogActions sx={{ p: 0 }}>
+        <Grid container spacing={0}>
+          {tabIndex === 0 && (
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginY: 1,
+                }}
+              >
+                <Select
+                  value={selectedStudy}
+                  onChange={handleStudyChange}
+                  size="small"
+                  sx={{
+                    // when selected, change border color
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: isDarkMode ? "#fff" : "primary",
+                    },
+                  }}
+                >
+                  <MenuItem value={0}>{t("combat_sim_study")}</MenuItem>
+                  <MenuItem value={1}>7+</MenuItem>
+                  <MenuItem value={2}>10+</MenuItem>
+                  <MenuItem value={3}>13+</MenuItem>
+                </Select>
+                <Tooltip title="Download Sheet" placement="bottom">
+                  <Button
+                    color={isDarkMode ? "white" : "primary"}
+                    aria-label="download"
+                    onClick={downloadImage}
+                  >
+                    <Download />
+                  </Button>
+                </Tooltip>
+              </Box>
+            </Grid>
+          )}
+          {tabIndex === 2 && (
+            <Grid item xs={12}>
+              <StandardRollsSection
+                selectedNPC={selectedNPC}
+                calcAttr={calcAttr}
+                handleRoll={handleRoll}
+              />
+            </Grid>
+          )}
+          <Grid item xs={12}>
+            <Box sx={{ width: "100%" }}>
+              <AttributeSection selectedNPC={selectedNPC} calcAttr={calcAttr} />
+            </Box>
+          </Grid>
+        </Grid>
       </DialogActions>
     </Dialog>
   ) : (

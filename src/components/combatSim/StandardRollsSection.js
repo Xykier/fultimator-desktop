@@ -35,11 +35,9 @@ const StandardRollsSection = ({ selectedNPC, calcAttr, handleRoll }) => {
       sx={{
         display: "flex",
         alignItems: "stretch",
-        borderBottom: "1px solid #ddd",
-        borderTop: "1px solid #ddd",
         py: 1,
         minHeight: 60,
-        mt: 2,
+
       }}
     >
       {/* Attribute Selectors */}

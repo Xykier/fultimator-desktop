@@ -129,7 +129,7 @@ export default function NpcSelector({
             </FormControl>
           </Box>
 
-          <Box sx={{ maxHeight: "75vh", overflowY: "auto" }}>
+          <Box sx={{ maxHeight: "calc(100vh - 170px)", overflowY: "auto" }}>
             {filteredNpcList.length > 0 ? (
               filteredNpcList.map((npc) => (
                 <React.Fragment key={npc.id}>
@@ -335,8 +335,8 @@ export default function NpcSelector({
           </Box>
 
           {/* NPC List */}
-          <Box sx={{ maxHeight: "68vh", overflowY: "auto" }}>
-            <List sx={{ height: "calc(68vh - 55px)", overflowY: "auto" }}>
+          <Box sx={{ maxHeight: "calc(100vh - 295px)", overflowY: "auto" }}>
+            <List sx={{ height: "calc(100vh - 295px)", overflowY: "auto" }}>
               {filteredNpcList.map((npc) => (
                 <Box key={npc.id}>
                   <ListItem
