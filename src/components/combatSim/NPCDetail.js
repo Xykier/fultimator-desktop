@@ -55,6 +55,7 @@ const NPCDetail = ({
   isMobile,
   addLog,
   openLogs,
+  npcDetailWidth,
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -68,8 +69,6 @@ const NPCDetail = ({
 
   const autoUseMP = localStorage.getItem("combatSimAutoUseMP") === "true";
   const autoOpenLogs = localStorage.getItem("combatSimAutoOpenLogs") === "true";
-
-  console.log(autoUseMP);
 
   if (!selectedNPC) return null;
 
@@ -646,12 +645,13 @@ const NPCDetail = ({
   ) : (
     <Box
       sx={{
-        width: "30%",
+        width: npcDetailWidth,
         bgcolor: isDarkMode ? "#333333" : "#ffffff",
         padding: 2,
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        borderRadius: "0 8px 8px 0",
       }}
     >
       {content}

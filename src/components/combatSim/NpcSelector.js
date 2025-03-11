@@ -249,6 +249,7 @@ export default function NpcSelector({
         bgcolor: isDarkMode ? "#333333" : "#ffffff",
         padding: 2,
         height: "100%",
+        borderRadius: "8px",
         transition: "width 0.3s ease-in-out", // Smooth transition
       }}
     >

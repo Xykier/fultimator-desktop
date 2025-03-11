@@ -24,6 +24,7 @@ import { typesList } from "../../libs/types";
 import { t } from "../../translation/translate";
 import DamageHealDialog from "../../components/combatSim/DamageHealDialog";
 import CombatLog from "../../components/combatSim/CombatLog";
+import { DragHandle } from "@mui/icons-material";
 
 export default function CombatSimulator() {
   return (
@@ -40,7 +41,11 @@ const CombatSim = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [loading, setLoading] = useState(true); // Loading state
   const inputRef = useRef(null);
-  const isDarkMode = theme.palette.mode === "dark";
+  const isDarkMode = theme.palette.mode === "dark"; // Check if dark mode is enabled
+  const [npcDetailWidth, setNpcDetailWidth] = useState(30); // NPC detail width in percentage
+  const isResizing = useRef(false); // NPC detail Resizing ref
+  const startX = useRef(0);
+  const startWidth = useRef(npcDetailWidth);
 
   // Encounter states
   const [encounter, setEncounter] = useState(null); // State for the current encounter
@@ -711,6 +716,32 @@ const CombatSim = () => {
     addLog("combat_sim_log_used_ultima_point", selectedNPC.name);
   };
 
+  // NPC Detail width resizing
+  const handleMouseDown = (e) => {
+    isResizing.current = true;
+    startX.current = e.clientX;
+    startWidth.current = npcDetailWidth;
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isResizing.current) return;
+
+    const deltaX = e.clientX - startX.current;
+    const newWidth = Math.max(
+      20, // Minimum width is 20%
+      Math.min(50, startWidth.current - (deltaX / window.innerWidth) * 100)
+    );
+    setNpcDetailWidth(newWidth);
+  };
+
+  const handleMouseUp = () => {
+    isResizing.current = false;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
   // During loading state
   if (loading) {
     return (
@@ -821,7 +852,37 @@ const CombatSim = () => {
             clearLogs={clearLogs}
           />
         </Box>
-        {/* NPC Sheet */}
+        {/* NPC Detail Resize Handle */}
+        {selectedNPC && (
+          <Box
+          sx={{
+            width: "5px",
+            cursor: "ew-resize",
+            backgroundColor: isDarkMode ? "#555" : "#ccc",
+            "&:hover": { backgroundColor: isDarkMode ? "#777" : "#aaa" },
+            marginLeft: -1,
+            marginRight: -2,
+            p: "0 5px",
+            borderRadius: "8px 0 0 8px",
+            display: "flex", // Flexbox to center the icon
+            justifyContent: "center", // Horizontally center the icon
+            alignItems: "center", // Vertically center the icon
+          }}
+          onMouseDown={handleMouseDown}
+        >
+          <DragHandle
+            fontSize="small"
+            sx={{
+              color: isDarkMode ? "#ddd" : "#555",
+              transform: "rotate(90deg)", // Rotate the icon by 90 degrees
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          />
+        </Box>
+        )}
+        {/* NPC Detail */}
         <NPCDetail
           selectedNPC={selectedNPC}
           setSelectedNPC={setSelectedNPC}
@@ -843,6 +904,7 @@ const CombatSim = () => {
           isMobile={isMobile}
           addLog={addLog}
           openLogs={() => setLogOpen(true)}
+          npcDetailWidth={`${npcDetailWidth}%`}
         />
       </Box>
       <DamageHealDialog
