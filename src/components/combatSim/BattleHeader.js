@@ -35,10 +35,13 @@ export default function BattleHeader({
         justifyContent: "space-between",
         alignItems: "center",
         bgcolor: isDarkMode ? "#333333" : "#ffffff",
-        padding: 2,
+        paddingX: 2,
+        paddingY: 1,
         borderRadius: 3,
+        position: "relative", // Ensure absolute positioning works for the round counter
       }}
     >
+      {/* Encounter Name Section */}
       <Box sx={{ display: "flex", alignItems: "center" }}>
         {isEditing ? (
           <TextField
@@ -75,13 +78,14 @@ export default function BattleHeader({
         )}
       </Box>
 
-      {/* Center Section for Round */}
+      {/* Center Section for Round - Always Centered */}
       <Box
         sx={{
+          position: "absolute", // Keeps it independent of flex alignment
+          left: "50%",
+          transform: "translateX(-50%)",
           display: "flex",
-          justifyContent: "center",
           alignItems: "center",
-          flex: 1,
         }}
       >
         <IconButton
@@ -93,7 +97,11 @@ export default function BattleHeader({
         </IconButton>
         <Typography
           variant="h5"
-          sx={{ marginX: 2, textTransform: "uppercase", fontSize: { sm: "0.8rem", md: "0.9rem", lg: "1rem"} }}
+          sx={{
+            marginX: 2,
+            textTransform: "uppercase",
+            fontSize: { sm: "0.8rem", md: "0.9rem", lg: "1rem" },
+          }}
         >
           {t("combat_sim_round") + `: ${round}`}
         </Typography>
@@ -106,6 +114,7 @@ export default function BattleHeader({
         </IconButton>
       </Box>
 
+      {/* Save Button & Time Ago Section */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         {timeAgo !== "Not saved yet" && !isMobile && (
           <Typography variant="body2">{timeAgo}</Typography>
@@ -127,7 +136,11 @@ export default function BattleHeader({
             color="primary"
             onClick={handleSaveState}
             startIcon={<Save />}
-            sx={{ fontWeight: "bold", fontSize: { sm:"0.7rem", md:"0.8rem", lg:"0.9rem"} }}
+            sx={{
+              fontWeight: "bold",
+              fontSize: { sm: "0.7rem", md: "0.8rem", lg: "0.9rem" },
+              borderRadius: 5,
+            }}
           >
             {t("combat_sim_save")}
           </Button>

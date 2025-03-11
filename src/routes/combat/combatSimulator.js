@@ -802,7 +802,7 @@ const CombatSim = () => {
         sx={{
           display: "flex",
           gap: 2,
-          height: isMobile ? "calc(100vh - 211px)" : "calc(100vh - 176px)",
+          height: isMobile ? "calc(100vh - 195px)" : "calc(100vh - 157px)",
         }}
       >
         {/* NPC Selector */}
@@ -855,32 +855,32 @@ const CombatSim = () => {
         {/* NPC Detail Resize Handle */}
         {selectedNPC && (
           <Box
-          sx={{
-            width: "5px",
-            cursor: "ew-resize",
-            backgroundColor: isDarkMode ? "#555" : "#ccc",
-            "&:hover": { backgroundColor: isDarkMode ? "#777" : "#aaa" },
-            marginLeft: -1,
-            marginRight: -2,
-            p: "0 5px",
-            borderRadius: "8px 0 0 8px",
-            display: "flex", // Flexbox to center the icon
-            justifyContent: "center", // Horizontally center the icon
-            alignItems: "center", // Vertically center the icon
-          }}
-          onMouseDown={handleMouseDown}
-        >
-          <DragHandle
-            fontSize="small"
             sx={{
-              color: isDarkMode ? "#ddd" : "#555",
-              transform: "rotate(90deg)", // Rotate the icon by 90 degrees
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              width: "5px",
+              cursor: "ew-resize",
+              backgroundColor: isDarkMode ? "#555" : "#ccc",
+              "&:hover": { backgroundColor: isDarkMode ? "#777" : "#aaa" },
+              marginLeft: -1,
+              marginRight: -2,
+              p: "0 5px",
+              borderRadius: "8px 0 0 8px",
+              display: "flex", // Flexbox to center the icon
+              justifyContent: "center", // Horizontally center the icon
+              alignItems: "center", // Vertically center the icon
             }}
-          />
-        </Box>
+            onMouseDown={handleMouseDown}
+          >
+            <DragHandle
+              fontSize="small"
+              sx={{
+                color: isDarkMode ? "#ddd" : "#555",
+                transform: "rotate(90deg)", // Rotate the icon by 90 degrees
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            />
+          </Box>
         )}
         {/* NPC Detail */}
         <NPCDetail
