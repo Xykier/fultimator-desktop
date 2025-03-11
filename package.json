@@ -1,6 +1,6 @@
 {
   "name": "fultimator",
-  "version": "1.0.0-prerelease2",
+  "version": "1.0.0-prerelease3",
   "private": true,
   "main": "build/electron.js",
   "homepage": "./",
