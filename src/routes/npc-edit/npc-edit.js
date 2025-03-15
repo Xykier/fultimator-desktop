@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import {
   Grid,
@@ -10,12 +10,9 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
-import {
-  Download,
-  Save,
-  ArrowUpward,
-} from "@mui/icons-material";
+import { Download, Save, ArrowUpward } from "@mui/icons-material";
 import Layout from "../../components/Layout";
 import NpcPretty from "../../components/npc/Pretty";
 import EditBasics from "../../components/npc/EditBasics";
@@ -51,7 +48,6 @@ export default function NpcEdit() {
   const npcId = parseInt(params.npcId, 10);
   const [showScrollTop, setShowScrollTop] = useState(true); // State for scroll-to-top button visibility
 
-
   // Scroll-to-top handler
   const handleMoveToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -60,6 +56,9 @@ export default function NpcEdit() {
   const [npc, setNpc] = useState(null); // NPC state
   const [npcTemp, setNpcTemp] = useState(null); // Temporary NPC state
   const [isUpdated, setIsUpdated] = useState(false); // State for unsaved changes
+  const [loadingIsUpdated, setLoadingIsUpdated] = useState(false);
+  const isNpcUpdated = useMemo(() => !deepEqual(npcTemp, npc), [npcTemp, npc]);
+
 
   // Effect to fetch NPC data from IndexedDB
   useEffect(() => {
@@ -83,12 +82,17 @@ export default function NpcEdit() {
   }, [npc]);
 
   useEffect(() => {
-    if (!deepEqual(npcTemp, npc)) {
-      setIsUpdated(true);
-    } else {
-      setIsUpdated(false);
-    }
-  }, [npcTemp, npc]);
+    setLoadingIsUpdated(true); // Start loading
+
+    const timeoutId = setTimeout(() => {
+      setIsUpdated(isNpcUpdated);
+
+      // Small delay before stopping loading (improves UI smoothness)
+      setTimeout(() => setLoadingIsUpdated(false), 10);
+    }, 300); // Adjust delay as needed
+
+    return () => clearTimeout(timeoutId); // Cleanup on dependency change
+  }, [npcTemp, npc, isNpcUpdated]);
 
   // Handler for Ctrl+S to save NPC
   const handleCtrlS = useCallback(
@@ -141,6 +145,13 @@ export default function NpcEdit() {
   const prettyRef = useRef();
   const [downloadImage] = useDownloadImage(npc?.name, prettyRef);
 
+  // Function to save NPC
+  const saveNpc = useCallback(() => {
+    updateNpc(npcTemp);
+    setIsUpdated(false);
+    setNpc(npcTemp);
+  }, [npcTemp]);
+
   // Check if the 'json' query parameter is true and return the JSON response
   const urlParams = new URLSearchParams(location.search);
   if (urlParams.get("json") === "true" && npc) {
@@ -155,13 +166,6 @@ export default function NpcEdit() {
   function DownloadImage() {
     setTimeout(downloadImage, 100);
   }
-
-  // Function to save NPC
-  const saveNpc = () => {
-    updateNpc(npcTemp);
-    setIsUpdated(false);
-    setNpc(npcTemp);
-  };
 
   return (
     <NpcProvider npcData={npcTemp}>
@@ -333,22 +337,31 @@ export default function NpcEdit() {
         <Divider sx={{ my: 2, mb: 20 }} />
 
         {/* Save Button, shown if there are unsaved changes */}
-        {isUpdated && (
+        {(loadingIsUpdated || isUpdated) && (
           <Grid
             style={{ position: "fixed", bottom: 65, right: 10, zIndex: 100 }}
           >
-            <Fade in={showScrollTop} timeout={300}>
-              <Tooltip title="Save" placement="bottom">
-                <Fab
-                  color="primary"
-                  aria-label="save"
-                  onClick={saveNpc}
-                  disabled={!isUpdated}
-                  size="medium"
-                  style={{ marginLeft: "5px" }}
-                >
-                  <Save />
-                </Fab>
+            <Fade in={true} timeout={300}>
+              <Tooltip
+                title={loadingIsUpdated ? "Checking..." : "Save"}
+                placement="bottom"
+              >
+                <span>
+                  <Fab
+                    color="primary"
+                    aria-label="save"
+                    onClick={saveNpc}
+                    disabled={loadingIsUpdated || !isUpdated} // Disable while loading
+                    size="medium"
+                    style={{ marginLeft: "5px" }}
+                  >
+                    {loadingIsUpdated ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      <Save />
+                    )}
+                  </Fab>
+                </span>
               </Tooltip>
             </Fade>
           </Grid>
