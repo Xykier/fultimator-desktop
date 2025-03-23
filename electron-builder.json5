@@ -13,9 +13,6 @@
       {
         target: "dmg",
         arch: ["x64", "arm64"]
-      },
-      {
-        "target": "universal"
       }
     ],
     artifactName: "${productName}-Mac-${version}-Installer.${ext}"
