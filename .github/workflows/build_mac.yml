@@ -1,0 +1,45 @@
+name: Build macOS Electron app
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest  # This specifies a macOS runner
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2  # Checkout the code from the repository
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2  # Set up Node.js
+      with:
+        node-version: '16'  # Specify the Node.js version
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: npm install  # Install dependencies
+
+    - name: Run translations (npm run translate)
+      run: npm run translate  # Run the translation script
+
+    - name: Build the Electron app
+      run: npm run build  # Run the build script (tsc, vite build, and electron-builder)
+
+    - name: Upload macOS build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: fultimator-macos-${{ github.sha }}
+        path: release/${{ github.event.head_commit.timestamp }}/Fultimator-Mac-${{ github.sha }}-Installer.dmg  # Adjust this to the actual path of the .dmg file
