@@ -10,19 +10,19 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest # This specifies a macOS runner
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4.2.2 # Checkout the code from the repository
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4.3.0 # Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: "20" # Specify the Node.js version
+          node-version: "20"
 
       - name: Cache Node.js modules
-        uses: actions/cache@v4.2.3
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -30,21 +30,25 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm install # Install dependencies
+        run: npm install
 
-      - name: Run translations (npm run translate)
-        run: npm run translate # Run the translation script
+      - name: Run translations
+        run: npm run translate
 
       - name: Build the Electron app
-        run: npm run build # Run the build script (tsc, vite build, and electron-builder)
+        run: npm run build
         env:
-          NODE_OPTIONS: "--max-old-space-size=8192" # Memory limit to 8GB
+          NODE_OPTIONS: "--max-old-space-size=8192"
+          # Disable auto-publishing to GitHub
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ""
+          ELECTRON_BUILDER_PUBLISH: "never"
 
       - name: List build directory contents
         run: find release -type f -name "*.dmg" | sort
-
+        
       - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: fultimator-macos-${{ github.sha }}
-          path: release/**/*.dmg # More flexible path pattern to find DMG files
+          path: release/**/*.dmg
