@@ -49,33 +49,10 @@ jobs:
           VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
           VITE_CLIENT_SECRET: ${{ secrets.VITE_CLIENT_SECRET }}
 
-      - name: Create Universal macOS Binary
-        run: |
-          mkdir -p release/universal
-          # Find the specific version directory
-          VERSION_DIR=$(find release -type d -name "[0-9]*.[0-9]*.[0-9]*-*" -o -name "[0-9]*.[0-9]*.[0-9]*" | head -1)
-          echo "Using version directory: $VERSION_DIR"
-
-          # Copy the arm64 app to the universal directory as a base
-          cp -r "$VERSION_DIR/mac-arm64/Fultimator.app" "$VERSION_DIR/universal/Fultimator.app"
-
-          # Create the directory for the universal binary if it doesn't exist
-          mkdir -p "$VERSION_DIR/universal/Fultimator.app/Contents/MacOS"
-
-          # Create the universal binary
-          lipo -create -output "$VERSION_DIR/universal/Fultimator.app/Contents/MacOS/Fultimator" \
-            "$VERSION_DIR/mac/Fultimator.app/Contents/MacOS/Fultimator" \
-            "$VERSION_DIR/mac-arm64/Fultimator.app/Contents/MacOS/Fultimator"
-
-      - name: Package Universal DMG
-        run: |
-          VERSION_DIR=$(find release -type d -name "[0-9]*.[0-9]*.[0-9]*-*" -o -name "[0-9]*.[0-9]*.[0-9]*" | head -1)
-          npm exec electron-builder -- --mac --dir "$VERSION_DIR/universal/Fultimator.app" --config.dmg.title="Fultimator Universal" --config.dmg.icon="public/icons/app.icns" --config.dmg.contents=[{"x":448,"y":344,"type":"link","path":"/Applications"},{"x":192,"y":344,"type":"file","path":"$VERSION_DIR/universal/Fultimator.app"}]
-
       - name: List build directory contents
         run: find release -type f -name "*.dmg" | sort
 
-      - name: Upload macOS build artifact
+      - name: Upload macOS build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: fultimator-macos-${{ github.sha }}
