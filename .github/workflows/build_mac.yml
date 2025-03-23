@@ -38,8 +38,11 @@ jobs:
       - name: Build the Electron app
         run: npm run build # Run the build script (tsc, vite build, and electron-builder)
 
+      - name: List build directory contents
+        run: find release -type f -name "*.dmg" | sort
+
       - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v1 # Fallback to v1 for the upload-artifact action
+        uses: actions/upload-artifact@v3 # Updated from v1 to v3
         with:
           name: fultimator-macos-${{ github.sha }}
-          path: release/${{ github.event.head_commit.timestamp }}/Fultimator-Mac-${{ github.sha }}-Installer.dmg # Ensure this path matches the actual output path
+          path: release/**/*.dmg # More flexible path pattern to find DMG files
