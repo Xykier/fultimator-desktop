@@ -42,7 +42,7 @@ jobs:
         run: find release -type f -name "*.dmg" | sort
 
       - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v3 # Updated from v1 to v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: fultimator-macos-${{ github.sha }}
           path: release/**/*.dmg # More flexible path pattern to find DMG files
