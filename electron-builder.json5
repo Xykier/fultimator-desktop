@@ -40,11 +40,5 @@
     artifactName: "${productName}-Linux-${version}.${ext}",
     icon: "public/icons/app.png",
     maintainer: "Fultimator <fultimator@gmail.com>",
-  },
-  publish: {
-    "provider": "github",
-    "repo": "fultimator-desktop",
-    "owner": "fultimator",
-    "releaseType": "draft"
   }
 }
