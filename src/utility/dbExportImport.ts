@@ -8,7 +8,7 @@ import {
   deleteAllPcs,
   getEncounterList,
   deleteAllEncounters,
-} from "./db";
+} from "./db.js";
 
 // Export function for both NPCs and PCs
 export const exportDatabase = async () => {
@@ -115,16 +115,11 @@ export const handleImport = async (fileId: string): Promise<string> => {
     const filePath = await window.electron.downloadFromGoogleDrive(fileId);
     console.log("File downloaded to path:", filePath);
 
-    // Fetch the file using the file path
-    const response = await fetch(filePath);
-    if (!response.ok) {
-      throw new Error("Failed to fetch the downloaded file");
-    }
-    const text = await response.text();
-    console.log("File content fetched successfully");
+    // Read the file content using Electron's file system API
+    const fileContent = await window.electron.readFile(filePath);
 
     // Create a File object from the file content
-    const file = new File([text], "fultimatordb.json", {
+    const file = new File([fileContent], "fultimatordb.json", {
       type: "application/json",
     });
 

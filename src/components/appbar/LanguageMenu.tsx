@@ -20,7 +20,7 @@ const LanguageMenu = () => {
     useRef(localStorage.getItem("selectedLanguage")).current ?? "en";
 
 
-  const handleLanguageChange = async (languageCode) => {
+  const handleLanguageChange = async (languageCode : string) => {
     // Save the selected language
     await localStorage.setItem("selectedLanguage", languageCode);
   
@@ -70,7 +70,7 @@ const LanguageMenu = () => {
           horizontal: "right",
         }}
       >
-        {languageOptions.map((option) => (
+        {languageOptions.map((option : { code : string, label : string} ) => (
           <MenuItem
             key={option.code}
             onClick={() => handleLanguageChange(option.code)}

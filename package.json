@@ -1,107 +1,54 @@
 {
-  "name": "fultimator",
-  "version": "1.0.0-prerelease3",
+  "name": "fultimator-desktop-vine",
   "private": true,
-  "main": "build/electron.js",
-  "homepage": "./",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "translate": "node DownloadTranslations.js",
-    "electron": "electron ./public/electron.js",
-    "electron-test": "npm run build && npm run electron",
-    "dist": "electron-builder",
-    "package": "node DownloadTranslations.js && npm run build && npm run dist"
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "translate": "node DownloadTranslations.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/base": "^5.0.0-beta.67",
-    "@mui/icons-material": "^5.16.14",
-    "@mui/material": "^5.16.14",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@types/react": "^18.3.18",
-    "axios": "^1.8.2",
-    "date-fns": "^2.29.3",
+    "@mui/icons-material": "^6.4.8",
+    "@mui/material": "^6.4.8",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
     "deep-equal": "^2.2.3",
-    "googleapis": "^146.0.0",
+    "googleapis": "^148.0.0",
     "html2canvas": "^1.4.1",
     "idb": "^8.0.2",
     "papaparse": "^5.5.2",
-    "react": "^18.3.1",
+    "react": "^18.2.0",
     "react-confetti": "^6.4.0",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-dom": "^18.3.1",
+    "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^6.30.0",
-    "react-scripts": "^5.0.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^4.2.4"
+    "react-router-dom": "^7.4.0"
   },
   "devDependencies": {
-    "dependency-cruiser": "^11.2.1",
-    "electron": "^31.7.7",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
-    "eslint": "^8.57.1",
-    "eslint-config-react-app": "^7.0.1"
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6",
+    "vite-plugin-electron": "^0.28.6",
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vite-plugin-svgr": "^4.3.0"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "optionalDependencies": {
-    "fsevents": "^2.3.3"
-  },
+  "main": "dist-electron/main.js",
   "description": "Unofficial Fabula Ultima Tools",
-  "author": "Fultimator <fultimator@gmail.com>",
-  "build": {
-    "appId": "com.fultimator.fultimator",
-    "productName": "Fultimator",
-    "asar": true,
-    "files": [
-      "build/**/*",
-      "public/electron.js"
-    ],
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb",
-        "rpm",
-        "snap",
-        "tar.gz"
-      ],
-      "icon": "public/icons/app.png",
-      "maintainer": "Fultimator <fultimator@gmail.com>"
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "zip"
-      ],
-      "icon": "public/icons/app.ico"
-    },
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    }
-  }
+  "author": "Fultimator <fultimator@gmail.com>"
 }

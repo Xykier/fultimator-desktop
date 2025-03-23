@@ -24,8 +24,8 @@ interface HelpFeedbackDialogProps {
 const HelpFeedbackDialog: React.FC<HelpFeedbackDialogProps> = ({
   open,
   onClose,
-  userEmail,
-  userUUID,
+  //userEmail,
+  //userUUID,
   title,
   placeholder,
   webhookUrl,

@@ -340,7 +340,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           "How can we help you today? Please leave a message in english!"
         )}
         onSuccess={() => console.log("Successfully submitted feedback")}
-        webhookUrl={process.env.REACT_APP_DISCORD_FEEDBACK_WEBHOOK_URL || ""}
+        webhookUrl={import.meta.env.VITE_DISCORD_FEEDBACK_WEBHOOK_URL || ""}
       />{" "}
       {/* Render the dialog */}
       <Dialog open={isImportWarningOpen} onClose={handleImportCancel}>

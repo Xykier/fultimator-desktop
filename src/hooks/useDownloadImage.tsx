@@ -2,12 +2,12 @@ import { useCallback } from "react";
 import html2canvas from "html2canvas";
 import { useCustomTheme } from "./useCustomTheme";
 
-const useDownloadImage = (name, ref) => {
+// Type the `ref` parameter to be a React.RefObject<HTMLDivElement> or another appropriate element type
+const useDownloadImage = (name: string, ref: React.RefObject<HTMLDivElement>) => {
   const theme = useCustomTheme();
+  
   const downloadImage = useCallback(async () => {
-    const background = theme.mode === 'dark'
-      ? `#1f1f1f`
-      : `#ffffff`;
+    const background = theme.mode === 'dark' ? `#1f1f1f` : `#ffffff`;
 
     if (ref.current) {
       try {

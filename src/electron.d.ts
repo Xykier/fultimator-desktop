@@ -11,6 +11,7 @@ declare global {
       listFiles(): Promise<{ id: string; name: string }[]>;
       checkAuthentication(): Promise<boolean>;
       logoutGoogle(): Promise<void>;
+      readFile(filePath: string): Promise<string>;
     };
   }
 }

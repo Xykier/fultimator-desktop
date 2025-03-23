@@ -7,7 +7,7 @@ const PC_STORE_NAME = 'pcPersonal';
 const ENCOUNTER_STORE_NAME = 'encounterStore';
 
 const dbPromise = openDB(DB_NAME, DB_VERSION, {
-  upgrade(db, oldVersion, newVersion, transaction) {
+  upgrade(db, oldVersion, newVersion) {
     console.log(`Upgrading DB from version ${oldVersion} to ${newVersion}`);
 
     if (oldVersion < 1) {

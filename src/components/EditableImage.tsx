@@ -1,14 +1,14 @@
-import React, {useRef, useState} from "react";
-import {Box} from "@mui/material";
-import {AddPhotoAlternate} from "@mui/icons-material";
+import { useRef, useState } from "react";
+import { Box } from "@mui/material";
+import { AddPhotoAlternate } from "@mui/icons-material";
 
 type EditableAvatarProps = {
-  size: number
-}
+  size: number;
+};
 
 // EditableAvatar displays an image that can be replaced by the user with a click and a select on a file in their hard drive
 // You can set the width and height of the image component with the property `size` (default 40)
-function EditableImage({size}: EditableAvatarProps) {
+function EditableImage({ size }: EditableAvatarProps) {
   if (size === 0) {
     size = 40;
   }
@@ -20,47 +20,62 @@ function EditableImage({size}: EditableAvatarProps) {
 
   // makes sure that when clicking on the component we trigger the file selection
   const handleClick = () => {
-    if (!ref.current) { return }
+    if (!ref.current) {
+      return;
+    }
     ref.current.click();
   };
 
   // reads the uploaded image and updates the image state
-  const handleFileInputChange = (event) => {
-    const selectedFile = event.target.files[0];
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+
     const reader = new FileReader();
     reader.onload = () => {
       const imageDataURL = reader.result;
-      if (typeof imageDataURL !== 'string') {return}
-      setImage(imageDataURL);
+      if (typeof imageDataURL === "string") {
+        setImage(imageDataURL);
+      }
     };
     reader.readAsDataURL(selectedFile);
   };
 
-  return <>
-    <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-      }}
-      onClick={handleClick}
-    >
-      {image ?
-        <img alt="" src={image} width={`${size}px`} height={`${size}px`} style={{objectFit: "cover"}}
-      /> :
-        <AddPhotoAlternate sx={{opacity: 0.5, width: `${size/2}px`, height: `${size/2}px`}} />
-      }
-    </Box>
-    <input
-      type="file"
-      ref={ref}
-      style={{ display: "none" }}
-      onChange={handleFileInputChange}
-    />
-  </>
+  return (
+    <>
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+        }}
+        onClick={handleClick}
+      >
+        {image ? (
+          <img
+            alt=""
+            src={image}
+            width={`${size}px`}
+            height={`${size}px`}
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <AddPhotoAlternate
+            sx={{ opacity: 0.5, width: `${size / 2}px`, height: `${size / 2}px` }}
+          />
+        )}
+      </Box>
+      <input
+        type="file"
+        ref={ref}
+        style={{ display: "none" }}
+        onChange={handleFileInputChange}
+      />
+    </>
+  );
 }
 
-export default EditableImage
+export default EditableImage;

@@ -7,7 +7,7 @@ function useDownloadJSON(name: string, data: any) {
   function downloadJSON() {
     const jsonData = JSON.stringify(data);
     const file = new Blob([jsonData], { type: "text/json" });
-    download(URL.createObjectURL(file), name + ".json", "text/json");
+    download(URL.createObjectURL(file), name + ".json");
   }
 
   function copyJSONToClipboard() {

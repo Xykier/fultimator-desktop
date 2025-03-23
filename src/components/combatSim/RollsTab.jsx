@@ -14,7 +14,7 @@ import {
   MeleeIcon,
   OffensiveSpellIcon,
   SpellIcon,
-} from "../icons.js";
+} from "../icons.jsx";
 import Diamond from "../Diamond";
 import { calcPrecision, calcDamage, calcMagic } from "../../libs/npcs";
 import { t } from "../../translation/translate";

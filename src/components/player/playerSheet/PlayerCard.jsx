@@ -15,9 +15,9 @@ import { useTranslate } from "../../../translation/translate";
 import avatar_image from "../../avatar.jpg";
 import Diamond from "../../Diamond";
 import { styled } from "@mui/system";
-import { ReactComponent as DefIcon } from "../../svgs/def.svg";
-import { ReactComponent as MdefIcon } from "../../svgs/mdef.svg";
-import { ReactComponent as InitIcon } from "../../svgs/init.svg";
+import DefIcon from '../../svgs/def.svg?react';
+import MdefIcon from '../../svgs/mdef.svg?react';
+import InitIcon from '../../svgs/init.svg?react';
 import { TypeAffinity } from "../stats/types";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";
 

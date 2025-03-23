@@ -17,7 +17,7 @@ import {
   MeleeIcon,
   OffensiveSpellIcon,
   SpellIcon,
-} from "../icons.js";
+} from "../icons.jsx";
 import { GiDeathSkull } from "react-icons/gi";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { t } from "../../translation/translate";

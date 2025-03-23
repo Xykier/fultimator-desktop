@@ -3,10 +3,10 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useCustomTheme } from "../../hooks/useCustomTheme";
 
 const CustomHeaderAccordion = ({
-    expanded,
-    handleAccordionChange,
-    headerText,
-    showIconButton,
+    //expanded,
+    //handleAccordionChange,
+    headerText = "",
+    showIconButton = false,
 }) => {
     const theme = useCustomTheme();
     return (
