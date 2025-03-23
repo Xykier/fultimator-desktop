@@ -22,7 +22,7 @@ jobs:
           node-version: "16" # Specify the Node.js version
 
       - name: Cache Node.js modules
-        uses: actions/cache@v3 # Updated to the latest version
+        uses: actions/cache@v3 # Keep cache action as v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -39,8 +39,7 @@ jobs:
         run: npm run build # Run the build script (tsc, vite build, and electron-builder)
 
       - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v3  # Use the latest version of the upload-artifact action
+        uses: actions/upload-artifact@v1 # Fallback to v1 for the upload-artifact action
         with:
           name: fultimator-macos-${{ github.sha }}
-          path: release/${{ github.event.head_commit.timestamp }}/Fultimator-Mac-${{ github.sha }}-Installer.dmg  # Adjust this to match the actual path
-      
+          path: release/${{ github.event.head_commit.timestamp }}/Fultimator-Mac-${{ github.sha }}-Installer.dmg # Ensure this path matches the actual output path
