@@ -33,7 +33,15 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      crypto: 'crypto-browserify' // Needed for macOS build on github workflow
-    }
-  }
+      crypto: 'crypto-browserify', // Polyfill crypto
+      // Make sure Node.js-related modules use the correct ones for Electron
+      buffer: 'buffer',
+      process: 'process/browser',
+      stream: 'stream-browserify',
+    },
+  },
+  optimizeDeps: {
+    // Ensure that polyfills are included
+    include: ['crypto-browserify', 'buffer', 'process', 'stream-browserify'],
+  },
 });
