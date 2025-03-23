@@ -33,7 +33,7 @@
     deleteAppDataOnUninstall: false,
   },
   portable: {
-    artifactName: "${productName}-Windows-Portable-${version}.${ext}",
+    artifactName: "${productName}-Windows-${version}-Portable.${ext}",
   },
   linux: {
     target: ["AppImage"],

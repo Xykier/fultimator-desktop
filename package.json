@@ -1,7 +1,7 @@
 {
-  "name": "fultimator-desktop-vine",
+  "name": "fultimator",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.0-prerelease4",
   "type": "module",
   "scripts": {
     "dev": "vite",
