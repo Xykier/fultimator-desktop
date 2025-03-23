@@ -37,6 +37,8 @@ jobs:
 
       - name: Build the Electron app
         run: npm run build # Run the build script (tsc, vite build, and electron-builder)
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192" # Memory limit to 8GB
 
       - name: List build directory contents
         run: find release -type f -name "*.dmg" | sort
