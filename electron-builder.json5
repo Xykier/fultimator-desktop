@@ -9,8 +9,9 @@
   },
   files: ["dist", "dist-electron"],
   mac: {
-    target: ["dmg"],
-    artifactName: "${productName}-Mac-${version}-Installer.${ext}",
+    target: ["dmg", "zip"],
+    arch: ["x64", "arm64"],
+    artifactName: "${productName}-Mac-${version}-${arch}.${ext}"
   },
   win: {
     target: [

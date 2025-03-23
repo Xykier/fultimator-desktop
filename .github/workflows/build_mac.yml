@@ -35,21 +35,32 @@ jobs:
       - name: Run translations
         run: npm run translate
 
-      - name: Build the Electron app
+      - name: Build the Electron app (x64 & arm64)
         run: npm run build:nopublish
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
-          # Disable auto-publishing to GitHub
           CSC_IDENTITY_AUTO_DISCOVERY: false
           GH_TOKEN: ""
           ELECTRON_BUILDER_PUBLISH: "never"
-          # Vite environment variables
           VITE_DISCORD_FEEDBACK_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_FEEDBACK_WEBHOOK_URL }}
           VITE_DISCORD_REPORT_BUG_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_REPORT_BUG_WEBHOOK_URL }}
           VITE_DISCORD_REPORT_CONTENT_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_REPORT_CONTENT_WEBHOOK_URL }}
           VITE_DISCORD_APPLICATIONS_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_APPLICATIONS_WEBHOOK_URL }}
           VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
           VITE_CLIENT_SECRET: ${{ secrets.VITE_CLIENT_SECRET }}
+
+      - name: Create Universal macOS Binary
+        run: |
+          mkdir -p release/universal
+          lipo -create -output release/universal/Fultimator.app/Contents/MacOS/Fultimator \
+            release/*-x64/Fultimator.app/Contents/MacOS/Fultimator \
+            release/*-arm64/Fultimator.app/Contents/MacOS/Fultimator
+          cp -r release/*-arm64/Fultimator.app release/universal/
+          mv release/universal/Fultimator.app release/universal/Fultimator-Mac-Universal.app
+
+      - name: Package Universal DMG
+        run: |
+          npm exec electron-builder -- --mac universal
 
       - name: List build directory contents
         run: find release -type f -name "*.dmg" | sort
