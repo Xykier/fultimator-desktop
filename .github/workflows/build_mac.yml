@@ -39,7 +39,8 @@ jobs:
         run: npm run build # Run the build script (tsc, vite build, and electron-builder)
 
       - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3  # Use the latest version of the upload-artifact action
         with:
           name: fultimator-macos-${{ github.sha }}
-          path: release/${{ github.event.head_commit.timestamp }}/Fultimator-Mac-${{ github.sha }}-Installer.dmg # Ensure this matches the actual file path
+          path: release/${{ github.event.head_commit.timestamp }}/Fultimator-Mac-${{ github.sha }}-Installer.dmg  # Adjust this to match the actual path
+      
