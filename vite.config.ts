@@ -31,4 +31,9 @@ export default defineConfig({
           : {},
     }),
   ],
+  resolve: {
+    alias: {
+      crypto: 'crypto-browserify' // Needed for macOS build on github workflow
+    }
+  }
 });
