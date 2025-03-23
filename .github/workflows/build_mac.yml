@@ -36,7 +36,7 @@ jobs:
         run: npm run translate
 
       - name: Build the Electron app
-        run: npm run build
+        run: npm run build:nopublish
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
           # Disable auto-publishing to GitHub
