@@ -43,10 +43,17 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           GH_TOKEN: ""
           ELECTRON_BUILDER_PUBLISH: "never"
+          # Vite environment variables
+          VITE_DISCORD_FEEDBACK_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_FEEDBACK_WEBHOOK_URL }}
+          VITE_DISCORD_REPORT_BUG_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_REPORT_BUG_WEBHOOK_URL }}
+          VITE_DISCORD_REPORT_CONTENT_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_REPORT_CONTENT_WEBHOOK_URL }}
+          VITE_DISCORD_APPLICATIONS_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_APPLICATIONS_WEBHOOK_URL }}
+          VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
+          VITE_CLIENT_SECRET: ${{ secrets.VITE_CLIENT_SECRET }}
 
       - name: List build directory contents
         run: find release -type f -name "*.dmg" | sort
-        
+
       - name: Upload macOS build artifact
         uses: actions/upload-artifact@v4
         with:
