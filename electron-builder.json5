@@ -19,6 +19,7 @@
         arch: ["arm64"],
       },
     ],
+    icon: "public/icons/app.icns",
     artifactName: "${productName}-Mac-${arch}-${version}-Installer.${ext}",
   },
   win: {
