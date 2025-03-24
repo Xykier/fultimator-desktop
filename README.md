@@ -36,10 +36,8 @@ Fultimator is available for the following platforms:
   - **arm64**: For M1, M2, and newer Apple Silicon Macs.
 - **Linux**: Available in the following formats:
   - **AppImage**: A portable package for most Linux distributions.
-  - **tar.gz**: Compressed source code or binaries.
   - **x86_64.rpm**: Red Hat-based Linux distributions (e.g., Fedora, CentOS).
   - **amd64.deb**: Debian-based Linux distributions (e.g., Ubuntu).
-  - **amd64.snap**: Snap package for distributions that support Snap.
 
 ### Pre-releases
 Pre-release versions of Fultimator are available only for **Windows** at this time.

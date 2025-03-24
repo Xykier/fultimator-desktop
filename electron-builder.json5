@@ -12,14 +12,14 @@
     target: [
       {
         target: "dmg",
-        arch: ["x64"]
+        arch: ["x64"],
       },
       {
         target: "dmg",
-        arch: ["arm64"]
-      }
+        arch: ["arm64"],
+      },
     ],
-    artifactName: "${productName}-Mac-${arch}-${version}-Installer.${ext}"
+    artifactName: "${productName}-Mac-${arch}-${version}-Installer.${ext}",
   },
   win: {
     target: [
@@ -45,9 +45,16 @@
     artifactName: "${productName}-Windows-${version}-Portable.${ext}",
   },
   linux: {
-    target: ["AppImage"],
-    artifactName: "${productName}-Linux-${version}.${ext}",
+    target: ["AppImage", "deb", "rpm"],
+    artifactName: "${productName}-Linux-${arch}-${version}.${ext}",
     icon: "public/icons/app.png",
     maintainer: "Fultimator <fultimator@gmail.com>",
-  }
+    category: "Utility",
+  },
+  deb: {
+    depends: ["libnotify4", "libxtst6", "libnss3"],
+  },
+  rpm: {
+    fpm: ["--rpm-rpmbuild-define=_build_id_links none"],
+  },
 }

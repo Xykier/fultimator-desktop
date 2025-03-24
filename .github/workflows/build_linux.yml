@@ -1,0 +1,85 @@
+name: Build Linux Electron app
+
+on:
+  workflow_dispatch: # This makes the action manually triggerable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - name: Install Linux packaging dependencies
+        run: |
+          sudo apt-get update
+          # Dependencies for general building
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            gcc \
+            g++ \
+            make \
+            fakeroot \
+            dpkg \
+            rpm \
+            file
+
+          # For deb packages
+          sudo apt-get install -y --no-install-recommends \
+            libopenjp2-tools \
+            lintian
+
+          # For rpm packages
+          sudo apt-get install -y --no-install-recommends \
+            rpm \
+            rpmlint
+
+          # For AppImage
+          sudo apt-get install -y --no-install-recommends \
+            libfuse2 \
+            squashfs-tools
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run translations
+        run: npm run translate
+
+      - name: Build the Electron app for Linux
+        run: npm run build:nopublish
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+          ELECTRON_BUILDER_PUBLISH: "never"
+          GH_TOKEN: ""
+          VITE_DISCORD_FEEDBACK_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_FEEDBACK_WEBHOOK_URL }}
+          VITE_DISCORD_REPORT_BUG_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_REPORT_BUG_WEBHOOK_URL }}
+          VITE_DISCORD_REPORT_CONTENT_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_REPORT_CONTENT_WEBHOOK_URL }}
+          VITE_DISCORD_APPLICATIONS_WEBHOOK_URL: ${{ secrets.VITE_DISCORD_APPLICATIONS_WEBHOOK_URL }}
+          VITE_CLIENT_ID: ${{ secrets.VITE_CLIENT_ID }}
+          VITE_CLIENT_SECRET: ${{ secrets.VITE_CLIENT_SECRET }}
+
+      - name: List build directory contents
+        run: find release -type f -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" | sort
+
+      - name: Upload Linux build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fultimator-linux-${{ github.sha }}
+          path: |
+            release/**/*.deb
+            release/**/*.rpm
+            release/**/*.AppImage
