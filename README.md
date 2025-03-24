@@ -39,7 +39,7 @@ Get the latest release from the [Releases Page](https://github.com/fultimator/fu
 
 ## Localization
 
-Fultimator is available in **English, Italian, German, French, Portuguese, Spanish, Polish, and Russian**.  
+Fultimator is available in **English, Italian, German, French, Portuguese (Brasil), Spanish and Polish**.  
 
 Want to help improve translations or add new ones? Join our [Discord Server](https://discord.gg/9yYc6R93Cd) and contribute to the localization effort!  
 
