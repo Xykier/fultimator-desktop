@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "fs";
 import { google } from "googleapis";
+import * as os from "os";
 
 //const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,9 @@ const OAuth2 = new OAuth2Client(
 );
 
 const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
+
+// Determine the current platform
+const platform = os.platform();
 
 // The built directory structure
 //
@@ -97,57 +101,156 @@ function createWindow() {
 
   // Handle Google authentication
   ipcMain.handle("authenticate-google", async () => {
+    const OAuth2Client = google.auth.OAuth2;
+    const clientId = import.meta.env.VITE_CLIENT_ID;
+    const clientSecret = import.meta.env.VITE_CLIENT_SECRET;
+
     const authUrl = OAuth2.generateAuthUrl({
       access_type: "offline",
       scope: SCOPES,
     });
 
-    return new Promise((resolve, reject) => {
-      const authWindow = new BrowserWindow({
-        width: 500,
-        height: 600,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-        },
-      });
+    // Platform-specific authentication logic
+    if (platform === "darwin") {
+      // macOS-specific authentication
+      return new Promise((resolve, reject) => {
+        const redirectUri = "http://localhost";
+        const OAuth2 = new OAuth2Client(clientId, clientSecret, redirectUri);
 
-      authWindow.loadURL(authUrl);
+        const authWindow = new BrowserWindow({
+          width: 800,
+          height: 600,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+          },
+          show: true,
+        });
 
-      const handleNavigation = (event, url) => {
-        const query = new URL(url).searchParams;
-        const code = query.get("code");
+        console.log("macOS Authentication URL:", authUrl);
 
-        if (code) {
-          if (event) event.preventDefault(); // Check if event exists before calling preventDefault
+        authWindow.loadURL(authUrl);
+        authWindow.show();
+        authWindow.focus();
 
-          OAuth2.getToken(code, (err, tokens) => {
-            if (err) {
-              console.error("Error getting tokens:", err);
-              reject("Failed to authenticate with Google.");
-              return;
+        const handleNavigation = (event: any, url: string) => {
+          try {
+            console.log("macOS Navigation detected:", url);
+            const parsedUrl = new URL(url);
+            const code = parsedUrl.searchParams.get("code");
+
+            if (code) {
+              // Prevent default navigation if event exists
+              if (event && event.preventDefault) {
+                event.preventDefault();
+              }
+
+              // Use a promise-based approach for token retrieval
+              OAuth2.getToken(code, (err, tokens) => {
+                if (err) {
+                  console.error("macOS Token retrieval error:", err);
+                  reject(err);
+                  return;
+                }
+
+                // Set credentials and save tokens
+                OAuth2.setCredentials(tokens);
+                fs.writeFileSync("tokens.json", JSON.stringify(tokens));
+
+                // Close the auth window
+                if (!authWindow.isDestroyed()) {
+                  authWindow.close();
+                }
+
+                resolve("Authenticated with Google successfully!");
+              });
             }
+          } catch (error) {
+            console.error("macOS Authentication process error:", error);
+            reject(error);
+          }
+        };
 
-            OAuth2.setCredentials(tokens);
-            fs.writeFileSync("tokens.json", JSON.stringify(tokens));
+        // Multiple event listeners for comprehensive tracking
+        authWindow.webContents.on("will-navigate", handleNavigation);
+        authWindow.webContents.on("did-finish-load", () => {
+          const currentURL = authWindow.webContents.getURL();
+          handleNavigation(null, currentURL);
+        });
 
-            if (authWindow) authWindow.close();
-            resolve("Authenticated with Google successfully!");
-          });
-        }
-      };
+        // Add error handling
+        authWindow.webContents.on(
+          "did-fail-load",
+          (event, errorCode, errorDescription) => {
+            console.error(
+              "macOS Failed to load authentication page:",
+              errorDescription
+            );
+            reject(
+              new Error(`Authentication page load failed: ${errorDescription}`)
+            );
+          }
+        );
 
-      authWindow.webContents.on("will-navigate", handleNavigation);
-
-      authWindow.webContents.on("did-finish-load", () => {
-        const currentURL = authWindow.webContents.getURL();
-        handleNavigation(null, currentURL); // Now it won't crash since we check for event inside handleNavigation
+        // Ensure proper cleanup
+        authWindow.on("closed", () => {
+          console.log("macOS Authentication window closed");
+          reject(
+            new Error(
+              "Authentication window closed before completing the process."
+            )
+          );
+        });
       });
+    } else {
+      // Windows/Linux authentication (using local server method)
+      return new Promise((resolve, reject) => {
+        const authWindow = new BrowserWindow({
+          width: 500,
+          height: 600,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+          },
+        });
 
-      authWindow.on("closed", () => {
-        reject("Authentication window closed before completing the process.");
+        authWindow.loadURL(authUrl);
+
+        const handleNavigation = (event, url) => {
+          const query = new URL(url).searchParams;
+          const code = query.get("code");
+
+          if (code) {
+            if (event) event.preventDefault(); // Check if event exists before calling preventDefault
+
+            OAuth2.getToken(code, (err, tokens) => {
+              if (err) {
+                console.error("Error getting tokens:", err);
+                reject("Failed to authenticate with Google.");
+                return;
+              }
+
+              OAuth2.setCredentials(tokens);
+              fs.writeFileSync("tokens.json", JSON.stringify(tokens));
+
+              if (authWindow) authWindow.close();
+              resolve("Authenticated with Google successfully!");
+            });
+          }
+        };
+
+        authWindow.webContents.on("will-navigate", handleNavigation);
+
+        authWindow.webContents.on("did-finish-load", () => {
+          const currentURL = authWindow.webContents.getURL();
+          handleNavigation(null, currentURL); // Now it won't crash since we check for event inside handleNavigation
+        });
+
+        authWindow.on("closed", () => {
+          reject("Authentication window closed before completing the process.");
+        });
       });
-    });
+    }
   });
 
   // Check Google authentication status
