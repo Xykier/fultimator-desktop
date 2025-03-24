@@ -1,6 +1,7 @@
 name: Build macOS Electron app
 
 on:
+  workflow_dispatch: # This makes the action manual
   push:
     branches:
       - main
