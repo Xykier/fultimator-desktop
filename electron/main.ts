@@ -95,141 +95,141 @@ function createWindow() {
     });
   });
 
-   // Handle Google authentication
-   ipcMain.handle('authenticate-google', async () => {
+  // Handle Google authentication
+  ipcMain.handle("authenticate-google", async () => {
     const authUrl = OAuth2.generateAuthUrl({
-      access_type: 'offline',
+      access_type: "offline",
       scope: SCOPES,
-    })
-
-    const authWindow = new BrowserWindow({
-      width: 500,
-      height: 600,
-      parent: win,
-      modal: true,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-      },
-    })
-
-    authWindow.loadURL(authUrl)
+    });
 
     return new Promise((resolve, reject) => {
-      const handleRedirect = (event, url) => {
-        const query = new URL(url).searchParams
-        const code = query.get('code')
+      const authWindow = new BrowserWindow({
+        width: 500,
+        height: 600,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      });
+
+      authWindow.loadURL(authUrl);
+
+      const handleNavigation = (event, url) => {
+        const query = new URL(url).searchParams;
+        const code = query.get("code");
 
         if (code) {
+          if (event) event.preventDefault(); // Check if event exists before calling preventDefault
+
           OAuth2.getToken(code, (err, tokens) => {
             if (err) {
-              console.error('Error while exchanging code for tokens', err)
-              reject('Failed to authenticate with Google.')
-              return
+              console.error("Error getting tokens:", err);
+              reject("Failed to authenticate with Google.");
+              return;
             }
 
-            OAuth2.setCredentials(tokens)
-            fs.writeFileSync('tokens.json', JSON.stringify(tokens))
-            authWindow.close()
-            resolve('Authenticated with Google successfully!')
-          })
+            OAuth2.setCredentials(tokens);
+            fs.writeFileSync("tokens.json", JSON.stringify(tokens));
+
+            if (authWindow) authWindow.close();
+            resolve("Authenticated with Google successfully!");
+          });
         }
-      }
+      };
 
-      authWindow.webContents.on('will-redirect', handleRedirect)
+      authWindow.webContents.on("will-navigate", handleNavigation);
 
-      authWindow.on('closed', () => {
-        reject('Authentication window closed before completing the process.')
-      })
+      authWindow.webContents.on("did-finish-load", () => {
+        const currentURL = authWindow.webContents.getURL();
+        handleNavigation(null, currentURL); // Now it won't crash since we check for event inside handleNavigation
+      });
 
-      authWindow.on('page-title-updated', (event, title) => {
-        if (title.includes('Error')) {
-          reject('Authentication failed.')
-        }
-      })
-    })
-  })
+      authWindow.on("closed", () => {
+        reject("Authentication window closed before completing the process.");
+      });
+    });
+  });
 
   // Check Google authentication status
-  ipcMain.handle('checkAuthentication', async () => {
+  ipcMain.handle("checkAuthentication", async () => {
     try {
-      const tokens = fs.existsSync('tokens.json')
-      return tokens // Returns true if tokens exist, meaning user is authenticated
+      const tokens = fs.existsSync("tokens.json");
+      return tokens; // Returns true if tokens exist, meaning user is authenticated
     } catch (error) {
-      console.error('Error checking authentication status', error)
-      return false
+      console.error("Error checking authentication status", error);
+      return false;
     }
-  })
+  });
 
   // Handle Google logout
-  ipcMain.handle('logoutGoogle', async () => {
+  ipcMain.handle("logoutGoogle", async () => {
     try {
-      fs.unlinkSync('tokens.json')
-      return true
+      fs.unlinkSync("tokens.json");
+      return true;
     } catch (error) {
-      console.error('Error during logout', error)
-      throw new Error('Failed to log out.')
+      console.error("Error during logout", error);
+      throw new Error("Failed to log out.");
     }
-  })
+  });
 
   // Handle file upload to Google Drive
-  ipcMain.handle('upload-to-google-drive', async (event, filePath) => {
+  ipcMain.handle("upload-to-google-drive", async (event, filePath) => {
     try {
       if (!fs.existsSync(filePath)) {
-        throw new Error(`File not found: ${filePath}`)
+        throw new Error(`File not found: ${filePath}`);
       }
 
-      const tokens = JSON.parse(fs.readFileSync('tokens.json').toString());
-      OAuth2.setCredentials(tokens)
+      const tokens = JSON.parse(fs.readFileSync("tokens.json").toString());
+      OAuth2.setCredentials(tokens);
 
-      const drive = google.drive({ version: 'v3', auth: OAuth2 })
+      const drive = google.drive({ version: "v3", auth: OAuth2 });
 
       const response = await drive.files.list({
         q: "name='fultimatordb.json'",
-        fields: 'files(id, name)',
-      })
+        fields: "files(id, name)",
+      });
 
       const existingFile = response.data.files.find(
-        (file) => file.name === 'fultimatordb.json'
-      )
+        (file) => file.name === "fultimatordb.json"
+      );
 
-      let res
+      let res;
       if (existingFile) {
         res = await drive.files.update({
           fileId: existingFile.id,
           media: {
             body: fs.createReadStream(filePath),
           },
-          fields: 'id',
-        })
+          fields: "id",
+        });
       } else {
         const fileMetadata = {
-          name: 'fultimatordb.json',
-          mimeType: 'application/json',
-        }
+          name: "fultimatordb.json",
+          mimeType: "application/json",
+        };
         const media = {
           body: fs.createReadStream(filePath),
-        }
+        };
         res = await drive.files.create({
           requestBody: fileMetadata,
           media: media,
-          fields: 'id',
-        })
+          fields: "id",
+        });
       }
 
-      console.log('File uploaded with ID:', res.data.id)
-      return res.data.id
+      console.log("File uploaded with ID:", res.data.id);
+      return res.data.id;
     } catch (error) {
-      console.error('Error uploading file:', error)
-      throw error
+      console.error("Error uploading file:", error);
+      throw error;
     }
-  })
+  });
 
-   // Handle download from Google Drive
-   ipcMain.handle("download-from-google-drive", async (event, fileId) => {
+  // Handle download from Google Drive
+  ipcMain.handle("download-from-google-drive", async (event, fileId) => {
     console.log("Requested file ID:", fileId); // Log file ID
     try {
-      const tokens = JSON.parse(fs.readFileSync('tokens.json').toString());
+      const tokens = JSON.parse(fs.readFileSync("tokens.json").toString());
       OAuth2.setCredentials(tokens);
 
       const drive = google.drive({ version: "v3", auth: OAuth2 });
@@ -254,16 +254,16 @@ function createWindow() {
   });
 
   // Handle file save
-  ipcMain.handle('save-file', async (event, { fileName, buffer }) => {
+  ipcMain.handle("save-file", async (event, { fileName, buffer }) => {
     try {
-      const filePath = path.join(app.getPath('documents'), fileName)
-      fs.writeFileSync(filePath, Buffer.from(buffer))
-      return filePath
+      const filePath = path.join(app.getPath("documents"), fileName);
+      fs.writeFileSync(filePath, Buffer.from(buffer));
+      return filePath;
     } catch (error) {
-      console.error('Error saving file', error)
-      throw error
+      console.error("Error saving file", error);
+      throw error;
     }
-  })
+  });
 
   // Handle file read
   ipcMain.handle("read-file", async (event, filePath) => {
@@ -277,35 +277,35 @@ function createWindow() {
   });
 
   // Handle version request
-  ipcMain.handle('get-version', async () => {
-    const packageJsonPath = path.join(__dirname, '..', 'package.json')
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
-    return packageJson.version
-  })
+  ipcMain.handle("get-version", async () => {
+    const packageJsonPath = path.join(__dirname, "..", "package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    return packageJson.version;
+  });
 
   // Handle file list from Google Drive
-  ipcMain.handle('list-files', async () => {
+  ipcMain.handle("list-files", async () => {
     try {
-      const tokens = JSON.parse(fs.readFileSync('tokens.json').toString());
-      OAuth2.setCredentials(tokens)
+      const tokens = JSON.parse(fs.readFileSync("tokens.json").toString());
+      OAuth2.setCredentials(tokens);
 
-      const drive = google.drive({ version: 'v3', auth: OAuth2 })
+      const drive = google.drive({ version: "v3", auth: OAuth2 });
 
       const response = await drive.files.list({
         q: "name='fultimatordb.json'",
-        fields: 'files(id, name)',
-      })
+        fields: "files(id, name)",
+      });
 
       if (response.data.files.length > 0) {
-        return response.data.files
+        return response.data.files;
       } else {
-        throw new Error('No files found')
+        throw new Error("No files found");
       }
     } catch (error) {
-      console.error('Error listing files', error)
-      throw error
+      console.error("Error listing files", error);
+      throw error;
     }
-  })
+  });
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
