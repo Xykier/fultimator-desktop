@@ -5,6 +5,9 @@ import path from "node:path";
 import fs from "fs";
 import { google } from "googleapis";
 import * as os from "os";
+import * as http from "http";
+import * as url from "url";
+import * as net from "net";
 
 //const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -101,105 +104,97 @@ function createWindow() {
 
   // Handle Google authentication
   ipcMain.handle("authenticate-google", async () => {
-    const OAuth2Client = google.auth.OAuth2;
-    const clientId = import.meta.env.VITE_CLIENT_ID;
-    const clientSecret = import.meta.env.VITE_CLIENT_SECRET;
-
     const authUrl = OAuth2.generateAuthUrl({
       access_type: "offline",
       scope: SCOPES,
     });
 
-    // Platform-specific authentication logic
     if (platform === "darwin") {
-      // macOS-specific authentication
       return new Promise((resolve, reject) => {
-        const redirectUri = "http://localhost";
-        const OAuth2 = new OAuth2Client(clientId, clientSecret, redirectUri);
+        let authWindow: BrowserWindow | null = null;
+        let server: http.Server | null = null;
 
-        const authWindow = new BrowserWindow({
-          width: 800,
-          height: 600,
-          webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-          },
-          show: true,
-        });
-
-        console.log("macOS Authentication URL:", authUrl);
-
-        authWindow.loadURL(authUrl);
-        authWindow.show();
-        authWindow.focus();
-
-        const handleNavigation = (event: any, url: string) => {
-          try {
-            console.log("macOS Navigation detected:", url);
-            const parsedUrl = new URL(url);
-            const code = parsedUrl.searchParams.get("code");
-
-            if (code) {
-              // Prevent default navigation if event exists
-              if (event && event.preventDefault) {
-                event.preventDefault();
-              }
-
-              // Use a promise-based approach for token retrieval
-              OAuth2.getToken(code, (err, tokens) => {
-                if (err) {
-                  console.error("macOS Token retrieval error:", err);
-                  reject(err);
-                  return;
-                }
-
-                // Set credentials and save tokens
-                OAuth2.setCredentials(tokens);
-                fs.writeFileSync("tokens.json", JSON.stringify(tokens));
-
-                // Close the auth window
-                if (!authWindow.isDestroyed()) {
-                  authWindow.close();
-                }
-
-                resolve("Authenticated with Google successfully!");
+        const findAvailablePort = (startPort: number): Promise<number> => {
+          return new Promise((portResolve) => {
+            const testServer = net.createServer();
+            testServer
+              .listen(startPort, () => {
+                const port = (testServer.address() as net.AddressInfo).port;
+                testServer.close(() => {
+                  portResolve(port);
+                });
+              })
+              .on("error", () => {
+                portResolve(findAvailablePort(startPort + 1));
               });
-            }
-          } catch (error) {
-            console.error("macOS Authentication process error:", error);
-            reject(error);
-          }
+          });
         };
 
-        // Multiple event listeners for comprehensive tracking
-        authWindow.webContents.on("will-navigate", handleNavigation);
-        authWindow.webContents.on("did-finish-load", () => {
-          const currentURL = authWindow.webContents.getURL();
-          handleNavigation(null, currentURL);
-        });
+        findAvailablePort(63342).then((redirectPort) => {
+          server = http.createServer((req, res) => {
+            const parsedUrl = url.parse(req.url, true);
 
-        // Add error handling
-        authWindow.webContents.on(
-          "did-fail-load",
-          (event, errorCode, errorDescription) => {
-            console.error(
-              "macOS Failed to load authentication page:",
-              errorDescription
-            );
-            reject(
-              new Error(`Authentication page load failed: ${errorDescription}`)
-            );
-          }
-        );
+            if (parsedUrl.pathname === "/callback") {
+              const code = parsedUrl.query.code as string;
 
-        // Ensure proper cleanup
-        authWindow.on("closed", () => {
-          console.log("macOS Authentication window closed");
-          reject(
-            new Error(
-              "Authentication window closed before completing the process."
-            )
-          );
+              if (code) {
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.end(
+                  "<html><body><h1>Authentication Successful! You can close this window.</h1></body></html>"
+                );
+
+                server?.close();
+
+                OAuth2.getToken(code, (err, tokens) => {
+                  if (err) {
+                    console.error("Token retrieval error:", err);
+                    reject(err);
+                    return;
+                  }
+
+                  OAuth2.setCredentials(tokens);
+                  fs.writeFileSync("tokens.json", JSON.stringify(tokens));
+
+                  authWindow?.close();
+                  resolve("Authenticated with Google successfully!");
+                });
+              }
+            }
+          });
+
+          server.listen(redirectPort, () => {
+            console.log(`Listening on port ${redirectPort}`);
+
+            authWindow = new BrowserWindow({
+              width: 800,
+              height: 600,
+              webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+              },
+              show: true,
+            });
+
+            authWindow.loadURL(
+              `${authUrl}&redirect_uri=http://localhost:${redirectPort}/callback`
+            );
+            authWindow.show();
+            authWindow.focus();
+
+            authWindow.on("closed", () => {
+              server?.close();
+              reject(
+                new Error(
+                  "Authentication window closed before completing the process."
+                )
+              );
+            });
+          });
+
+          server.on("error", (err) => {
+            console.error("Server error:", err);
+            reject(err);
+          });
         });
       });
     } else {
