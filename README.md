@@ -28,6 +28,26 @@ The source code is licensed under the [MIT License](https://github.com/fultimato
 
 Get the latest release from the [Releases Page](https://github.com/fultimator/fultimator-desktop/releases).
 
+Fultimator is available for the following platforms:
+
+- **Windows**: Available in both **portable** and **setup** versions (compatible with Windows 10 and newer).
+- **macOS**: Available for macOS 10.12+ in two versions:
+  - **x64**: For Intel-based Macs.
+  - **arm64**: For M1, M2, and newer Apple Silicon Macs.
+- **Linux**: Available in the following formats:
+  - **AppImage**: A portable package for most Linux distributions.
+  - **tar.gz**: Compressed source code or binaries.
+  - **x86_64.rpm**: Red Hat-based Linux distributions (e.g., Fedora, CentOS).
+  - **amd64.deb**: Debian-based Linux distributions (e.g., Ubuntu).
+  - **amd64.snap**: Snap package for distributions that support Snap.
+
+### Pre-releases
+Pre-release versions of Fultimator are available only for **Windows** at this time.
+
+## macOS Installation Guide
+
+For users installing Fultimator on macOS, please refer to the full installation guide [here](https://github.com/fultimator/fultimator-desktop/blob/main/INSTALLATION_GUIDE_MACOS.md).
+
 ---
 
 ## Community & Support
