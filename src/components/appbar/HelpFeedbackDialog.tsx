@@ -179,12 +179,13 @@ const HelpFeedbackDialog: React.FC<HelpFeedbackDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={isSubmitting}>
+        <Button variant="contained" onClick={handleClose} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button
           onClick={handleSubmit}
           color="primary"
+          variant="contained"
           disabled={isSubmitting || cooldown > 0}
         >
           {cooldown > 0 ? `Submit (wait ${cooldown}s)` : "Submit"}

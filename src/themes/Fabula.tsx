@@ -207,6 +207,106 @@ const darkFabula = createTheme({
         },
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        root: () => ({
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor:  "#fff",
+          },
+        }),
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#2b2b2b",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          "&.Mui-selected": {
+            backgroundColor: "#2b4b42",
+            "&:hover": {
+              backgroundColor: "#47645b",
+            },
+          },
+        },
+      },
+    },
+    MuiListSubheader: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1e1e1e",
+          color: "#ffffff",
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: "#85C3B1",
+          "&.Mui-checked": {
+            color: "#85C3B1",
+          },
+          "&.Mui-disabled": {
+            color: "rgba(133, 195, 177, 0.5)",
+          },
+          "&:hover": {
+            backgroundColor: "rgba(133, 195, 177, 0.1)",
+          },
+        },
+      },
+    },
+    MuiSwitch: {
+      styleOverrides: {
+        switchBase: {
+          "&.Mui-checked": {
+            color: "#85C3B1",
+            "& + .MuiSwitch-track": {
+              backgroundColor: "#47645b",
+            },
+          },
+        },
+        thumb: {
+          backgroundColor: "#85C3B1", 
+        },
+        track: {
+          backgroundColor: "#1e1e1e",
+          transition: "background-color 0.3s",
+        },
+      },
+    },
+    MuiSlider: {
+      styleOverrides: {
+        root: {
+          color: "#85C3B1",
+        },
+        thumb: {
+          backgroundColor: "#85C3B1",
+          "&:hover, &.Mui-focusVisible": {
+            backgroundColor: "#6FA999", 
+          },
+          "&.Mui-disabled": {
+            backgroundColor: "rgba(133, 195, 177, 0.5)", 
+          },
+        },
+        track: {
+          backgroundColor: "#85C3B1",
+        },
+        rail: {
+          backgroundColor: "#47645b",
+        },
+        mark: {
+          backgroundColor: "#47645b", 
+          borderRadius: "50%",
+        },
+        markActive: {
+          backgroundColor: "#85C3B1", // Active mark color
+        },
+      },
+    },
   },
 });
 

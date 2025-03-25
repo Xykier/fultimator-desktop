@@ -24,17 +24,19 @@ import PrettyAccessory from "./PrettyAccessory";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
 import { globalConfirm } from "../../../../utility/globalConfirm";
+import { useTheme } from "@mui/material/styles";
 
 export default function PlayerAccessoryModal({
   open,
   onClose,
   editAccIndex,
   accessory,
-  setAccessory,
   onAddAccessory,
   onDeleteAccessory,
 }) {
   const { t } = useTranslate();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const [name, setName] = useState(accessory?.name || "");
   const [quality, setQuality] = useState(accessory?.quality || "");
@@ -195,8 +197,10 @@ export default function PlayerAccessoryModal({
 
   const handleDelete = async (accIndex) => {
     // Use globalConfirm for confirmation
-    const confirmed = await globalConfirm("Are you sure you want to delete this accessory?");
-    
+    const confirmed = await globalConfirm(
+      "Are you sure you want to delete this accessory?"
+    );
+
     if (confirmed) {
       if (accIndex !== null) {
         onDeleteAccessory(accIndex); // Call the delete function if confirmed
@@ -378,7 +382,10 @@ export default function PlayerAccessoryModal({
             {t("Delete")}
           </Button>
         )}
-        <Button onClick={handleSave} color="primary">
+        <Button
+          onClick={handleSave}
+          color={isDarkMode ? "secondary" : "primary"}
+        >
           {t("Save Changes")}
         </Button>
       </DialogActions>

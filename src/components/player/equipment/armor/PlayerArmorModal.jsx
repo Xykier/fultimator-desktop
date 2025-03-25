@@ -27,17 +27,19 @@ import PrettyArmor from "./PrettyArmor";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
 import { globalConfirm } from "../../../../utility/globalConfirm";
+import { useTheme } from "@mui/material/styles";
 
 export default function PlayerArmorModal({
   open,
   onClose,
   editArmorIndex,
   armorPlayer,
-  setArmorPlayer,
   onAddArmor,
   onDeleteArmor,
 }) {
   const { t } = useTranslate();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const [base, setBase] = useState(armorPlayer?.base || armor[0]);
   const [name, setName] = useState(armorPlayer?.name || armor[0].name);
@@ -452,7 +454,10 @@ export default function PlayerArmorModal({
             {t("Delete")}
           </Button>
         )}
-        <Button onClick={handleSave} color="primary">
+        <Button
+          onClick={handleSave}
+          color={isDarkMode ? "secondary" : "primary"}
+        >
           {t("Save Changes")}
         </Button>
       </DialogActions>

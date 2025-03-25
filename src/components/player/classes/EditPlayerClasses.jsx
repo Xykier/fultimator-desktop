@@ -601,12 +601,13 @@ export default function EditPlayerClasses({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} color="primary">
+          <Button onClick={() => setDialogOpen(false)} color="primary" variant="contained">
             {t("Cancel")}
           </Button>
           <Button
             onClick={() => addClassToPlayer(newClassName, true)}
             color="primary"
+            variant="contained"
             disabled={!newClassName}
           >
             {t("Add")}

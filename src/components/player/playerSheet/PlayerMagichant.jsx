@@ -72,7 +72,7 @@ export default function PlayerMagichant({ player, setPlayer, isEditMode }) {
                 marginBottom: "-1px",
                 paddingY: "10px",
                 backgroundColor: primary,
-                color: ternary,
+                color: "#fff",
                 borderRadius: "0 8px 8px 0",
                 transform: "rotate(180deg)",
                 fontSize: "2em",

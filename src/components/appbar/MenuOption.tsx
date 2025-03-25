@@ -358,10 +358,10 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleImportCancel} color="primary">
+          <Button variant="contained" onClick={handleImportCancel} color="primary">
             {t("Cancel")}
           </Button>
-          <Button onClick={handleImportConfirm} color="primary">
+          <Button variant="contained" onClick={handleImportConfirm} color="primary">
             {t("Confirm")}
           </Button>
         </DialogActions>

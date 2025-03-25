@@ -205,10 +205,11 @@ export default function GenericRolls({ player, isEditMode }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>{t("Close")}</Button>
+          <Button onClick={handleClose} variant="contained" color="error" >{t("Close")}</Button>
           <Button
             onClick={handleRollDice}
             disabled={!attribute1 || !attribute2}
+            variant="contained"
           >
             {t("Roll")}
           </Button>

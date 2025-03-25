@@ -24,6 +24,7 @@ import { globalConfirm } from "../../../utility/globalConfirm";
 export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const secondary = theme.palette.secondary.main;
 
   const [open, setOpen] = useState(false);
@@ -246,7 +247,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
         ))}
       </Grid>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{t("Add Clock")}</DialogTitle>
+        <DialogTitle variant="h3">{t("Add Clock")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {t("Enter the clock details below:")}
@@ -258,7 +259,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             label={t("Clock Name")}
             type="text"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={clockName}
             onChange={(e) => setClockName(e.target.value)}
             inputProps={{ maxLength: 30 }}
@@ -269,7 +270,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             label={t("Clock Sections")}
             type="number"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={clockSections}
             onChange={(e) => {
               const value = parseInt(e.target.value, 10);
@@ -279,8 +280,8 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>{t("Cancel")}</Button>
-          <Button onClick={handleConfirm}>{t("Add")}</Button>
+          <Button onClick={handleClose} color={isDarkMode ? "error" : "primary"} variant="contained" >{t("Cancel")}</Button>
+          <Button onClick={handleConfirm} color={isDarkMode ? "secondary" : "primary"} variant="contained">{t("Add")}</Button>
         </DialogActions>
       </Dialog>
     </Paper>

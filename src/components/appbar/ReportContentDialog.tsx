@@ -196,11 +196,12 @@ const ReportContentDialog: React.FC<ReportContentDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={isSubmitting}>
+        <Button variant="contained" onClick={handleClose} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button
           onClick={handleSubmit}
+          variant="contained"
           color="primary"
           disabled={isSubmitting || cooldown > 0}
         >

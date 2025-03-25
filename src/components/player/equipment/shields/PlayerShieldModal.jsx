@@ -27,17 +27,19 @@ import ChangeModifiers from "../ChangeModifiers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
 import { globalConfirm } from "../../../../utility/globalConfirm";
+import { useTheme } from "@mui/material/styles";
 
 export default function PlayerShieldModal({
   open,
   onClose,
   editShieldIndex,
   shield,
-  setShield,
   onAddShield,
   onDeleteShield,
 }) {
   const { t } = useTranslate();
+    const theme = useTheme();
+    const isDarkMode = theme.palette.mode === "dark";
 
   const [base, setBase] = useState(shield?.base || shields[0]);
   const [name, setName] = useState(shield?.name || shields[0].name);
@@ -433,7 +435,7 @@ export default function PlayerShieldModal({
             {t("Delete")}
           </Button>
         )}
-        <Button onClick={handleSave} color="primary">
+        <Button onClick={handleSave} color={isDarkMode ? "secondary" : "primary"}>
           {t("Save Changes")}
         </Button>
       </DialogActions>

@@ -823,13 +823,14 @@ export default function PlayerSpells({ player, setPlayer, isEditMode }) {
                 </DialogContent>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleDialogClose}>{t("Close")}</Button>
+                <Button onClick={handleDialogClose} variant="contained" color="error">{t("Close")}</Button>
                 <Button
                   onClick={
                     selectedSpell && selectedSpell?.spellType === "default"
                       ? handleRoll
                       : handleGambleRoll
                   }
+                  variant="contained"
                 >
                   {isRolling ? t("Re-Roll") : t("Roll")}
                 </Button>
