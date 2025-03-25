@@ -71,16 +71,17 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   }, []);
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        const authenticated = await window.electron.checkAuthentication();
-        setIsAuthenticated(authenticated);
-      } catch (error) {
-        console.error("Error checking authentication status", error);
+    const checkAuth = async () => {
+      const response = await window.electron.checkAuth();
+      console.log("Auth Response:", response);
+      setIsAuthenticated(response.isAuthenticated);
+
+      if (response.isAuthenticated && response.tokens) {
+        console.log("Tokens:", response.tokens);
       }
     };
 
-    checkAuthentication();
+    checkAuth();
   }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -107,9 +108,9 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const handleGoogleAuth = async () => {
     setIsLoading(true);
     try {
-      const result: string = await window.electron.authenticateGoogle();
+      await window.electron.loginWithGoogle();
       setIsAuthenticated(true);
-      setMessage(result);
+      setMessage("Logged in successfully!");
     } catch (error) {
       setIsAuthenticated(false);
       const errorMessage =

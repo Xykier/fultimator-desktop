@@ -4,10 +4,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "fs";
 import { google } from "googleapis";
-import * as os from "os";
-import * as http from "http";
-import * as url from "url";
-import * as net from "net";
+//import * as os from "os";
+import Store from "electron-store";
 
 //const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -15,16 +13,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OAuth2Client = google.auth.OAuth2;
 const clientId = import.meta.env.VITE_CLIENT_ID;
 const clientSecret = import.meta.env.VITE_CLIENT_SECRET;
-const OAuth2 = new OAuth2Client(
-  clientId,
-  clientSecret,
-  "http://localhost" // Redirect URI
-);
+const REDIRECT_URI = "http://localhost";
+const OAuth2 = new OAuth2Client(clientId, clientSecret, REDIRECT_URI);
 
-const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
+const store = new Store();
 
 // Determine the current platform
-const platform = os.platform();
+//const platform = os.platform();
 
 // The built directory structure
 //
@@ -102,172 +97,78 @@ function createWindow() {
     });
   });
 
-  // Handle Google authentication
-  ipcMain.handle("authenticate-google", async () => {
-    const authUrl = OAuth2.generateAuthUrl({
-      access_type: "offline",
-      scope: SCOPES,
-    });
-
-    if (platform === "darwin") {
-      return new Promise((resolve, reject) => {
-        let authWindow: BrowserWindow | null = null;
-        let server: http.Server | null = null;
-
-        const findAvailablePort = (startPort: number): Promise<number> => {
-          return new Promise((portResolve) => {
-            const testServer = net.createServer();
-            testServer
-              .listen(startPort, () => {
-                const port = (testServer.address() as net.AddressInfo).port;
-                testServer.close(() => {
-                  portResolve(port);
-                });
-              })
-              .on("error", () => {
-                portResolve(findAvailablePort(startPort + 1));
-              });
-          });
-        };
-
-        findAvailablePort(63342).then((redirectPort) => {
-          server = http.createServer((req, res) => {
-            const parsedUrl = url.parse(req.url, true);
-
-            if (parsedUrl.pathname === "/callback") {
-              const code = parsedUrl.query.code as string;
-
-              if (code) {
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.end(
-                  "<html><body><h1>Authentication Successful! You can close this window.</h1></body></html>"
-                );
-
-                server?.close();
-
-                OAuth2.getToken(code, (err, tokens) => {
-                  if (err) {
-                    console.error("Token retrieval error:", err);
-                    reject(err);
-                    return;
-                  }
-
-                  OAuth2.setCredentials(tokens);
-                  fs.writeFileSync("tokens.json", JSON.stringify(tokens));
-
-                  authWindow?.close();
-                  resolve("Authenticated with Google successfully!");
-                });
-              }
-            }
-          });
-
-          server.listen(redirectPort, () => {
-            console.log(`Listening on port ${redirectPort}`);
-
-            authWindow = new BrowserWindow({
-              width: 800,
-              height: 600,
-              webPreferences: {
-                nodeIntegration: false,
-                contextIsolation: true,
-              },
-              show: true,
-            });
-
-            authWindow.loadURL(
-              `${authUrl}&redirect_uri=http://localhost:${redirectPort}/callback`
-            );
-            authWindow.show();
-            authWindow.focus();
-
-            authWindow.on("closed", () => {
-              server?.close();
-              reject(
-                new Error(
-                  "Authentication window closed before completing the process."
-                )
-              );
-            });
-          });
-
-          server.on("error", (err) => {
-            console.error("Server error:", err);
-            reject(err);
-          });
-        });
+  // OAuth login function
+  ipcMain.handle("login-google", async () => {
+    return new Promise((resolve, reject) => {
+      const authUrl = OAuth2.generateAuthUrl({
+        access_type: "offline",
+        scope: ["https://www.googleapis.com/auth/drive.file"],
       });
-    } else {
-      // Windows/Linux authentication (using local server method)
-      return new Promise((resolve, reject) => {
-        const authWindow = new BrowserWindow({
-          width: 500,
-          height: 600,
-          webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-          },
-        });
 
-        authWindow.loadURL(authUrl);
+      let authWindow = new BrowserWindow({
+        width: 500,
+        height: 600,
+        show: true,
+      });
 
-        const handleNavigation = (event, url) => {
-          const query = new URL(url).searchParams;
-          const code = query.get("code");
+      authWindow.loadURL(authUrl);
+
+      authWindow.webContents.on("will-redirect", async (event, url) => {
+        if (url.startsWith(REDIRECT_URI)) {
+          event.preventDefault();
+          const code = new URL(url).searchParams.get("code");
 
           if (code) {
-            if (event) event.preventDefault(); // Check if event exists before calling preventDefault
-
-            OAuth2.getToken(code, (err, tokens) => {
-              if (err) {
-                console.error("Error getting tokens:", err);
-                reject("Failed to authenticate with Google.");
-                return;
-              }
-
+            try {
+              const { tokens } = await OAuth2.getToken(code);
               OAuth2.setCredentials(tokens);
-              fs.writeFileSync("tokens.json", JSON.stringify(tokens));
-
-              if (authWindow) authWindow.close();
-              resolve("Authenticated with Google successfully!");
-            });
+              store.set("googleTokens", tokens); // Save tokens persistently
+              resolve(tokens);
+            } catch (error) {
+              reject(error);
+            }
           }
-        };
 
-        authWindow.webContents.on("will-navigate", handleNavigation);
-
-        authWindow.webContents.on("did-finish-load", () => {
-          const currentURL = authWindow.webContents.getURL();
-          handleNavigation(null, currentURL); // Now it won't crash since we check for event inside handleNavigation
-        });
-
-        authWindow.on("closed", () => {
-          reject("Authentication window closed before completing the process.");
-        });
+          authWindow?.close();
+        }
       });
-    }
+
+      authWindow.on("closed", () => {
+        authWindow = null;
+      });
+    });
   });
 
-  // Check Google authentication status
-  ipcMain.handle("checkAuthentication", async () => {
-    try {
-      const tokens = fs.existsSync("tokens.json");
-      return tokens; // Returns true if tokens exist, meaning user is authenticated
-    } catch (error) {
-      console.error("Error checking authentication status", error);
-      return false;
+  // Function to Check Authentication
+  ipcMain.handle("check-auth", async () => {
+    const tokens = store.get("googleTokens");
+    if (!tokens) return { isAuthenticated: false };
+  
+    OAuth2.setCredentials(tokens);
+  
+    // Check if the token is expired
+    const now = new Date().getTime();
+    const expiryDate = (tokens as any).expiry_date || 0;
+  
+    if (now >= expiryDate) {
+      console.log("Token expired, refreshing...");
+      try {
+        const { credentials } = await OAuth2.refreshAccessToken();
+        store.set("googleTokens", credentials);
+        return { isAuthenticated: true, tokens: credentials };
+      } catch (error) {
+        store.delete("googleTokens");
+        return { isAuthenticated: false };
+      }
     }
+  
+    return { isAuthenticated: true, tokens };
   });
 
-  // Handle Google logout
-  ipcMain.handle("logoutGoogle", async () => {
-    try {
-      fs.unlinkSync("tokens.json");
-      return true;
-    } catch (error) {
-      console.error("Error during logout", error);
-      throw new Error("Failed to log out.");
-    }
+  // Logout and Clear Tokens
+  ipcMain.handle("logoutGoogle", () => {
+    store.delete("googleTokens");
+    return { isAuthenticated: false };
   });
 
   // Handle file upload to Google Drive
@@ -277,7 +178,7 @@ function createWindow() {
         throw new Error(`File not found: ${filePath}`);
       }
 
-      const tokens = JSON.parse(fs.readFileSync("tokens.json").toString());
+      const tokens = store.get("googleTokens");
       OAuth2.setCredentials(tokens);
 
       const drive = google.drive({ version: "v3", auth: OAuth2 });
@@ -327,7 +228,7 @@ function createWindow() {
   ipcMain.handle("download-from-google-drive", async (event, fileId) => {
     console.log("Requested file ID:", fileId); // Log file ID
     try {
-      const tokens = JSON.parse(fs.readFileSync("tokens.json").toString());
+      const tokens = store.get("googleTokens");
       OAuth2.setCredentials(tokens);
 
       const drive = google.drive({ version: "v3", auth: OAuth2 });
@@ -384,7 +285,7 @@ function createWindow() {
   // Handle file list from Google Drive
   ipcMain.handle("list-files", async () => {
     try {
-      const tokens = JSON.parse(fs.readFileSync("tokens.json").toString());
+      const tokens = store.get("googleTokens");
       OAuth2.setCredentials(tokens);
 
       const drive = google.drive({ version: "v3", auth: OAuth2 });
