@@ -76,6 +76,7 @@ function createWindow() {
   });
 
   // Handle dialog-confirm
+  ipcMain.removeHandler("dialog-confirm"); // Remove any existing handler
   ipcMain.handle("dialog-confirm", async (event, message) => {
     const result = await dialog.showMessageBox(win, {
       type: "question",
