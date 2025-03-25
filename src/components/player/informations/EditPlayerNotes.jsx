@@ -219,7 +219,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                         <strong style={{ fontSize: "1.4em" }}>
                           {clock.name}
                         </strong>{" "}
-                        ({t("Sections")}: {clock.sections})
+                        ({t("Clock Sections")}: {clock.sections})
                       </Typography>
                     </Grid>
                     {isEditMode && (
