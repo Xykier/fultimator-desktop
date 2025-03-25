@@ -4,7 +4,10 @@ import {
   Typography,
   Paper,
   IconButton,
-  Modal,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Button,
   Tooltip,
   Divider,
@@ -14,7 +17,7 @@ import { useTranslate } from "../../../translation/translate";
 import { Info } from "@mui/icons-material";
 import ReactMarkdown from "react-markdown";
 
-export default function PlayerSkills({ player, setPlayer }) {
+export default function PlayerSkills({ player }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const primary = theme.palette.primary.main;
@@ -157,38 +160,23 @@ export default function PlayerSkills({ player, setPlayer }) {
                 </Grid>
               ))}
             </Grid>
-            <Modal
+            <Dialog
               open={openModal}
               onClose={handleCloseModal}
-              aria-labelledby="skill-description"
-              aria-describedby="skill-description"
+              PaperProps={{ sx: { width: { xs: "90%", md: "80%" } } }}
             >
-              <Paper
-                sx={{
-                  position: "absolute",
-                  width: { xs: "90%", md: 400 },
-                  bgcolor: "#fff",
-                  border: "2px solid",
-                  borderColor: secondary,
-                  borderRadius: "8px",
-                  boxShadow: 24,
-                  padding: 2,
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
+              <DialogTitle>
                 <Typography
-                  variant="h4"
+                  variant="h2"
                   sx={{ textTransform: "uppercase" }}
-                  fontWeight={"bold"}
+                  fontWeight="bold"
                 >
                   {selectedSkill &&
                     (selectedSkill.isHomebrew
                       ? selectedSkill.skillName
                       : t(selectedSkill.skillName))}
                   {" - "}
-                  {selectedSkill && t(selectedSkill.className)} {" -  "}{" "}
+                  {selectedSkill && t(selectedSkill.className)} {" -  "}
                   <Typography
                     component="span"
                     sx={{ ml: -1, mr: 0, fontSize: "1.2em" }}
@@ -203,21 +191,21 @@ export default function PlayerSkills({ player, setPlayer }) {
                     】
                   </Typography>
                 </Typography>
+              </DialogTitle>
+              <DialogContent sx={{ marginTop: "10px" }}>
                 <ReactMarkdown>
                   {selectedSkill &&
                     (selectedSkill.isHomebrew
                       ? selectedSkill.description
                       : t(selectedSkill.description))}
                 </ReactMarkdown>
-                <Button
-                  variant="contained"
-                  onClick={handleOK}
-                  sx={{ marginTop: 2, width: "100%" }}
-                >
+              </DialogContent>
+              <DialogActions>
+                <Button variant="contained" onClick={handleOK} fullWidth>
                   OK
                 </Button>
-              </Paper>
-            </Modal>
+              </DialogActions>
+            </Dialog>
           </Paper>
         </>
       )}
