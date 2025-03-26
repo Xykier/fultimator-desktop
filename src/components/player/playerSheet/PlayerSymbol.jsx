@@ -16,7 +16,7 @@ import { useTranslate } from "../../../translation/translate";
 import { Info } from "@mui/icons-material";
 import SpellSymbolist from "../spells/SpellSymbolist";
 
-export default function PlayerSymbol({ player, setPlayer, isEditMode }) {
+export default function PlayerSymbol({ player }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const primary = theme.palette.primary.main;

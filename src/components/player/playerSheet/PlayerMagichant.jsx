@@ -16,7 +16,7 @@ import { useTranslate } from "../../../translation/translate";
 import { Info } from "@mui/icons-material";
 import SpellChanter from "../spells/SpellChanter";
 
-export default function PlayerMagichant({ player, setPlayer, isEditMode }) {
+export default function PlayerMagichant({ player }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const primary = theme.palette.primary.main;

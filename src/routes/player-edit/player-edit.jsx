@@ -608,14 +608,14 @@ const Tab = styled(BaseTab)(({ theme }) => ({
   },
 }));
 
-const TabPanel = styled(BaseTabPanel)(({ theme }) => ({
+const TabPanel = styled(BaseTabPanel)(() => ({
   width: "100%",
   fontFamily: "IBM Plex Sans, sans-serif",
   fontSize: "0.875rem",
 }));
 
 const TabsList = styled(BaseTabsList)(
-  ({ primary, secondary, ternary }) => `
+  ({ primary }) => `
     min-width: 400px;
     background-color: ${primary};
     border-radius: 12px;

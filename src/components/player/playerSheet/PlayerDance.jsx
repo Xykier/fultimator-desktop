@@ -16,7 +16,7 @@ import { useTranslate } from "../../../translation/translate";
 import { Info } from "@mui/icons-material";
 import SpellDancer from "../spells/SpellDancer";
 
-export default function PlayerDance({ player, setPlayer, isEditMode }) {
+export default function PlayerDance({ player }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const primary = theme.palette.primary.main;
