@@ -22,7 +22,7 @@ function Weapons() {
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
   const [base, setBase] = useState(weapons[0]);
-  const [name, setName] = useState(weapons[0].name);
+  const [name, setName] = useState(t(weapons[0].name));
   const [type, setType] = useState(weapons[0].type);
   const [hands, setHands] = useState(weapons[0].hands);
   const [att1, setAtt1] = useState(weapons[0].att1);
@@ -38,6 +38,11 @@ function Weapons() {
   const [selectedQuality, setSelectedQuality] = useState("");
 
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    // Translate the name after the component mounts
+    setName(t(base.name));
+  }, [t, base.name]);
 
   const handleFileUpload = (data) => {
     if (data) {
@@ -102,7 +107,7 @@ function Weapons() {
 
   const handleClearFields = () => {
     setBase(weapons[0]);
-    setName(weapons[0].name);
+    setName(t(weapons[0].name));
     setType(weapons[0].type);
     setHands(weapons[0].hands);
     setAtt1(weapons[0].att1);
@@ -226,7 +231,7 @@ function Weapons() {
                   const base = weapons.find((el) => el.name === e.target.value);
 
                   setBase(base);
-                  setName(base.name);
+                  setName(t(base.name));
                   setType(base.type);
                   setHands(base.hands);
                   setDamageBonus(false);

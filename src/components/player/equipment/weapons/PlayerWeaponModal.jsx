@@ -79,7 +79,7 @@ export default function PlayerWeaponModal({
 
   useEffect(() => {
     setBase(weapon?.base || weapons[0]);
-    setName(weapon?.name || weapons[0].name);
+    setName(weapon?.name || t(weapons[0].name));
     setCategory(weapon?.category || weapons[0].category);
     setType(weapon?.type || weapons[0].type);
     setHands(weapon?.hands || weapons[0].hands);
@@ -107,6 +107,7 @@ export default function PlayerWeaponModal({
         ? true
         : false
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weapon]);
 
   const handleFileUpload = (data) => {
@@ -399,7 +400,7 @@ export default function PlayerWeaponModal({
                 const base = weapons.find((el) => el.name === e.target.value);
 
                 setBase(base);
-                setName(base.name);
+                setName(t(base.name));
                 setCategory(base.category);
                 setType(base.type);
                 setHands(base.hands);

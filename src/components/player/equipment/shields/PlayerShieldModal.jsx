@@ -71,7 +71,7 @@ export default function PlayerShieldModal({
 
   useEffect(() => {
     setBase(shield?.base || shields[0]);
-    setName(shield?.name || shields[0].name);
+    setName(shield?.name || t(shields[0].name));
     setQuality(shield?.quality || "");
     setMartial(shield?.martial || false);
     setQualityCost(shield?.qualityCost || 0);
@@ -93,6 +93,7 @@ export default function PlayerShieldModal({
         ? true
         : false
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shield]);
 
   const { handleFileUpload } = useUploadJSON((data) => {
@@ -182,7 +183,7 @@ export default function PlayerShieldModal({
 
   const handleClearFields = () => {
     setBase(shields[0]);
-    setName(shields[0].name);
+    setName(t(shields[0].name));
     setMartial(shields[0].martial);
     setQuality("");
     setQualityCost(0);
@@ -272,7 +273,7 @@ export default function PlayerShieldModal({
                 const base = shields.find((el) => el.name === e.target.value);
 
                 setBase(base);
-                setName(base.name);
+                setName(t(base.name));
                 setMartial(base.martial);
                 setInit(base.init);
               }}
