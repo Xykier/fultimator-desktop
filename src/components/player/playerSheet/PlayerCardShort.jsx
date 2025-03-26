@@ -9,7 +9,6 @@ import { useCustomTheme } from "../../../hooks/useCustomTheme";
 
 export default function PlayerCardShort({
   player,
-  isEditMode,
   isCharacterSheet,
   characterImage,
 }) {

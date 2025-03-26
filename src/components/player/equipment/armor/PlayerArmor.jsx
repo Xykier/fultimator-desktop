@@ -12,7 +12,7 @@ import { Edit, Error } from "@mui/icons-material";
 import { Equip } from "../../../icons";
 import Export from "../../../Export";
 import CustomHeaderAccordion from "../../../common/CustomHeaderAccordion";
-import { useCustomTheme } from "../../../../hooks/useCustomTheme";
+import { useTheme } from "@mui/material/styles";
 
 export default function PlayerArmor({
   player,
@@ -22,7 +22,7 @@ export default function PlayerArmor({
   isEditMode,
 }) {
   const { t } = useTranslate();
-  const theme = useCustomTheme();
+  const theme = useTheme();
 
   const [expanded, setExpanded] = useState(false);
 
@@ -108,7 +108,7 @@ export default function PlayerArmor({
         p: "15px",
         borderRadius: "8px",
         border: "2px solid",
-        borderColor: theme.secondary,
+        borderColor: theme.palette.secondary,
         marginBottom: 3,
       }}
       expanded={expanded}
@@ -159,11 +159,34 @@ export default function PlayerArmor({
                             handleEquipArmor(index, !armorItem.isEquipped)
                           }
                           disabled={!isEditMode}
-                          sx={{ mt: 1, boxShadow: "1px 1px 5px" }}
+                          sx={{
+                            mt: 1,
+                            boxShadow: "1px 1px 5px",
+                            backgroundColor: armorItem.isEquipped
+                              ? theme.palette.ternary.main
+                              : theme.palette.background.paper,
+                            "&:hover": {
+                              backgroundColor: armorItem.isEquipped
+                                ? theme.palette.quaternary.main // Darker for equipped state
+                                : theme.palette.secondary.main, // Highlight when not equipped
+                            },
+                            transition: "background-color 0.3s",
+                          }}
                         >
                           <Equip
-                            color={armorItem.isEquipped ? "green" : theme.ternary}
-                            strokeColor={"#000"}
+                            color={
+                              armorItem.isEquipped
+                                ? theme.palette.mode === "dark"
+                                  ? theme.palette.white.main // White in dark mode
+                                  : theme.palette.primary.main // Primary in light mode
+                                : theme.palette.background.default
+                            }
+                            strokeColor={
+                              armorItem.isEquipped &&
+                              theme.palette.mode === "dark"
+                                ? theme.palette.white.main // White stroke in dark mode
+                                : theme.palette.secondary.main // Default primary stroke
+                            }
                           />
                         </IconButton>
                       </Tooltip>
@@ -176,7 +199,11 @@ export default function PlayerArmor({
                     )}
                   </Grid>
                   <Grid item xs={12} sx={{ mt: 1 }}>
-                    <Export name={armorItem.name} dataType="armor" data={armorItem} />
+                    <Export
+                      name={armorItem.name}
+                      dataType="armor"
+                      data={armorItem}
+                    />
                   </Grid>
                 </Grid>
               </Grid>
