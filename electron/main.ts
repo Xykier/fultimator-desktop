@@ -53,6 +53,18 @@ function createWindow() {
     },
   });
 
+  ipcMain.removeHandler("dialog-confirm");
+  ipcMain.removeHandler("dialog-alert");
+  ipcMain.removeHandler("login-google");
+  ipcMain.removeHandler("check-auth");
+  ipcMain.removeHandler("logoutGoogle");
+  ipcMain.removeHandler("upload-to-google-drive");
+  ipcMain.removeHandler("download-from-google-drive");
+  ipcMain.removeHandler("save-file");
+  ipcMain.removeHandler("read-file");
+  ipcMain.removeHandler("get-version");
+  ipcMain.removeHandler("list-files");
+
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
@@ -76,7 +88,6 @@ function createWindow() {
   });
 
   // Handle dialog-confirm
-  ipcMain.removeHandler("dialog-confirm"); // Remove any existing handler
   ipcMain.handle("dialog-confirm", async (event, message) => {
     const result = await dialog.showMessageBox(win, {
       type: "question",
@@ -144,13 +155,13 @@ function createWindow() {
   ipcMain.handle("check-auth", async () => {
     const tokens = store.get("googleTokens");
     if (!tokens) return { isAuthenticated: false };
-  
+
     OAuth2.setCredentials(tokens);
-  
+
     // Check if the token is expired
     const now = new Date().getTime();
     const expiryDate = (tokens as any).expiry_date || 0;
-  
+
     if (now >= expiryDate) {
       console.log("Token expired, refreshing...");
       try {
@@ -162,7 +173,7 @@ function createWindow() {
         return { isAuthenticated: false };
       }
     }
-  
+
     return { isAuthenticated: true, tokens };
   });
 
