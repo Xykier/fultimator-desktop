@@ -450,13 +450,14 @@ export default function PlayerArmorModal({
       </DialogContent>
       <DialogActions>
         {editArmorIndex !== null && (
-          <Button onClick={() => handleDelete(editArmorIndex)} color="error">
+          <Button onClick={() => handleDelete(editArmorIndex)} color="error" variant="contained">
             {t("Delete")}
           </Button>
         )}
         <Button
           onClick={handleSave}
           color={isDarkMode ? "secondary" : "primary"}
+          variant="contained"
         >
           {t("Save Changes")}
         </Button>

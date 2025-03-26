@@ -38,8 +38,8 @@ export default function PlayerShieldModal({
   onDeleteShield,
 }) {
   const { t } = useTranslate();
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === "dark";
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const [base, setBase] = useState(shield?.base || shields[0]);
   const [name, setName] = useState(shield?.name || shields[0].name);
@@ -431,11 +431,19 @@ export default function PlayerShieldModal({
       </DialogContent>
       <DialogActions>
         {editShieldIndex !== null && (
-          <Button onClick={() => handleDelete(editShieldIndex)} color="error">
+          <Button
+            onClick={() => handleDelete(editShieldIndex)}
+            color="error"
+            variant="contained"
+          >
             {t("Delete")}
           </Button>
         )}
-        <Button onClick={handleSave} color={isDarkMode ? "secondary" : "primary"}>
+        <Button
+          onClick={handleSave}
+          color={isDarkMode ? "secondary" : "primary"}
+          variant="contained"
+        >
           {t("Save Changes")}
         </Button>
       </DialogActions>

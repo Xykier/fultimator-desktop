@@ -613,13 +613,14 @@ export default function PlayerWeaponModal({
       </DialogContent>
       <DialogActions>
         {editWeaponIndex !== null && (
-          <Button onClick={() => handleDelete(editWeaponIndex)} color="error">
+          <Button onClick={() => handleDelete(editWeaponIndex)} color="error" variant="contained">
             {t("Delete")}
           </Button>
         )}
         <Button
           onClick={handleSave}
           color={isDarkMode ? "secondary" : "primary"}
+          variant="contained"
           disabled={
             /* disable if the weapon has a value "magitech" === true */ weapon?.magicannon
           }

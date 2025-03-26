@@ -200,6 +200,112 @@ const darkBravely = createTheme({
         },
       },
     },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1e1e1e",
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: () => ({
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor:  "#fff",
+          },
+        }),
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#2b2b2b",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          "&.Mui-selected": {
+            backgroundColor: "#765f43",
+            "&:hover": {
+              backgroundColor: "#756449",
+            },
+          },
+        },
+      },
+    },
+    MuiListSubheader: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#1e1e1e",
+          color: "#ffffff",
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: "#dccdc4",
+          "&.Mui-checked": {
+            color: "#dccdc4",
+          },
+          "&.Mui-disabled": {
+            color: "#7564491A",
+          },
+          "&:hover": {
+            backgroundColor: "#3E17001A",
+          },
+        },
+      },
+    },
+    MuiSwitch: {
+      styleOverrides: {
+        switchBase: {
+          "&.Mui-checked": {
+            color: "#dccdc4",
+            "& + .MuiSwitch-track": {
+              backgroundColor: "#756449",
+            },
+          },
+        },
+        thumb: {
+          backgroundColor: "#dccdc4", 
+        },
+        track: {
+          backgroundColor: "#1e1e1e",
+          transition: "background-color 0.3s",
+        },
+      },
+    },
+    MuiSlider: {
+      styleOverrides: {
+        root: {
+          color: "#dccdc4",
+        },
+        thumb: {
+          backgroundColor: "#dccdc4",
+          "&:hover, &.Mui-focusVisible": {
+            backgroundColor: "#756449", 
+          },
+          "&.Mui-disabled": {
+            backgroundColor: "#7564491A", 
+          },
+        },
+        track: {
+          backgroundColor: "#dccdc4",
+        },
+        rail: {
+          backgroundColor: "#756449",
+        },
+        mark: {
+          backgroundColor: "#756449", 
+        },
+        markActive: {
+          backgroundColor: "#dccdc4",
+        },
+      },
+    },
   },
 });
 

@@ -378,13 +378,14 @@ export default function PlayerAccessoryModal({
       </DialogContent>
       <DialogActions>
         {editAccIndex !== null && (
-          <Button onClick={() => handleDelete(editAccIndex)} color="error">
+          <Button onClick={() => handleDelete(editAccIndex)} color="error" variant="contained" >
             {t("Delete")}
           </Button>
         )}
         <Button
           onClick={handleSave}
           color={isDarkMode ? "secondary" : "primary"}
+          variant="contained"
         >
           {t("Save Changes")}
         </Button>

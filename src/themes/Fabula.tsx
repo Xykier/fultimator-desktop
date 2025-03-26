@@ -251,10 +251,10 @@ const darkFabula = createTheme({
             color: "#85C3B1",
           },
           "&.Mui-disabled": {
-            color: "rgba(133, 195, 177, 0.5)",
+            color: "#47645b1A",
           },
           "&:hover": {
-            backgroundColor: "rgba(133, 195, 177, 0.1)",
+            backgroundColor: "#192E201A",
           },
         },
       },
@@ -286,10 +286,10 @@ const darkFabula = createTheme({
         thumb: {
           backgroundColor: "#85C3B1",
           "&:hover, &.Mui-focusVisible": {
-            backgroundColor: "#6FA999", 
+            backgroundColor: "#47645b", 
           },
           "&.Mui-disabled": {
-            backgroundColor: "rgba(133, 195, 177, 0.5)", 
+            backgroundColor: "#47645b1A", 
           },
         },
         track: {
@@ -300,10 +300,9 @@ const darkFabula = createTheme({
         },
         mark: {
           backgroundColor: "#47645b", 
-          borderRadius: "50%",
         },
         markActive: {
-          backgroundColor: "#85C3B1", // Active mark color
+          backgroundColor: "#85C3B1", 
         },
       },
     },
