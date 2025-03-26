@@ -306,6 +306,32 @@ const darkHigh = createTheme({
         },
       },
     },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          color: "#725759", // Secondary
+          "&.Mui-checked": {
+            color: "#725759", // Secondary
+          },
+          "&.Mui-disabled": {
+            color: "#a24b4d1A", // Quaternary with 10% opacity
+          },
+          "&:hover": {
+            backgroundColor: "#4218041A", // Ternary with 10% opacity
+          },
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&.Mui-focused": {
+            color: "#fff",
+          },
+        },
+      },
+    },
   },
 });
 

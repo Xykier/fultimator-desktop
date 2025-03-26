@@ -306,6 +306,32 @@ const darkObscura = createTheme({
         },
       },
     },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          color: "#9176AC", // Secondary
+          "&.Mui-checked": {
+            color: "#9176AC", // Secondary
+          },
+          "&.Mui-disabled": {
+            color: "#4C5D8B1A", // Quaternary with 10% opacity
+          },
+          "&:hover": {
+            backgroundColor: "#2023251A", // Ternary with 10% opacity
+          },
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&.Mui-focused": {
+            color: "#fff",
+          },
+        },
+      },
+    },
   },
 });
 

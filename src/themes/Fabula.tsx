@@ -306,6 +306,32 @@ const darkFabula = createTheme({
         },
       },
     },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          color: "#85C3B1", // Secondary
+          "&.Mui-checked": {
+            color: "#85C3B1",  // Secondary
+          },
+          "&.Mui-disabled": {
+            color: "#47645b1A", // Quaternary with 10% opacity
+          },
+          "&:hover": {
+            backgroundColor: "#192E201A", // Ternary with 10% opacity
+          },
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&.Mui-focused": {
+            color: "#fff",
+          },
+        },
+      },
+    },
   },
 });
 

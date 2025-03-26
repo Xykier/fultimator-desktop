@@ -306,6 +306,32 @@ const darkTechno = createTheme({
         },
       },
     },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          color: "#879da9", // Secondary
+          "&.Mui-checked": {
+            color: "#879da9", // Secondary
+          },
+          "&.Mui-disabled": {
+            color: "#1A1D1E1A", // Quaternary with 10% opacity
+          },
+          "&:hover": {
+            backgroundColor: "#2124251A", // Ternary with 10% opacity
+          },
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&.Mui-focused": {
+            color: "#fff",
+          },
+        },
+      },
+    },
   },
 });
 

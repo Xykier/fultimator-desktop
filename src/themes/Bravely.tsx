@@ -306,6 +306,32 @@ const darkBravely = createTheme({
         },
       },
     },
+    MuiRadio: {
+      styleOverrides: {
+        root: {
+          color: "#dccdc4", // Secondary
+          "&.Mui-checked": {
+            color: "#dccdc4", // Secondary
+          },
+          "&.Mui-disabled": {
+            color: "#7564491A", // Quaternary with 10% opacity
+          },
+          "&:hover": {
+            backgroundColor: "#3E17001A", // Ternary with 10% opacity
+          },
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          color: "#fff",
+          "&.Mui-focused": {
+            color: "#fff",
+          },
+        },
+      },
+    },
   },
 });
 
