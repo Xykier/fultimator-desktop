@@ -5,7 +5,7 @@ import { Martial } from "../../../icons";
 import ReactMarkdown from "react-markdown";
 import { useCustomTheme } from "../../../../hooks/useCustomTheme";
 
-export default function PrettyArmor({ armor, showActions }) {
+export default function PrettyArmor({ armor }) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
 
@@ -14,8 +14,6 @@ export default function PrettyArmor({ armor, showActions }) {
       ? `linear-gradient(90deg, ${theme.ternary}, rgba(24, 26, 27, 0) 100%)` // Dark mode gradient with black end
       : `linear-gradient(90deg, ${theme.ternary} 0%, #ffffff 100%)`; // Light mode gradient
 
-  const background2 = theme.mode === "dark" ? `black` : `white`;
-
   const cardBackground =
     theme.mode === "dark"
       ? `backgroundColor: "#181a1b", background: "#181a1b"`
@@ -23,9 +21,9 @@ export default function PrettyArmor({ armor, showActions }) {
 
   const ref = useRef();
 
-const StyledMarkdown = ({ children, ...props }) => {
+  const StyledMarkdown = ({ children, ...props }) => {
     return (
-      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
+      <div style={{ whiteSpace: "pre-line", margin: 0, padding: 0 }}>
         <ReactMarkdown
           {...props}
           components={{
@@ -170,43 +168,28 @@ const StyledMarkdown = ({ children, ...props }) => {
                 </Grid>
 
                 {/* Second Row */}
-                <Grid
-                  container
-                  justifyContent="flex-start"
+                <Typography
                   sx={{
-                    background2,
-                    padding: "5px",
+                    background: "transparent",
+                    borderBottom: `1px solid ${theme.secondary}`,
                     px: 1,
                     py: 1,
                   }}
                 >
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      background2,
+                  {!armor.quality && t("No Qualities")}{" "}
+                  <StyledMarkdown
+                    components={{
+                      strong: (props) => (
+                        <strong style={{ fontWeight: "bold" }} {...props} />
+                      ),
+                      em: (props) => (
+                        <em style={{ fontStyle: "italic" }} {...props} />
+                      ),
                     }}
                   >
-                    <Typography fontSize={{ xs: "0.7rem", sm: "1.0rem" }}>
-                      {!armor.quality && t("No Qualities")}
-                    </Typography>
-                    <StyledMarkdown
-                      components={{
-                        strong: (props) => (
-                          <strong style={{ fontWeight: "bold" }} {...props} />
-                        ),
-                        em: (props) => (
-                          <em style={{ fontStyle: "italic" }} {...props} />
-                        ),
-                      }}
-                      sx={{
-                        fontSize: { xs: "0.9rem", sm: "1.0rem" },
-                        fontFamily: "PT Sans Narrow",
-                      }}
-                    >
-                      {armor.quality}
-                    </StyledMarkdown>
-                  </div>
-                </Grid>
+                    {armor.quality}
+                  </StyledMarkdown>
+                </Typography>
               </Grid>
             </Grid>
           </Stack>
