@@ -88,7 +88,7 @@ function Export({ name = "", dataType, data = {} }: Props) {
         open={isSnackbarOpen}
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
-        message="Copied to Clipboard!"
+        message={t("Copied to Clipboard!")}
       />
     </>
   );

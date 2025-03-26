@@ -319,7 +319,7 @@ export default function PlayerWeaponModal({
 
   const handleDelete = async () => {
     const confirmDelete = await globalConfirm(
-      "Are you sure you want to delete this weapon?"
+      t("delete_equipment_confirm")
     );
     if (confirmDelete) {
       if (editWeaponIndex !== null) {
