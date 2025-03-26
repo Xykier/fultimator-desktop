@@ -509,9 +509,9 @@ const NPCDetail = ({
             }}
           >
             <MenuItem value={0}>{t("combat_sim_study")}</MenuItem>
-            <MenuItem value={1}>7+</MenuItem>
-            <MenuItem value={2}>10+</MenuItem>
-            <MenuItem value={3}>13+</MenuItem>
+            <MenuItem value={1}>10+</MenuItem>
+            <MenuItem value={2}>13+</MenuItem>
+            <MenuItem value={3}>16+</MenuItem>
           </Select>
           <Tooltip title="Download Sheet" placement="bottom">
             <Button
