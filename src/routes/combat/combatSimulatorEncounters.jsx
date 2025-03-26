@@ -183,7 +183,7 @@ const CombatSimEncounters = () => {
               {t("combat_sim_saved_encounters")} ({encounters.length}/
               {MAX_ENCOUNTERS})
             </Typography>
-            <Tooltip title={t("Settings")}>
+            <Tooltip title={t("combat_sim_settings")}>
               <IconButton
                 color={isDarkMode ? "white" : "primary"}
                 onClick={() => setSettingsOpen(true)}

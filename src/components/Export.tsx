@@ -73,14 +73,14 @@ function Export({ name = "", dataType, data = {} }: Props) {
             exportJSON(ExportAction.FILE);
           }}
         >
-          Export as JSON File
+          {t("export_json_file")}
         </MenuItem>
         <MenuItem
           onClick={() => {
             exportJSON(ExportAction.CLIPBOARD);
           }}
         >
-          Copy JSON to Clipboard
+          {t("copy_json_clipboard")}
         </MenuItem>
       </Menu>
       <Snackbar

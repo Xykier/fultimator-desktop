@@ -11,6 +11,7 @@ import MenuOption from "./MenuOption";
 import { useNpc } from "../npc/NpcContext";
 import ExplainSkillsSimplified from "../npc/ExplainSkillsSimplified";
 import EditCompendiumModal from "../npc/EditCompendiumModal";
+import { t } from "../../translation/translate";
 
 const NpcEditAppBar = ({
   //isNpcEdit,
@@ -104,7 +105,7 @@ const PcEditAppBar = ({
           </Grid>
           <Grid item xs={6} textAlign="center">
             <Grid container justifyContent="center">
-              <span>Welcome to Character Designer Alpha!</span>
+              <span>{t("Character Designer")}</span>
             </Grid>
           </Grid>
           <Grid item xs={3} textAlign="right">
