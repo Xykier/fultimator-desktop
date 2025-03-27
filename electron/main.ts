@@ -1,5 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
-//import { createRequire } from 'node:module'
+import { app, BrowserWindow, ipcMain, dialog, Menu } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "fs";
@@ -42,6 +41,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   : RENDERER_DIST;
 
 let win: BrowserWindow | null;
+let loadingWindow: BrowserWindow | null;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -51,6 +51,196 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+    show: false, // Don't show the window immediately
+  });
+
+  const template = [
+    {
+      label: "File",
+      submenu: [
+        { type: "separator" },
+        {
+          label: "Exit",
+          accelerator: "CmdOrCtrl+Q",
+          click: () => {
+            app.quit();
+          },
+        },
+      ],
+    },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload" },
+        { role: "forceReload" },
+        { role: "toggleDevTools" },
+        { type: "separator" },
+        { role: "resetZoom" },
+        { role: "zoomIn" },
+        { role: "zoomOut" },
+        { type: "separator" },
+        { role: "togglefullscreen" },
+      ],
+    },
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "About",
+          click: () => {
+            showAboutDialog(win);
+          },
+        },
+      ],
+    },
+  ];
+
+  // Create the menu from the template
+  const menu = Menu.buildFromTemplate(template as any);
+
+  // Set the application menu
+  Menu.setApplicationMenu(menu);
+
+  // Array of possible logo paths to try
+  const logoPossiblePaths = [
+    path.join(process.env.VITE_PUBLIC, "logo512.png"),
+    path.join(process.env.VITE_PUBLIC, "logo192.png"),
+    path.join(process.env.VITE_PUBLIC, "logo120.png"),
+  ];
+
+  // Find the first existing logo
+  const logoPath = logoPossiblePaths.find((path) => fs.existsSync(path));
+
+  // If no PNG logo found, fallback to default loading
+  const loadingHTML = `
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fultimator - Loading</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        flex-direction: column;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+
+        background-color: canvas;
+        color: canvastext;
+      }
+      .logo {
+        max-width: 150px;
+        margin-bottom: 20px;
+        animation: pulse 1.5s infinite;
+      }
+      .spinner {
+        border: 4px solid rgba(128, 128, 128, 0.2);
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+      .loading-text {
+        margin-top: 20px;
+        font-size: 18px;
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    ${
+      logoPath
+        ? `<img src="data:image/png;base64,${fs
+            .readFileSync(logoPath)
+            .toString("base64")}" alt="Fultimator Logo" class="logo">`
+        : ""
+    }
+    <div class="spinner"></div>
+  </body>
+</html>
+    `;
+
+  win = new BrowserWindow({
+    icon: path.join(process.env.VITE_PUBLIC, "favicon.ico"),
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+    show: false, // Don't show the window immediately
+  });
+
+  // Create a loading window first
+  loadingWindow = new BrowserWindow({
+    parent: win,
+    modal: false, // Change to false to prevent blocking
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+    show: true,
+    frame: false, // Frameless window
+    transparent: true, // Make background transparent
+    alwaysOnTop: true,
+  });
+
+  loadingWindow.loadURL(
+    `data:text/html;charset=utf-8,${encodeURIComponent(loadingHTML)}`
+  );
+
+  // When the main window finishes loading
+  win.once("ready-to-show", () => {
+    if (loadingWindow) {
+      loadingWindow.close(); // Close the loading window
+      loadingWindow = null;
+    }
+    win.show(); // Show the main window
+  });
+
+  // Explicit close handling
+  win.on("close", (event) => {
+    // Prevent the window from closing immediately
+    event.preventDefault();
+
+    // Perform any cleanup or save operations here if needed
+
+    // Explicitly quit the app
+    app.quit();
+  });
+
+  // Explicitly handle window closure
+  win.on("closed", () => {
+    win = null;
+
+    // Ensure loading window is also closed
+    if (loadingWindow) {
+      loadingWindow.close();
+      loadingWindow = null;
+    }
   });
 
   ipcMain.removeHandler("dialog-confirm");
@@ -319,14 +509,47 @@ function createWindow() {
   });
 }
 
+function showAboutDialog(mainWindow: BrowserWindow) {
+  const packageJsonPath = path.join(__dirname, "..", "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  const version = packageJson.version;
+
+  // Find the first existing logo
+  const logoPossiblePaths = [
+    path.join(process.env.VITE_PUBLIC, "logo512.png"),
+    path.join(process.env.VITE_PUBLIC, "logo192.png"),
+    path.join(process.env.VITE_PUBLIC, "logo120.png"),
+  ];
+
+  const logoPath = logoPossiblePaths.find((path) => fs.existsSync(path));
+
+  dialog.showMessageBox(mainWindow, {
+    type: "info",
+    title: "About Fultimator",
+    icon: logoPath ? logoPath : undefined,
+    message: "Fultimator Desktop",
+    detail: `Version: ${version}\n\n`,
+    buttons: ["OK"],
+  });
+}
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
+  // Ensure all windows are closed and explicitly quit the app
+  if (win) win.close();
+  if (loadingWindow) loadingWindow.close();
+
   if (process.platform !== "darwin") {
     app.quit();
-    win = null;
   }
+});
+
+app.on("before-quit", () => {
+  // Destroy all windows
+  if (win) win.destroy();
+  if (loadingWindow) loadingWindow.destroy();
 });
 
 app.on("activate", () => {

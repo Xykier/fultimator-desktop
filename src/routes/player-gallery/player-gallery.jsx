@@ -19,6 +19,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import Layout from "../../components/Layout";
 import {
@@ -55,6 +56,7 @@ function Personal() {
   const [pcs, setPcs] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -63,11 +65,14 @@ function Personal() {
   }, []);
 
   const fetchPcs = async () => {
+    setLoading(true);
     try {
       const pcsData = await getPcs();
       setPcs(pcsData);
     } catch (error) {
       console.error("Failed to fetch PCs", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -344,7 +349,7 @@ function Personal() {
                   id="select-direction"
                   value={direction}
                   label="direction:"
-                  onChange={(evt, val2) => {
+                  onChange={(evt) => {
                     setDirection(evt.target.value);
                   }}
                 >
@@ -403,6 +408,17 @@ function Personal() {
           </Grid>
         </Paper>
       </div>
+      {loading && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 50,
+            }}
+          >
+           <CircularProgress />
+          </div>
+        )}
       <Grid container spacing={1} sx={{ py: 1 }}>
         {filteredList.map((player, index) => (
           <Grid
