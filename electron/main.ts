@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import { fileURLToPath } from "node:url";
 import { createAppMenu } from "./menus";
 import path from "node:path";
@@ -7,7 +7,6 @@ import { createLoadingWindow } from "./window";
 import "./google";
 import { setupIpcHandlers } from "./ipc-handlers";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 
 // The built directory structure
 //
@@ -97,6 +96,13 @@ function createWindow() {
     } else {
       console.error("Main window not found");
     }
+  });
+
+  // Open external links in default browser
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    console.log("Opening external link:", url);
+    shell.openExternal(url);
+    return { action: "deny" };
   });
 
   setupIpcHandlers(win);

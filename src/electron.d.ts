@@ -12,6 +12,7 @@ declare global {
       readFile(filePath: string): Promise<string>;
       loginWithGoogle(): Promise<void>;
       checkAuth(): Promise<{ isAuthenticated: boolean; tokens?: any }>;
+      openExternal(url: string): void;
     };
   }
 }
