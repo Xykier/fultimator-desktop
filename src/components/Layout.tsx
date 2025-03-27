@@ -13,9 +13,10 @@ interface LayoutProps {
   children: React.ReactNode;
   fullWidth?: boolean; // New prop for controlling Container width
   unsavedChanges?: boolean;
+  loading?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) => {
+const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges, loading }) => {
   const { t } = useTranslate();
   const { selectedTheme, isDarkMode, setTheme, toggleDarkMode } = useThemeContext();
 
@@ -62,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children, fullWidth, unsavedChanges }) 
 
   return (
     <>
-      {isNpcEdit || isPcEdit ? (
+      {!loading && (isNpcEdit || isPcEdit)  ? (
         <CompactAppBar
           isNpcEdit={isNpcEdit}
           isPcEdit={isPcEdit}

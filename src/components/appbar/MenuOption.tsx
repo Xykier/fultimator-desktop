@@ -73,12 +73,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   useEffect(() => {
     const checkAuth = async () => {
       const response = await window.electron.checkAuth();
-      console.log("Auth Response:", response);
       setIsAuthenticated(response.isAuthenticated);
-
-      if (response.isAuthenticated && response.tokens) {
-        console.log("Tokens:", response.tokens);
-      }
     };
 
     checkAuth();
@@ -153,9 +148,15 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   };
 
   const handleLocalExport = async () => {
-    await exportDatabase();
-    setMessage("Database exported successfully!");
-    setIsSnackbarOpen(true);
+    try {
+      await exportDatabase();
+      setMessage("Database exported successfully!");
+      setIsSnackbarOpen(true);
+    } catch (error) {
+      console.error(error);
+      setMessage("Failed to export database.");
+      setIsSnackbarOpen(true);
+    }
   };
 
   const handleGoogleImport = () => {
@@ -358,10 +359,18 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={handleImportCancel} color="primary">
+          <Button
+            variant="contained"
+            onClick={handleImportCancel}
+            color="primary"
+          >
             {t("Cancel")}
           </Button>
-          <Button variant="contained" onClick={handleImportConfirm} color="primary">
+          <Button
+            variant="contained"
+            onClick={handleImportConfirm}
+            color="primary"
+          >
             {t("Confirm")}
           </Button>
         </DialogActions>
