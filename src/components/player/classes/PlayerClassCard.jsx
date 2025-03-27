@@ -40,15 +40,22 @@ export default function PlayerClassCard({
   isEditMode,
   editClassName,
   editHeroic,
-  isHomebrew
+  isHomebrew,
 }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
 
-const StyledMarkdown = ({ children, ...props }) => {
+  const StyledMarkdown = ({ children, ...props }) => {
     return (
-      <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 0 }}>
+      <div
+        style={{
+          whiteSpace: "pre-line",
+          display: "inline",
+          margin: 0,
+          padding: 1,
+        }}
+      >
         <ReactMarkdown
           {...props}
           components={{
@@ -326,7 +333,10 @@ const StyledMarkdown = ({ children, ...props }) => {
 
   // Only query when the necessary conditions are met
   useEffect(() => {
-    if (!hasMultipleFaithfulCompanionSkills && hasSingleFaithfulCompanionSkill) {
+    if (
+      !hasMultipleFaithfulCompanionSkills &&
+      hasSingleFaithfulCompanionSkill
+    ) {
       console.log("Fetching companions...");
       setLoading(true);
       setErr(null);
@@ -334,9 +344,7 @@ const StyledMarkdown = ({ children, ...props }) => {
       const fetchCompanions = async () => {
         try {
           const npcs = await getNpcs();
-          const companions = npcs.filter(
-            (npc) => npc.rank === 'companion'
-          );
+          const companions = npcs.filter((npc) => npc.rank === "companion");
           companions.sort((a, b) => {
             // Sort by level and name
             if (a.lvl !== b.lvl) return a.lvl - b.lvl;
@@ -352,14 +360,13 @@ const StyledMarkdown = ({ children, ...props }) => {
 
       fetchCompanions();
     }
-  }, [
-    hasMultipleFaithfulCompanionSkills,
-    hasSingleFaithfulCompanionSkill,
-  ]);
+  }, [hasMultipleFaithfulCompanionSkills, hasSingleFaithfulCompanionSkill]);
 
   const handleRemoveClick = async () => {
     // Use globalConfirm for confirmation
-    const confirmed = await globalConfirm(t("Are you sure you want to remove the class?"));
+    const confirmed = await globalConfirm(
+      t("Are you sure you want to remove the class?")
+    );
     if (confirmed) {
       onRemove(); // Call the remove function if confirmed
     }
@@ -520,17 +527,17 @@ const StyledMarkdown = ({ children, ...props }) => {
                 isEditMode={isEditMode}
                 isHeroicSkill={false}
               />
-              <StyledMarkdown
-                allowedElements={["strong", "em"]}
-                unwrapDisallowed={true}
-                sx={{
-                  fontFamily: "PT Sans Narrow",
-                  padding: "0 17px",
-                  fontSize: "1rem",
-                }}
+              <Typography
+                component={"div"}
+                sx={{ minHeight: "20px", paddingX: "10px" }}
               >
-                {isHomebrew ? skill.description : t(skill.description)}
-              </StyledMarkdown>
+                <StyledMarkdown
+                  allowedElements={["strong", "em"]}
+                  unwrapDisallowed={true}
+                >
+                  {isHomebrew ? skill.description : t(skill.description)}
+                </StyledMarkdown>
+              </Typography>
             </Grid>
           ))}
         {classItem.lvl === 10 && (
@@ -557,17 +564,17 @@ const StyledMarkdown = ({ children, ...props }) => {
                 isEditMode={isEditMode}
                 isHeroicSkill={true}
               />
-              <StyledMarkdown
-                allowedElements={["strong", "em"]}
-                unwrapDisallowed={true}
-                sx={{
-                  fontFamily: "PT Sans Narrow",
-                  padding: "0 17px",
-                  fontSize: "1rem",
-                }}
+              <Typography
+                component={"div"}
+                sx={{ minHeight: "20px", paddingX: "10px" }}
               >
-                {classItem.heroic.description}
-              </StyledMarkdown>
+                <StyledMarkdown
+                  allowedElements={["strong", "em"]}
+                  unwrapDisallowed={true}
+                >
+                  {classItem.heroic.description}
+                </StyledMarkdown>
+              </Typography>
             </Grid>
           </>
         )}

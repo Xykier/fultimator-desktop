@@ -682,14 +682,14 @@ function Attacks({ npc }) {
                   return (
                     <Typography component="span" key={i}>
                       {" "}
-                      - <StyledMarkdown>{effect}</StyledMarkdown>{" "}
+                      - <SpanMarkdown>{effect}</SpanMarkdown>{" "}
                     </Typography>
                   );
                 })}
                 {(typeof myVar === "string" ||
                   attack.special instanceof String) && (
                   <Typography component="span" key={i}>
-                    <StyledMarkdown
+                    <SpanMarkdown
                       components={{
                         strong: (props) => (
                           <strong style={{ fontWeight: "bold" }} {...props} />
@@ -700,7 +700,7 @@ function Attacks({ npc }) {
                       }}
                     >
                       {attack.special}
-                    </StyledMarkdown>
+                    </SpanMarkdown>
                   </Typography>
                 )}
               </Typography>
