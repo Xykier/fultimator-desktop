@@ -7,7 +7,9 @@ import https from "https";
 import semver from "semver";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const buildData = JSON.parse(fs.readFileSync("./build-counter.json", "utf8"));
+
+// Path to the package.json file
+const packageJsonPath = path.join(__dirname, "..", "package.json");
 
 export function createAppMenu(mainWindow: BrowserWindow) {
   const template = [
@@ -77,9 +79,11 @@ export function createAppMenu(mainWindow: BrowserWindow) {
 }
 
 export function showAboutDialog(mainWindow: BrowserWindow) {
-  const packageJsonPath = path.join(__dirname, "..", "package.json");
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
   const version = packageJson.version;
+
+  // Retrieve the build counter data from package.json
+  const buildCounter = packageJson.buildcounter || { count: 0 };
 
   const logoPossiblePaths = [
     path.join(process.env.VITE_PUBLIC!, "logo512.png"),
@@ -95,7 +99,7 @@ export function showAboutDialog(mainWindow: BrowserWindow) {
     title: "About Fultimator",
     icon: logoPath || undefined,
     message: "Fultimator Desktop",
-    detail: `Version: ${version} (Build: ${buildData.count})
+    detail: `Version: ${version} (Build: ${buildCounter.count})
     
 License: MIT
 System: ${systemInfo}`,

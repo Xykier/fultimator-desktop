@@ -2,34 +2,36 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "node:url";
 
+// Get the current directory of the module
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Path to the counter file
-const counterFile = path.join(__dirname, "../../build-counter.json");
-// Read package.json version
+// Path to the package.json file
 const packageJsonPath = path.join(__dirname, "..", "..", "package.json");
+
+// Read package.json content
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
+// Get the current version from package.json
 const currentVersion = packageJson.version;
 
-// Load or initialize the counter file
-let data = { version: currentVersion, count: 0 };
-if (fs.existsSync(counterFile)) {
-    try {
-        data = JSON.parse(fs.readFileSync(counterFile, "utf8"));
-    } catch (err) {
-        console.error("Failed to read build-counter.json:", err);
-    }
+// Initialize the buildcounter field if not exists
+if (!packageJson.buildcounter) {
+    packageJson.buildcounter = { version: currentVersion, count: 0 };
 }
 
-// Reset counter if version has changed
-if (data.version !== currentVersion) {
-    data.version = currentVersion;
-    data.count = 1;
+// Load or initialize the counter
+let buildCounter = packageJson.buildcounter;
+
+// Reset counter if the version has changed
+if (buildCounter.version !== currentVersion) {
+    buildCounter.version = currentVersion;
+    buildCounter.count = 1;
 } else {
-    data.count += 1;
+    buildCounter.count += 1;
 }
 
-// Save updated counter
-fs.writeFileSync(counterFile, JSON.stringify(data, null, 2));
-console.log(`Build Counter Updated: ${data.version} - Build ${data.count}`);
+// Save the updated package.json
+fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+// Output the updated build counter
+console.log(`Build Counter Updated: ${buildCounter.version} - Build ${buildCounter.count}`);

@@ -33,6 +33,12 @@ let win: BrowserWindow | null;
 let loadingWindow: BrowserWindow | null;
 
 function createWindow() {
+
+  if (!app.isReady()) {
+    console.error("App is not ready yet! Waiting before creating window.");
+    return;
+  }
+
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "favicon.ico"),
     webPreferences: {
@@ -141,4 +147,11 @@ app.on("activate", () => {
   }
 });
 
-app.whenReady().then(createWindow);
+console.log("Electron app is starting...");
+
+app.whenReady().then(() => {
+  console.log("App is ready, creating window...");
+  createWindow();
+}).catch(err => {
+  console.error("Error during app initialization:", err);
+});

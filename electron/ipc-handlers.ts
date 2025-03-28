@@ -122,5 +122,4 @@ export function setupIpcHandlers(mainWindow: BrowserWindow) {
     return packageJson.version;
   });
 
-  // ... (upload-to-google-drive, download-from-google-drive, save-file, read-file, list-files)
 }

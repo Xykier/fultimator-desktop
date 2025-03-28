@@ -4,8 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run prebuild && vite",
-    "prebuild": "node src/scripts/build-counter.js",
+    "dev": "node src/scripts/build-counter.js && vite",
     "build": "tsc && vite build && electron-builder",
     "build:nopublish": "tsc && vite build && electron-builder --publish never",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -58,5 +57,9 @@
   },
   "main": "dist-electron/main.js",
   "description": "Unofficial Fabula Ultima Tools",
-  "author": "Fultimator <fultimator@gmail.com>"
+  "author": "Fultimator <fultimator@gmail.com>",
+  "buildcounter": {
+    "version": "1.0.0",
+    "count": 5
+  }
 }
