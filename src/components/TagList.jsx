@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import Autocomplete from "@mui/material/Autocomplete";
 import { useTheme } from "@mui/system";
 import { useTranslate } from "../translation/translate";
 import AddIcon from "@mui/icons-material/Add";
+import { getNpcTagList } from "../utility/db";
 
 const TagList = ({ npc, setNpc }) => {
   const { t } = useTranslate();
@@ -15,10 +17,39 @@ const TagList = ({ npc, setNpc }) => {
   const secondary = theme.palette.secondary.main;
 
   const [inputValue, setInputValue] = useState("");
+  const [autocompleteValue, setAutocompleteValue] = useState(null);
+  const [availableTags, setAvailableTags] = useState([]);
   const maxTags = 5; // Maximum tag count
   const maxTagLength = 50; // Maximum tag length
+  const maxVisibleTags = 5; // Maximum visible tags in autocomplete
 
-  //console.log(npc.tags);
+  // Fetch available tags when component mounts
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const fetchedTags = await getNpcTagList();
+        const filteredTags = fetchedTags
+          .map((tag) => tag.name)
+          .filter(
+            (tag) =>
+              !npc.tags?.some(
+                (existingTag) =>
+                  existingTag.name.toUpperCase() === tag.toUpperCase()
+              )
+          );
+
+        // Sort tags based on input
+        const sortedTags = inputValue.trim()
+          ? filteredTags.sort((a, b) => a.localeCompare(b)) // Sort alphabetically
+          : filteredTags; // No need to sort by usageCount if it doesn't exist
+
+        setAvailableTags(sortedTags);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchTags();
+  }, [npc.tags, inputValue]);
 
   // Function to handle deletion of a tag
   const handleDelete = (i) => {
@@ -33,25 +64,16 @@ const TagList = ({ npc, setNpc }) => {
     };
   };
 
-  // Function to handle input change in the text field
-  const handleInputChange = (e) => {
-    // Limit input value to maxTagLength characters
-    if (e.target.value.length <= maxTagLength) {
-      setInputValue(e.target.value);
-    }
-  };
-
-  // Function to handle key down events in the text field
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
   // Function to handle adding a tag
-  const handleAddTag = () => {
-    const trimmedValue = inputValue.trim().toUpperCase();
+  const handleAddTag = (newTagName) => {
+    const trimmedValue = (
+      typeof newTagName === "string"
+        ? newTagName
+        : newTagName?.label || inputValue
+    )
+      .trim()
+      .toUpperCase();
+
     if (
       trimmedValue &&
       (npc.tags?.length < maxTags || !npc.tags) &&
@@ -68,12 +90,18 @@ const TagList = ({ npc, setNpc }) => {
         };
         return newState;
       });
+
+      // Reset input and autocomplete values
       setInputValue("");
+      setAutocompleteValue(null);
     }
   };
 
   // Check if the input field is disabled
   const isInputDisabled = npc.tags?.length >= maxTags;
+
+  // Calculate remaining selectable tags
+  const remainingSelectableTags = availableTags.length - maxVisibleTags;
 
   return (
     <Paper
@@ -98,26 +126,77 @@ const TagList = ({ npc, setNpc }) => {
       </Typography>
       {/* Stack for input field and add button */}
       <Stack direction="row" spacing={1} alignItems="flex-start">
-        {/* Text field for adding tags */}
-        <TextField
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown} // Check if handleKeyDown is properly attached
-          placeholder={isInputDisabled ? t("Reached tag limit") : t("Add Tag")}
-          variant="outlined"
-          size="small"
+        {/* Autocomplete for adding tags */}
+        <Autocomplete
           fullWidth
+          freeSolo
           disabled={isInputDisabled}
-          inputProps={{ maxLength: maxTagLength }} // Limit input to maxTagLength characters
-          sx={{ height: "40px" }} // Set fixed height for the TextField
+          options={[
+            ...availableTags.slice(0, maxVisibleTags),
+            ...(remainingSelectableTags > 0
+              ? [
+                  {
+                    label: "+ " + remainingSelectableTags + " more",
+                    disabled: true,
+                  },
+                ]
+              : []),
+          ]}
+          value={autocompleteValue}
+          onChange={(_, newValue) => {
+            // Only add tag if it's a valid selection and not a disabled option
+            if (newValue && !newValue.disabled) {
+              // Set input value and autocomplete value to prevent double tag creation
+              setInputValue(newValue.label || newValue);
+              setAutocompleteValue(newValue);
+              handleAddTag(newValue);
+            }
+          }}
+          inputValue={inputValue}
+          onInputChange={(_, newInputValue) => {
+            setInputValue(newInputValue);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder={
+                isInputDisabled
+                  ? t("Reached tag limit")
+                  : t("Add Tag or Select from List")
+              }
+              variant="outlined"
+              size="small"
+              inputProps={{
+                ...params.inputProps,
+                maxLength: maxTagLength,
+              }}
+              sx={{ height: "40px" }}
+            />
+          )}
+          renderOption={(props, option) => (
+            <li
+              {...props}
+              style={{
+                ...(option.disabled
+                  ? {
+                      color: "gray",
+                      cursor: "default",
+                      pointerEvents: "none",
+                    }
+                  : {}),
+              }}
+            >
+              {option.label || option}
+            </li>
+          )}
         />
         {/* Button to add tags */}
         <Button
           variant="contained"
           color="primary"
           size="small"
-          onClick={handleAddTag}
-          disabled={isInputDisabled}
+          onClick={() => handleAddTag(inputValue)}
+          disabled={isInputDisabled || !inputValue.trim()}
           sx={{
             height: "40px",
             display: isInputDisabled ? "none" : "flex",
@@ -137,7 +216,7 @@ const TagList = ({ npc, setNpc }) => {
             label={tag.name.toUpperCase()}
             onDelete={handleDelete(i)}
             color="primary"
-            variant="outlined"
+            variant={theme.palette.mode === "dark" ? "contained" : "outlined"}
             style={{ marginRight: "5px", marginBottom: "5px" }}
           />
         ))}

@@ -341,7 +341,7 @@ function Personal() {
                   id="select-rank"
                   value={rank}
                   label={t("Rank:")}
-                  onChange={(evt, val2) => {
+                  onChange={(evt) => {
                     setRank(evt.target.value);
                   }}
                 >
@@ -376,7 +376,7 @@ function Personal() {
                   id="select-species"
                   value={species}
                   label={t("Species:")}
-                  onChange={(evt, val2) => {
+                  onChange={(evt) => {
                     setSpecies(evt.target.value);
                   }}
                 >
@@ -407,7 +407,7 @@ function Personal() {
                   id="select-sort"
                   value={sort}
                   label={t("Sort:")}
-                  onChange={(evt, val2) => {
+                  onChange={(evt) => {
                     setSort(evt.target.value);
                   }}
                 >
@@ -434,7 +434,7 @@ function Personal() {
                   id="select-direction"
                   value={direction}
                   label="direction:"
-                  onChange={(evt, val2) => {
+                  onChange={(evt) => {
                     setDirection(evt.target.value);
                   }}
                 >

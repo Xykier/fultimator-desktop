@@ -56,6 +56,29 @@ export const deleteAllNpcs = async () => {
   await transaction.done;
 };
 
+export const getNpcTagList = async () => {
+  const db = await dbPromise;
+  const npcs = await db.getAll(NPC_STORE_NAME);
+
+  const tagMap = new Map();
+
+  npcs.forEach(npc => {
+    if (Array.isArray(npc.tags)) {
+      npc.tags.forEach(tag => {
+        if (tag.name) {
+          const tagName = tag.name.toUpperCase();
+          tagMap.set(tagName, (tagMap.get(tagName) || 0) + 1);
+        }
+      });
+    }
+  });
+
+  return Array.from(tagMap.entries())
+    .map(([name, usageCount]) => ({ name, usageCount }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+};
+
+
 // PC Functions
 export const addPc = async (pc) => {
   const db = await dbPromise;
