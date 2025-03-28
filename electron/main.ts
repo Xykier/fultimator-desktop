@@ -91,12 +91,17 @@ function createWindow() {
   // Handle navigating to the home page
   ipcMain.on("navigate-home", () => {
     if (win) {
-      win.loadURL(path.join(__dirname, "..", "dist", "index.html"));
+      if (VITE_DEV_SERVER_URL) {
+        win.loadURL(VITE_DEV_SERVER_URL);
+      } else {
+        win.loadFile(path.join(RENDERER_DIST, "index.html"));
+      }
       console.log("Navigating to home page");
     } else {
       console.error("Main window not found");
     }
   });
+  
 
   // Open external links in default browser
   win.webContents.setWindowOpenHandler(({ url }) => {

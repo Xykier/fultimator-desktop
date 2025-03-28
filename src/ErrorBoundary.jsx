@@ -200,8 +200,10 @@ class ErrorBoundary extends Component {
 const ReturnHomeButton = () => {
   const handleReturnHome = () => {
     if (window.electron) {
+      console.log("Returning to home with electron");
         window.electron.navigateHome();
     } else {
+      console.log("Returning to home");
       window.location.href = "/";
     }
   };
