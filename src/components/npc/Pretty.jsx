@@ -562,9 +562,9 @@ function Attacks({ npc }) {
     poison: "poison_damage",
   };
 
-  const StyledMarkdown = ({ children, ...props }) => {
+  const SpanMarkdown = ({ children, ...props }) => {
     return (
-      <div
+      <span
         style={{
           whiteSpace: "pre-line",
           display: "inline",
@@ -575,41 +575,19 @@ function Attacks({ npc }) {
         <ReactMarkdown
           {...props}
           components={{
-            p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
-            ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
-            li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
-            strong: (props) => (
+            p: ({ ...props }) => <span {...props} />, // Render <p> as <span>
+            strong: ({ ...props }) => (
               <strong style={{ fontWeight: "bold" }} {...props} />
             ),
-            em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
-            span: (props) => (
-              <span style={{ margin: 0, padding: 0 }} {...props} />
+            em: ({ ...props }) => (
+              <em style={{ fontStyle: "italic" }} {...props} />
             ),
+            span: ({ ...props }) => <span {...props} />,
           }}
         >
           {children}
         </ReactMarkdown>
-      </div>
-    );
-  };
-
-  const SpanMarkdown = ({ children, ...props }) => {
-    return (
-      <ReactMarkdown
-        {...props}
-        components={{
-          p: ({ node, ...props }) => <span {...props} />, // Render <p> as <span>
-          strong: ({ node, ...props }) => (
-            <strong style={{ fontWeight: "bold" }} {...props} />
-          ),
-          em: ({ node, ...props }) => (
-            <em style={{ fontStyle: "italic" }} {...props} />
-          ),
-          span: ({ node, ...props }) => <span {...props} />,
-        }}
-      >
-        {children}
-      </ReactMarkdown>
+      </span>
     );
   };
 
@@ -944,21 +922,30 @@ function Special({ npc }) {
 
   const SpanMarkdown = ({ children, ...props }) => {
     return (
-      <ReactMarkdown
-        {...props}
-        components={{
-          p: ({ node, ...props }) => <span {...props} />, // Render <p> as <span>
-          strong: ({ node, ...props }) => (
-            <strong style={{ fontWeight: "bold" }} {...props} />
-          ),
-          em: ({ node, ...props }) => (
-            <em style={{ fontStyle: "italic" }} {...props} />
-          ),
-          span: ({ node, ...props }) => <span {...props} />,
+      <span
+        style={{
+          whiteSpace: "pre-line",
+          display: "inline",
+          margin: 0,
+          padding: 0,
         }}
       >
-        {children}
-      </ReactMarkdown>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: ({ ...props }) => <span {...props} />, // Render <p> as <span>
+            strong: ({ ...props }) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: ({ ...props }) => (
+              <em style={{ fontStyle: "italic" }} {...props} />
+            ),
+            span: ({ ...props }) => <span {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </span>
     );
   };
 
@@ -1035,21 +1022,30 @@ function Actions({ npc }) {
 
   const SpanMarkdown = ({ children, ...props }) => {
     return (
-      <ReactMarkdown
-        {...props}
-        components={{
-          p: ({ node, ...props }) => <span {...props} />, // Render <p> as <span>
-          strong: ({ node, ...props }) => (
-            <strong style={{ fontWeight: "bold" }} {...props} />
-          ),
-          em: ({ node, ...props }) => (
-            <em style={{ fontStyle: "italic" }} {...props} />
-          ),
-          span: ({ node, ...props }) => <span {...props} />,
+      <span
+        style={{
+          whiteSpace: "pre-line",
+          display: "inline",
+          margin: 0,
+          padding: 0,
         }}
       >
-        {children}
-      </ReactMarkdown>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: ({ ...props }) => <span {...props} />, // Render <p> as <span>
+            strong: ({ ...props }) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: ({ ...props }) => (
+              <em style={{ fontStyle: "italic" }} {...props} />
+            ),
+            span: ({ ...props }) => <span {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </span>
     );
   };
 
@@ -1129,21 +1125,30 @@ function Notes({ npc }) {
 
   const SpanMarkdown = ({ children, ...props }) => {
     return (
-      <ReactMarkdown
-        {...props}
-        components={{
-          p: ({ node, ...props }) => <span {...props} />, // Render <p> as <span>
-          strong: ({ node, ...props }) => (
-            <strong style={{ fontWeight: "bold" }} {...props} />
-          ),
-          em: ({ node, ...props }) => (
-            <em style={{ fontStyle: "italic" }} {...props} />
-          ),
-          span: ({ node, ...props }) => <span {...props} />,
+      <span
+        style={{
+          whiteSpace: "pre-line",
+          display: "inline",
+          margin: 0,
+          padding: 0,
         }}
       >
-        {children}
-      </ReactMarkdown>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: ({ ...props }) => <span {...props} />, // Render <p> as <span>
+            strong: ({ ...props }) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: ({ ...props }) => (
+              <em style={{ fontStyle: "italic" }} {...props} />
+            ),
+            span: ({ ...props }) => <span {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </span>
     );
   };
 
@@ -1223,21 +1228,30 @@ function RareGear({ npc }) {
 
   const SpanMarkdown = ({ children, ...props }) => {
     return (
-      <ReactMarkdown
-        {...props}
-        components={{
-          p: ({ node, ...props }) => <span {...props} />, // Render <p> as <span>
-          strong: ({ node, ...props }) => (
-            <strong style={{ fontWeight: "bold" }} {...props} />
-          ),
-          em: ({ node, ...props }) => (
-            <em style={{ fontStyle: "italic" }} {...props} />
-          ),
-          span: ({ node, ...props }) => <span {...props} />,
+      <span
+        style={{
+          whiteSpace: "pre-line",
+          display: "inline",
+          margin: 0,
+          padding: 0,
         }}
       >
-        {children}
-      </ReactMarkdown>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: ({ ...props }) => <span {...props} />, // Render <p> as <span>
+            strong: ({ ...props }) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: ({ ...props }) => (
+              <em style={{ fontStyle: "italic" }} {...props} />
+            ),
+            span: ({ ...props }) => <span {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </span>
     );
   };
 
@@ -1329,21 +1343,30 @@ function Equip({ npc }) {
 
   const SpanMarkdown = ({ children, ...props }) => {
     return (
-      <ReactMarkdown
-        {...props}
-        components={{
-          p: ({ node, ...props }) => <span {...props} />, // Render <p> as <span>
-          strong: ({ node, ...props }) => (
-            <strong style={{ fontWeight: "bold" }} {...props} />
-          ),
-          em: ({ node, ...props }) => (
-            <em style={{ fontStyle: "italic" }} {...props} />
-          ),
-          span: ({ node, ...props }) => <span {...props} />,
+      <span
+        style={{
+          whiteSpace: "pre-line",
+          display: "inline",
+          margin: 0,
+          padding: 0,
         }}
       >
-        {children}
-      </ReactMarkdown>
+        <ReactMarkdown
+          {...props}
+          components={{
+            p: ({ ...props }) => <span {...props} />, // Render <p> as <span>
+            strong: ({ ...props }) => (
+              <strong style={{ fontWeight: "bold" }} {...props} />
+            ),
+            em: ({ ...props }) => (
+              <em style={{ fontStyle: "italic" }} {...props} />
+            ),
+            span: ({ ...props }) => <span {...props} />,
+          }}
+        >
+          {children}
+        </ReactMarkdown>
+      </span>
     );
   };
 
