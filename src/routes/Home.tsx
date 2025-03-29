@@ -252,7 +252,7 @@ function Home() {
                 />
                 {t("extra_resources")}
               </Typography>
-              <Stack spacing={2} sx={{ mb: 2 }}>
+              <Stack spacing={2} >
                 <Typography variant="body1">
                   {t("contact_runty")}
                   <Tooltip title="Email contactrunty@iCloud.com" arrow>
