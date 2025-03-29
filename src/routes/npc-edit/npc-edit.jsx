@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import { useParams, useLocation } from "react-router-dom";
 import {
   Grid,
@@ -45,6 +51,7 @@ export default function NpcEdit() {
 
   let params = useParams(); // URL parameters hook
   const location = useLocation(); // Location hook for getting URL
+
   const npcId = parseInt(params.npcId, 10);
   const [showScrollTop, setShowScrollTop] = useState(true); // State for scroll-to-top button visibility
 
@@ -58,7 +65,6 @@ export default function NpcEdit() {
   const [isUpdated, setIsUpdated] = useState(false); // State for unsaved changes
   const [loadingIsUpdated, setLoadingIsUpdated] = useState(false);
   const isNpcUpdated = useMemo(() => !deepEqual(npcTemp, npc), [npcTemp, npc]);
-
 
   // Effect to fetch NPC data from IndexedDB
   useEffect(() => {
@@ -147,9 +153,15 @@ export default function NpcEdit() {
 
   // Function to save NPC
   const saveNpc = useCallback(() => {
-    updateNpc(npcTemp);
+    // Add updatedAt timestamp to the NPC object
+    const updatedNpc = { ...npcTemp, updatedAt: new Date().toISOString() };
+
+    // Update the NPC
+    updateNpc(updatedNpc);
+
+    // Reset the update state and save the updated NPC to state
     setIsUpdated(false);
-    setNpc(npcTemp);
+    setNpc(updatedNpc);
   }, [npcTemp]);
 
   // Check if the 'json' query parameter is true and return the JSON response
