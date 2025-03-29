@@ -13,6 +13,7 @@ import PrettyAccessory from "./PrettyAccessory";
 import Export from "../../../Export";
 import CustomHeaderAccordion from "../../../common/CustomHeaderAccordion";
 import { useTheme } from "@mui/material/styles";
+import { AccessoryIcon } from "../../../icons";
 
 export default function PlayerAccessories({
   player,
@@ -105,23 +106,23 @@ export default function PlayerAccessories({
     <Accordion
       elevation={3}
       sx={{
-        p: "15px",
         borderRadius: "8px",
         border: "2px solid",
-        borderColor: theme.palette.secondary,
+        borderColor: theme.palette.secondary.main,
         marginBottom: 3,
       }}
       expanded={expanded}
       onChange={handleAccordionChange}
     >
       <CustomHeaderAccordion
-        expanded={expanded}
+        isExpanded={expanded}
         handleAccordionChange={handleAccordionChange}
         headerText={t("Accessories")}
         showIconButton={false}
+        icon={<AccessoryIcon />}
       />
       <AccordionDetails>
-        <Grid container justifyContent="flex-end" spacing={2}>
+        <Grid container justifyContent="flex-end" spacing={3}>
           {/* map the weapons and display them with a PrettyWeapon component if they exist */}
           {accessories.map((accessory, index) => (
             <React.Fragment key={index}>

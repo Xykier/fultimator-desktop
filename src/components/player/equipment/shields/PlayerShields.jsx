@@ -13,6 +13,7 @@ import { Equip } from "../../../icons";
 import Export from "../../../Export";
 import CustomHeaderAccordion from "../../../common/CustomHeaderAccordion";
 import { useTheme } from "@mui/material/styles";
+import { ShieldIcon } from "../../../icons";
 
 export default function PlayerShields({
   player,
@@ -144,23 +145,23 @@ export default function PlayerShields({
     <Accordion
       elevation={3}
       sx={{
-        p: "15px",
         borderRadius: "8px",
         border: "2px solid",
-        borderColor: theme.palette.secondary,
+        borderColor: theme.palette.secondary.main,
         marginBottom: 3,
       }}
       expanded={expanded}
       onChange={handleAccordionChange}
     >
       <CustomHeaderAccordion
-        expanded={expanded}
+        isExpanded={expanded}
         handleAccordionChange={handleAccordionChange}
         headerText={t("Shield")}
         showIconButton={false}
+        icon = {<ShieldIcon />}
       />
       <AccordionDetails>
-        <Grid container justifyContent="flex-end" spacing={2}>
+        <Grid container justifyContent="flex-end" spacing={3}>
           {/* map the weapons and display them with a PrettyWeapon component if they exist */}
           {shields.map((shield, index) => (
             <React.Fragment key={index}>
