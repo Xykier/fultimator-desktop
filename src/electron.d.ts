@@ -13,6 +13,7 @@ declare global {
       loginWithGoogle(): Promise<void>;
       checkAuth(): Promise<{ isAuthenticated: boolean; tokens?: any }>;
       openExternal(url: string): void;
+      checkForUpdates(): Promise<void>;
     };
   }
 }

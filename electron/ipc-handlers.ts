@@ -11,6 +11,7 @@ import {
   downloadFromGoogleDrive,
   listGoogleDriveFiles,
 } from "./google";
+import { checkForUpdates } from "./menus";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,6 +29,7 @@ function removeExistingHandlers() {
     "read-file",
     "get-version",
     "list-files",
+    "check-for-updates"
   ];
   handlers.forEach((channel) => {
     ipcMain.removeHandler(channel);
@@ -120,6 +122,11 @@ export function setupIpcHandlers(mainWindow: BrowserWindow) {
     const packageJsonPath = path.join(__dirname, "..", "package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
     return packageJson.version;
+  });
+
+  // Handle update check request
+  ipcMain.handle("check-for-updates", async () => {
+    return checkForUpdates(mainWindow);
   });
 
 }

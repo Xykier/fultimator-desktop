@@ -40,4 +40,5 @@ contextBridge.exposeInMainWorld("electron", {
   loginWithGoogle: () => ipcRenderer.invoke("login-google"),
   checkAuth: () => ipcRenderer.invoke("check-auth"),
   openExternal: (url: string) => shell.openExternal(url),
+  checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
 });
