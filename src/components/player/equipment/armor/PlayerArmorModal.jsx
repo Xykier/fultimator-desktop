@@ -27,7 +27,6 @@ import PrettyArmor from "./PrettyArmor";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
 import { globalConfirm } from "../../../../utility/globalConfirm";
-import { useTheme } from "@mui/material/styles";
 
 export default function PlayerArmorModal({
   open,
@@ -38,8 +37,6 @@ export default function PlayerArmorModal({
   onDeleteArmor,
 }) {
   const { t } = useTranslate();
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const [base, setBase] = useState(armorPlayer?.base || armor[0]);
   const [name, setName] = useState(armorPlayer?.name || t(armor[0].name));
@@ -265,7 +262,7 @@ export default function PlayerArmorModal({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      <DialogTitle variant="h3" sx={{ fontWeight: "bold" }}>
         {t("Add Armor")}
       </DialogTitle>
       <IconButton
@@ -457,7 +454,7 @@ export default function PlayerArmorModal({
         )}
         <Button
           onClick={handleSave}
-          color={isDarkMode ? "secondary" : "primary"}
+          color= "primary"
           variant="contained"
         >
           {t("Save Changes")}

@@ -36,7 +36,7 @@ export default function EditHeroicSkillModal({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      <DialogTitle variant="h3" sx={{ fontWeight: "bold"}}>
         {t("Edit Heroic Skill")}
       </DialogTitle>
       <IconButton
@@ -72,7 +72,7 @@ export default function EditHeroicSkillModal({
         />
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" color="secondary" onClick={handleSave}>
+        <Button variant="contained" color="primary" onClick={handleSave}>
           {t("Save Changes")}
         </Button>
       </DialogActions>

@@ -147,7 +147,7 @@ const ReportContentDialog: React.FC<ReportContentDialogProps> = ({
         },
       }}
     >
-      <DialogTitle sx={{ fontSize: "1.4rem" }}>
+      <DialogTitle variant="h3">
         {t("Report Content")}
       </DialogTitle>
       <DialogContent>
@@ -196,7 +196,7 @@ const ReportContentDialog: React.FC<ReportContentDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleClose} disabled={isSubmitting}>
+        <Button variant="contained" color="secondary" onClick={handleClose} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button

@@ -425,8 +425,6 @@ function ExpAdornment({
   const [levelUpDialogOpen, setLevelUpDialogOpen] = useState(false);
   const [levelUpCelebrationOpen, setLevelUpCelebrationOpen] = useState(false);
   const { t } = useTranslate();
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const handleExpClick = () => {
     if (exp >= 10 && isEditMode) {
@@ -496,15 +494,15 @@ function ExpAdornment({
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+        <DialogTitle variant="h3" sx={{ fontWeight: "bold" }}>
           {t("Level Up Confirmation")}
         </DialogTitle>
         <DialogContent>
           <p>{t("Do you want to use 10 EXP to level up?")}</p>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="error">{t("Cancel")}</Button>
-          <Button onClick={handleLevelUpConfirm} color={isDarkMode ? "secondary" : "primary"}>{t("Level Up")}</Button>
+          <Button variant="contained" onClick={handleClose} color="error">{t("Cancel")}</Button>
+          <Button variant="contained" onClick={handleLevelUpConfirm} color= "primary">{t("Level Up")}</Button>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -581,7 +579,7 @@ function ExpAdornment({
           </ul>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color={isDarkMode ? "secondary" : "primary"}>{t("OK")}</Button>
+          <Button variant="contained" onClick={handleClose} color="primary" >{t("OK")}</Button>
         </DialogActions>
       </Dialog>
       <style>

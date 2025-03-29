@@ -161,7 +161,7 @@ export default function PlayerMagichant({ player }) {
                 )}
               </DialogContent>
               <DialogActions>
-                <Button variant="contained" onClick={handleCloseModal}>
+                <Button variant="contained" color="primary" onClick={handleCloseModal}>
                   OK
                 </Button>
               </DialogActions>

@@ -612,7 +612,7 @@ export default function PlayerEquipment({
                 </DialogContent>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleDialogClose} color="error" variant="contained">
+                <Button onClick={handleDialogClose} color="secondary" variant="contained">
                   {t("Close")}
                 </Button>
                 <Button

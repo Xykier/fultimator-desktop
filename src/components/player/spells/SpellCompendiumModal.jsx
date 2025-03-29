@@ -256,7 +256,7 @@ const StyledMarkdown = ({ children, ...props }) => {
           }
           label={t("Add as Magisphere")}
         />
-        <Button variant="contained" color="secondary" onClick={handleSave}>
+        <Button variant="contained" color="primary" onClick={handleSave}>
           {t("Add")}
         </Button>
       </DialogActions>

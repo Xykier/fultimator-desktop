@@ -33,7 +33,6 @@ import { Close } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { globalConfirm } from "../../../../utility/globalConfirm";
 import PrettyWeapon from "./PrettyWeapon";
-import { useTheme } from "@mui/material/styles";
 
 export default function PlayerWeaponModal({
   open,
@@ -44,8 +43,6 @@ export default function PlayerWeaponModal({
   onDeleteWeapon,
 }) {
   const { t } = useTranslate();
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const [base, setBase] = useState(weapon?.base || weapons[0]);
   const [name, setName] = useState(weapon?.name || weapons[0].name);
@@ -375,7 +372,7 @@ export default function PlayerWeaponModal({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      <DialogTitle variant="h3" sx={{ fontWeight: "bold" }}>
         {t("Add Weapon")}
       </DialogTitle>
       <IconButton
@@ -620,7 +617,7 @@ export default function PlayerWeaponModal({
         )}
         <Button
           onClick={handleSave}
-          color={isDarkMode ? "secondary" : "primary"}
+          color= "primary"
           variant="contained"
           disabled={
             /* disable if the weapon has a value "magitech" === true */ weapon?.magicannon

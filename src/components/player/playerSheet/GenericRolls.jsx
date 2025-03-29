@@ -205,11 +205,12 @@ export default function GenericRolls({ player }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} variant="contained" color="error" >{t("Close")}</Button>
+          <Button onClick={handleClose} variant="contained" color="secondary" >{t("Close")}</Button>
           <Button
             onClick={handleRollDice}
             disabled={!attribute1 || !attribute2}
             variant="contained"
+            color="primary"
           >
             {t("Roll")}
           </Button>

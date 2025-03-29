@@ -201,7 +201,7 @@ export default function PlayerSkills({ player }) {
                 </ReactMarkdown>
               </DialogContent>
               <DialogActions>
-                <Button variant="contained" onClick={handleOK} fullWidth>
+                <Button variant="contained" color="primary" onClick={handleOK} fullWidth>
                   OK
                 </Button>
               </DialogActions>

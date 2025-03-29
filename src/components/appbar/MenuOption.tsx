@@ -346,7 +346,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
       />{" "}
       {/* Render the dialog */}
       <Dialog open={isImportWarningOpen} onClose={handleImportCancel}>
-        <DialogTitle>{t("Confirm Import")}</DialogTitle>
+        <DialogTitle variant="h3">{t("Confirm Import")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {importType === "google"
@@ -362,14 +362,14 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           <Button
             variant="contained"
             onClick={handleImportCancel}
-            color="primary"
+            color="secondary"
           >
             {t("Cancel")}
           </Button>
           <Button
             variant="contained"
             onClick={handleImportConfirm}
-            color="primary"
+            color="error"
           >
             {t("Confirm")}
           </Button>

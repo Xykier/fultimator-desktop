@@ -27,7 +27,6 @@ import ChangeModifiers from "../ChangeModifiers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
 import { globalConfirm } from "../../../../utility/globalConfirm";
-import { useTheme } from "@mui/material/styles";
 
 export default function PlayerShieldModal({
   open,
@@ -38,8 +37,6 @@ export default function PlayerShieldModal({
   onDeleteShield,
 }) {
   const { t } = useTranslate();
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const [base, setBase] = useState(shield?.base || shields[0]);
   const [name, setName] = useState(shield?.name || shields[0].name);
@@ -246,7 +243,7 @@ export default function PlayerShieldModal({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      <DialogTitle variant="h3" sx={{ fontWeight: "bold" }}>
         {t("Add Shield")}
       </DialogTitle>
       <IconButton
@@ -442,7 +439,7 @@ export default function PlayerShieldModal({
         )}
         <Button
           onClick={handleSave}
-          color={isDarkMode ? "secondary" : "primary"}
+          color= "primary"
           variant="contained"
         >
           {t("Save Changes")}

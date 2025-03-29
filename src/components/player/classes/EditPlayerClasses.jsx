@@ -586,7 +586,7 @@ export default function EditPlayerClasses({
         ))}
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>{t("Enter Class Name")}</DialogTitle>
+        <DialogTitle variant="h3">{t("Enter Class Name")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {t("Please enter the name for the new class")}.
@@ -598,10 +598,11 @@ export default function EditPlayerClasses({
             fullWidth
             value={newClassName}
             onChange={(e) => setNewClassName(e.target.value)}
+            sx={{mt: 2}}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} color="primary" variant="contained">
+          <Button onClick={() => setDialogOpen(false)} color="secondary" variant="contained">
             {t("Cancel")}
           </Button>
           <Button

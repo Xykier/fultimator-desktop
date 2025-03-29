@@ -24,7 +24,6 @@ import PrettyAccessory from "./PrettyAccessory";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import useUploadJSON from "../../../../hooks/useUploadJSON";
 import { globalConfirm } from "../../../../utility/globalConfirm";
-import { useTheme } from "@mui/material/styles";
 
 export default function PlayerAccessoryModal({
   open,
@@ -35,8 +34,6 @@ export default function PlayerAccessoryModal({
   onDeleteAccessory,
 }) {
   const { t } = useTranslate();
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const [name, setName] = useState(accessory?.name || "");
   const [quality, setQuality] = useState(accessory?.quality || "");
@@ -220,7 +217,7 @@ export default function PlayerAccessoryModal({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      <DialogTitle variant="h3" sx={{ fontWeight: "bold" }}>
         {t("Add Accessory")}
       </DialogTitle>
       <IconButton
@@ -384,7 +381,7 @@ export default function PlayerAccessoryModal({
         )}
         <Button
           onClick={handleSave}
-          color={isDarkMode ? "secondary" : "primary"}
+          color= "primary"
           variant="contained"
         >
           {t("Save Changes")}

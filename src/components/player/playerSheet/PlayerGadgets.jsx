@@ -645,7 +645,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
                 )}
               </DialogContent>
               <DialogActions>
-                <Button variant="contained" onClick={handleCloseModal}>
+                <Button variant="contained" color="primary" onClick={handleCloseModal}>
                   OK
                 </Button>
               </DialogActions>
@@ -789,6 +789,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
                 <Button
                   variant="contained"
                   onClick={handleCloseRollAlchemyModal}
+                  color="secondary"
                 >
                   {t("Cancel")}
                 </Button>
@@ -870,7 +871,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
               <DialogActions>
                 <Button
                   variant="contained"
-                  color="error"
+                  color="secondary"
                   onClick={handleCloseModal}
                 >
                   {t("Cancel")}
@@ -879,6 +880,7 @@ export default function PlayerGadgets({ player, setPlayer, isEditMode }) {
                   variant="contained"
                   onClick={handleCreateMagicannon}
                   disabled={useMagicannonIP && player.stats.ip.current < 3}
+                  color="primary"
                 >
                   {t("Create Magicannon")}
                 </Button>
