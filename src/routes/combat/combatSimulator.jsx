@@ -290,7 +290,14 @@ const CombatSim = () => {
       const newTurnsCount = newTurns.filter((turn) => turn).length;
       const oldTurnsCount = oldTurns.filter((turn) => turn).length;
       if (newTurnsCount > oldTurnsCount) {
-        addLog("combat_sim_log_turn_checked", npc.name, newTurnsCount);
+        addLog(
+          "combat_sim_log_turn_checked",
+          npc.name +
+            (npc?.combatStats?.combatNotes
+              ? "【" + npc.combatStats.combatNotes + "】"
+              : ""),
+          newTurnsCount
+        );
       }
     }
   };
@@ -372,7 +379,13 @@ const CombatSim = () => {
     // Add log entry to logs array
     const npc = selectedNPCs.find((npc) => npc.combatId === npcCombatId);
     if (npc) {
-      addLog("combat_sim_log_npc_removed", npc.name);
+      addLog(
+        "combat_sim_log_npc_removed",
+        npc.name +
+          (npc?.combatStats?.combatNotes
+            ? "【" + npc.combatStats.combatNotes + "】"
+            : "")
+      );
     }
   };
 
@@ -514,26 +527,38 @@ const CombatSim = () => {
     if (adjustedValue < 0 && statType === "HP" && damageType !== "") {
       addLog(
         "combat_sim_log_npc_damage",
-        npcClicked.name,
+        npcClicked.name +
+          (npcClicked?.combatStats?.combatNotes
+            ? "【" + npcClicked.combatStats.combatNotes + "】"
+            : ""),
         Math.abs(adjustedValue),
         damageType
       );
     } else if (adjustedValue < 0 && statType === "HP") {
       addLog(
         "combat_sim_log_npc_damage_no_type",
-        npcClicked.name,
+        npcClicked.name +
+          (npcClicked?.combatStats?.combatNotes
+            ? "【" + npcClicked.combatStats.combatNotes + "】"
+            : ""),
         Math.abs(adjustedValue)
       );
     } else if (adjustedValue < 0 && statType === "MP") {
       addLog(
         "combat_sim_log_npc_used_mp",
-        npcClicked.name,
+        npcClicked.name +
+          (npcClicked?.combatStats?.combatNotes
+            ? "【" + npcClicked.combatStats.combatNotes + "】"
+            : ""),
         Math.abs(adjustedValue)
       );
     } else if (adjustedValue > 0) {
       addLog(
         "combat_sim_log_npc_heal",
-        npcClicked.name,
+        npcClicked.name +
+          (npcClicked?.combatStats?.combatNotes
+            ? "【" + npcClicked.combatStats.combatNotes + "】"
+            : ""),
         Math.abs(adjustedValue),
         statType
       );
@@ -546,7 +571,13 @@ const CombatSim = () => {
       0
     ) {
       setTimeout(() => {
-        addLog("combat_sim_log_npc_fainted", npcClicked.name);
+        addLog(
+          "combat_sim_log_npc_fainted",
+          npcClicked.name +
+            (npcClicked?.combatStats?.combatNotes
+              ? "【" + npcClicked.combatStats.combatNotes + "】"
+              : "")
+        );
       }, 500);
     }
   };
@@ -639,9 +670,25 @@ const CombatSim = () => {
 
     // Add log entry if status effect is added or removed
     if (updatedStatusEffects.includes(status)) {
-      addLog("combat_sim_log_status_effect_added", npc.name, null, status);
+      addLog(
+        "combat_sim_log_status_effect_added",
+        npc.name +
+          (npc?.combatStats?.combatNotes
+            ? "【" + npc.combatStats.combatNotes + "】"
+            : ""),
+        null,
+        status
+      );
     } else {
-      addLog("combat_sim_log_status_effect_removed", npc.name, null, status);
+      addLog(
+        "combat_sim_log_status_effect_removed",
+        npc.name +
+          (npc?.combatStats?.combatNotes
+            ? "【" + npc.combatStats.combatNotes + "】"
+            : ""),
+        null,
+        status
+      );
     }
   };
 
@@ -713,7 +760,13 @@ const CombatSim = () => {
     );
 
     // Add log entry
-    addLog("combat_sim_log_used_ultima_point", selectedNPC.name);
+    addLog(
+      "combat_sim_log_used_ultima_point",
+      selectedNPC.name +
+        (selectedNPC?.combatStats?.combatNotes
+          ? "【" + selectedNPC.combatStats.combatNotes + "】"
+          : "")
+    );
   };
 
   // NPC Detail width resizing
