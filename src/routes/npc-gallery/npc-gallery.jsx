@@ -18,6 +18,7 @@ import {
   MenuItem,
   Button,
   Autocomplete,
+  Typography,
 } from "@mui/material";
 import Layout from "../../components/Layout";
 import NpcPretty from "../../components/npc/Pretty";
@@ -27,6 +28,7 @@ import {
   Download,
   Edit,
   HistoryEdu,
+  UploadFile,
 } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import useDownloadImage from "../../hooks/useDownloadImage";
@@ -36,6 +38,8 @@ import { addNpc, getNpcs, deleteNpc } from "../../utility/db";
 import { globalConfirm } from "../../utility/globalConfirm";
 import { validateNpc } from "../../utility/validateJson";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import ExportAllNPCs from "../../components/common/ExportAllNPCs";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 export default function NpcGallery() {
   return (
@@ -236,18 +240,23 @@ function Personal() {
     }
   };
 
+  let npcCounter = 0; // Local counter to avoid fetching from DB repeatedly
   const getNextId = async () => {
-    const npcs = await getNpcs();
-    if (npcs.length === 0) return 1;
-    const maxId = Math.max(...npcs.map((npc) => npc.id));
-    return maxId + 1;
+    if (npcCounter === 0) {
+      const npcs = await getNpcs();
+      npcCounter =
+        npcs.length === 0 ? 1 : Math.max(...npcs.map((npc) => npc.id)) + 1;
+    } else {
+      npcCounter++; // Ensure each ID is unique within this upload session
+    }
+    return npcCounter;
   };
 
   const handleFileUpload = async (jsonData) => {
     try {
       // Validate the JSON data
       if (!validateNpc(jsonData)) {
-        console.error("Invalid NPC data.");
+        console.error("Invalid NPC data:", jsonData);
         const alertMessage = t("Invalid NPC JSON data") + ".";
         if (window.electron) {
           window.electron.alert(alertMessage);
@@ -269,6 +278,40 @@ function Personal() {
     } catch (error) {
       console.error("Error uploading NPC from JSON:", error);
     }
+  };
+
+  const handleFileSelection = async (event) => {
+    const files = Array.from(event.target.files);
+
+    if (files.length === 0) {
+      console.warn("No files selected.");
+      return;
+    }
+
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const result = JSON.parse(reader.result);
+
+          // Assign a unique ID
+          result.id = await getNextId();
+
+          await handleFileUpload(result); // Ensures sequential execution
+        } catch (err) {
+          console.error(`Error parsing JSON from ${file.name}:`, err);
+        }
+      };
+
+      reader.onerror = () => {
+        console.error(`Error reading file ${file.name}:`, reader.error);
+      };
+
+      reader.readAsText(file);
+      await new Promise((resolve) => (reader.onloadend = resolve)); // Wait for each file to finish processing
+    }
+
+    event.target.value = "";
   };
 
   const handleClose = () => {
@@ -508,9 +551,7 @@ function Personal() {
                   <MenuItem value={"name"}>{t("Name")}</MenuItem>
                   <MenuItem value={"level"}>{t("Level")}</MenuItem>
                   <MenuItem value={"createdAt"}>{t("creation_date")}</MenuItem>
-                  <MenuItem value={"updatedAt"}>
-                    {t("updated_date")}
-                  </MenuItem>
+                  <MenuItem value={"updatedAt"}>{t("updated_date")}</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -553,14 +594,53 @@ function Personal() {
                   fullWidth
                   sx={{
                     height: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    padding: 0, // Remove default padding
+                    minWidth: 0, // Ensure the button doesn't enforce a minimum width
                   }}
                 >
                   <DeleteSweepIcon />
                 </Button>
               </Tooltip>
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              alignItems="center"
+              justifyContent="center"
+              sx={{ display: "flex" }}
+            >
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<HistoryEdu />}
+                onClick={handleAddNpc}
+              >
+                {t("Create NPC")}
+              </Button>
+            </Grid>
+            <Grid item xs={12} md={3} sx={{ display: "flex" }}>
+              <ExportAllNPCs
+                npcs={filteredList?.length > 0 ? filteredList : []}
+              />
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Button
+                variant="outlined"
+                startIcon={<UploadFile />}
+                fullWidth
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {t("Add NPC from JSON")}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                multiple
+                onChange={handleFileSelection}
+                style={{ display: "none" }}
+              />
             </Grid>
             <Grid
               item
@@ -572,6 +652,7 @@ function Personal() {
               <Button
                 variant="outlined"
                 fullWidth
+                startIcon={collapse ? <ExpandLess /> : <ExpandMore />}
                 onClick={() => {
                   setCollapse(!collapse);
                 }}
@@ -579,52 +660,10 @@ function Personal() {
                 {collapse ? t("Collapse") : t("Expand")}
               </Button>
             </Grid>
-            <Grid
-              item
-              xs={12}
-              md={2}
-              sx={{}}
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Button
-                fullWidth
-                variant="contained"
-                startIcon={<HistoryEdu />}
-                onClick={handleAddNpc}
-              >
-                {t("Create NPC")}
-              </Button>
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <Button
-                variant="outlined"
-                fullWidth
-                onClick={() => fileInputRef.current.click()}
-              >
-                {t("Add NPC from JSON")}
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      try {
-                        const result = JSON.parse(reader.result);
-                        handleFileUpload(result);
-                      } catch (err) {
-                        console.error("Error parsing JSON:", err);
-                      }
-                    };
-                    reader.readAsText(file);
-                  }
-                }}
-                style={{ display: "none" }}
-              />
+            <Grid item xs={12}>
+              <Typography variant="h6" align="center" mt={1} mb={-1}>
+                {t("filtered_npc_count") + " " + filteredList?.length}
+              </Typography>
             </Grid>
           </Grid>
         </Paper>
