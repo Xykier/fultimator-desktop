@@ -32,7 +32,7 @@ import CustomHeaderAlt from "../../components/common/CustomHeaderAlt";
 import { SportsMartialArts, NavigateNext } from "@mui/icons-material";
 import { t } from "../../translation/translate";
 
-const MAX_ENCOUNTERS = 10;
+const MAX_ENCOUNTERS = 100;
 
 export default function CombatSimulatorEncounters() {
   return (
