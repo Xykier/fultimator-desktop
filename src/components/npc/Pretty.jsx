@@ -30,12 +30,15 @@ import Study from "./Study";
 import { ArrowDropDown } from "@mui/icons-material";
 import { useTranslate, t } from "../../translation/translate";
 import { useCustomTheme } from "../../hooks/useCustomTheme";
+import { useTheme } from "@mui/material/styles";
 
 function NpcPretty(
   { npc, study, npcImage, collapse, onClick = () => {} },
   ref
 ) {
   const { t } = useTranslate();
+  const theme = useTheme();
+
   return (
     <Card>
       <div ref={ref} onClick={() => onClick()} style={{ cursor: "pointer" }}>
@@ -72,7 +75,7 @@ function NpcPretty(
                 >
                   <ArrowDropDown />
                   <Typography
-                    color="black"
+                    color={theme.palette.text.primary}
                     fontSize="1.1rem"
                     fontWeight="medium"
                   >

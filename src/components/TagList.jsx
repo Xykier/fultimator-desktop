@@ -136,7 +136,7 @@ const TagList = ({ npc, setNpc }) => {
             ...(remainingSelectableTags > 0
               ? [
                   {
-                    label: "+ " + remainingSelectableTags + " more",
+                    label: "+ " + remainingSelectableTags + " " + t("more_tags"),
                     disabled: true,
                   },
                 ]
@@ -161,8 +161,8 @@ const TagList = ({ npc, setNpc }) => {
               {...params}
               placeholder={
                 isInputDisabled
-                  ? t("Reached tag limit")
-                  : t("Add Tag or Select from List")
+                  ? t("reached_tag_limit_placeholder")
+                  : t("add_select_tag_placeholder")
               }
               variant="outlined"
               size="small"
