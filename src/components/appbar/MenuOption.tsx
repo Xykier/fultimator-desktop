@@ -36,6 +36,7 @@ import {
   handleExport,
   handleImport,
 } from "../../utility/dbExportImport"; // Import the new functions
+import { useLocation } from "react-router-dom";
 
 interface MenuOptionProps extends ThemeSwitcherProps, DarkModeToggleProps {}
 
@@ -58,6 +59,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const [version, setVersion] = useState<string>("");
+  const location = useLocation(); // Get the current route
 
   useEffect(() => {
     const fetchVersion = async () => {
@@ -186,6 +188,7 @@ const MenuOption: React.FC<MenuOptionProps> = ({
   };
 
   const handleImportConfirm = async () => {
+    // Start import process
     if (importType === "google") {
       setIsImportWarningOpen(false);
       // Start Google import process
@@ -195,6 +198,41 @@ const MenuOption: React.FC<MenuOptionProps> = ({
         fileInputRef.current.click();
       }
       setIsImportWarningOpen(false);
+
+      // Wait for the file import to finish before checking the route
+      await new Promise<void>((resolve) => {
+        // Wait until the file is imported
+        const handleFileImport = async (file) => {
+          try {
+            await importDatabase(file);
+            setMessage("Database imported successfully!");
+            setIsSnackbarOpen(true);
+            resolve(); // Resolve the promise once the import is done
+          } catch (error) {
+            console.error(error);
+            setMessage("Failed to import database.");
+            setIsSnackbarOpen(true);
+            resolve(); // Resolve the promise even if the import fails
+          }
+        };
+
+        // Attach event listener to handle file import after file selection
+        fileInputRef.current?.addEventListener("change", (event) => {
+          const input = event.target as HTMLInputElement; // Cast event.target to HTMLInputElement
+          if (input.files && input.files[0]) {
+            handleFileImport(input.files[0]);
+          }
+        });
+      });
+    }
+
+    // After the import process, check if we are on a specific route and reload
+    if (
+      location.pathname === "/npc-gallery" ||
+      location.pathname === "/pc-gallery" ||
+      location.pathname === "/combat-sim"
+    ) {
+      window.location.reload();
     }
   };
 
@@ -245,7 +283,15 @@ const MenuOption: React.FC<MenuOptionProps> = ({
           </ListItemIcon>
           <ListItemText primary={t("Export Local Database")} />
         </MenuItem>
-        <MenuItem onClick={handleImportClick} disabled={isLoading}>
+        <MenuItem
+          onClick={handleImportClick}
+          disabled={
+            isLoading ||
+            location.pathname.startsWith("/npc-gallery/") ||
+            location.pathname.startsWith("/pc-gallery/") ||
+            location.pathname.startsWith("/combat-sim/")
+          }
+        >
           <ListItemIcon>
             <FileUpload />
           </ListItemIcon>
@@ -266,7 +312,15 @@ const MenuOption: React.FC<MenuOptionProps> = ({
               </ListItemIcon>
               <ListItemText primary={t("Export to Google Drive")} />
             </MenuItem>
-            <MenuItem onClick={handleGoogleImport} disabled={isLoading}>
+            <MenuItem
+              onClick={handleGoogleImport}
+              disabled={
+                isLoading ||
+                location.pathname.startsWith("/npc-gallery/") ||
+                location.pathname.startsWith("/pc-gallery/") ||
+                location.pathname.startsWith("/combat-sim/")
+              }
+            >
               <ListItemIcon>
                 <CloudDownload />
               </ListItemIcon>
