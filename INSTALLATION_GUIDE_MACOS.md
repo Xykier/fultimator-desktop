@@ -22,7 +22,7 @@ Once downloaded, follow these steps to open Fultimator:
 3. Click **"Open Anyway"** to allow the app to run.
 4. Alternatively, **right-click** (or **Control+click**) on the app and select **"Open"** from the context menu.
 
-### If the app still won't open:
+### If the app still won't open or MacOS reports the app as "damaged":
 1. Open **Terminal** (Applications > Utilities > Terminal).
 2. Run the following command:
    ```
