@@ -19,11 +19,13 @@ import Layout from "../../components/Layout";
 import { Download } from "@mui/icons-material";
 import PlayerCardShort from "../../components/player/playerSheet/PlayerCardShort";
 import { getPc } from "../../utility/db";
+import { useTheme } from "@mui/material/styles";
 
 export default function CharacterSheet() {
   const { t } = useTranslate();
   const { playerId } = useParams();
-  
+  const theme = useTheme();
+
   const [player, setPlayer] = useState(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [fullCharacterSheet, setFullCharacterSheet] = useState(true);
@@ -70,20 +72,24 @@ export default function CharacterSheet() {
   }, [player]);
 
   const takeScreenshot = async () => {
-    if (!imagesLoaded) {
-      // Images are not loaded yet, prevent taking screenshot
-      return;
-    }
+    if (!imagesLoaded) return;
 
     const element = document.getElementById(
       fullCharacterSheet ? "character-sheet" : "character-sheet-short"
     );
 
-    // Set a fixed size for the screenshot
+    if (!element) return;
+
+    // Save original styles
     const originalStyle = {
       width: element.style.width,
+      backgroundColor: element.style.backgroundColor,
     };
-    element.style.width = fullCharacterSheet ? "2000px" : "1000px"; // Example: Set to a fixed width
+
+    // Apply fixed size and theme background
+    element.style.width = fullCharacterSheet ? "2000px" : "1000px";
+    element.style.backgroundColor =
+      theme.palette.mode === "dark" ? theme.palette.background.default : "#ffffff";
 
     try {
       const canvas = await html2canvas(element, {
@@ -93,10 +99,10 @@ export default function CharacterSheet() {
       });
       const imgData = canvas.toDataURL("image/png");
 
-      // Restore original size and transformations
+      // Restore original styles
       element.style.width = originalStyle.width;
+      element.style.backgroundColor = originalStyle.backgroundColor;
 
-      // Create a link to download the image
       const link = document.createElement("a");
       link.href = imgData;
       link.download = player.name + "_sheet.png";
@@ -196,7 +202,12 @@ export default function CharacterSheet() {
           </Grid>
         </Grid>
       ) : (
-        <Grid container sx={{ padding: 1 }} justifyContent={"center"} id="character-sheet-short">
+        <Grid
+          container
+          sx={{ padding: 1 }}
+          justifyContent={"center"}
+          id="character-sheet-short"
+        >
           <Grid container item xs={12}>
             <PlayerCardShort
               player={player}

@@ -468,6 +468,7 @@ export default function PlayerEquipment({
                               weapon={weapon}
                               player={player}
                               setPlayer={setPlayer}
+                              isCharacterSheet={isCharacterSheet}
                             />
                           </Grid>
                           {isEditMode && (
@@ -500,7 +501,7 @@ export default function PlayerEquipment({
                       <React.Fragment key={index}>
                         <Grid container>
                           <Grid item xs={isEditMode ? 11 : 12}>
-                            <PrettyArmor armor={armor} />
+                            <PrettyArmor armor={armor} isCharacterSheet={isCharacterSheet} />
                           </Grid>
                           <Grid item xs={1}></Grid>
                         </Grid>
@@ -522,7 +523,7 @@ export default function PlayerEquipment({
                       <React.Fragment key={index}>
                         <Grid container>
                           <Grid item xs={isEditMode ? 11 : 12}>
-                            <PrettyArmor armor={shield} />
+                            <PrettyArmor armor={shield} isCharacterSheet={isCharacterSheet} />
                           </Grid>
                           <Grid item xs={1}></Grid>
                         </Grid>
@@ -544,7 +545,7 @@ export default function PlayerEquipment({
                       <React.Fragment key={index}>
                         <Grid container>
                           <Grid item xs={isEditMode ? 11 : 12}>
-                            <PrettyAccessory accessory={accessory} />
+                            <PrettyAccessory accessory={accessory} isCharacterSheet={isCharacterSheet} />
                           </Grid>
                           <Grid item xs={1}></Grid>
                         </Grid>

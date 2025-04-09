@@ -11,7 +11,7 @@ import { OpenBracket, CloseBracket } from "../../../Bracket";
 import Diamond from "../../../Diamond";
 import { useCustomTheme } from "../../../../hooks/useCustomTheme";
 
-export default function PrettyWeapon({ weapon }) {
+export default function PrettyWeapon({ weapon, isCharacterSheet }) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
 
@@ -50,7 +50,7 @@ export default function PrettyWeapon({ weapon }) {
 
   return (
     <>
-      <Card>
+      <Card sx={{ boxShadow: isCharacterSheet ? 0 : 2 }}>
         <div ref={ref} style={{ cardBackground }}>
           <Stack>
             <Grid

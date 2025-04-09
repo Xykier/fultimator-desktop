@@ -5,7 +5,7 @@ import { Martial } from "../../../icons";
 import ReactMarkdown from "react-markdown";
 import { useCustomTheme } from "../../../../hooks/useCustomTheme";
 
-export default function PrettyArmor({ armor }) {
+export default function PrettyArmor({ armor, isCharacterSheet }) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
 
@@ -44,7 +44,7 @@ export default function PrettyArmor({ armor }) {
 
   return (
     <>
-      <Card>
+      <Card sx={{ boxShadow: isCharacterSheet ? 0 : 2 }}>
         <div ref={ref} style={{ cardBackground }}>
           <Stack>
             <Grid

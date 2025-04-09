@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { useTranslate } from "../../../../translation/translate";
 import { useCustomTheme } from "../../../../hooks/useCustomTheme";
 
-function PrettyAccessory({ accessory }) {
+function PrettyAccessory({ accessory, isCharacterSheet }) {
   const { t } = useTranslate();
   const theme = useCustomTheme();
 
@@ -43,7 +43,7 @@ function PrettyAccessory({ accessory }) {
 
   return (
     <>
-      <Card>
+      <Card sx={{ boxShadow: isCharacterSheet ? 0 : 2 }}>
         <div ref={ref} style={{ cardBackground }}>
           <Stack>
             <Grid
