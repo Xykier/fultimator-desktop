@@ -1,4 +1,4 @@
-import { Menu, BrowserWindow, dialog, shell } from "electron";
+import { app, Menu, BrowserWindow, dialog, shell } from "electron";
 import path from "node:path";
 import fs from "fs";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const packageJsonPath = path.join(__dirname, "..", "package.json");
 
 export function createAppMenu(mainWindow: BrowserWindow) {
+  const isMac = process.platform === "darwin";
+
   const template = [
+    ...(isMac
+      ? [
+          {
+            label: app.name,
+            submenu: [
+              { role: "about" },
+              { type: "separator" },
+              { role: "services" },
+              { type: "separator" },
+              { role: "hide" },
+              { role: "hideOthers" },
+              { role: "unhide" },
+              { type: "separator" },
+              { role: "quit" },
+            ],
+          },
+        ]
+      : []),
     {
       label: "File",
       submenu: [
@@ -24,6 +44,20 @@ export function createAppMenu(mainWindow: BrowserWindow) {
             mainWindow.close();
           },
         },
+      ],
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        ...(isMac ? [{ role: "pasteAndMatchStyle" }] : []),
+        { role: "delete" },
+        { role: "selectAll" },
       ],
     },
     {

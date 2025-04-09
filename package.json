@@ -1,7 +1,7 @@
 {
   "name": "fultimator",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "node src/scripts/build-counter.js && vite",
@@ -60,7 +60,7 @@
   "description": "Unofficial Fabula Ultima Tools",
   "author": "Fultimator <fultimator@gmail.com>",
   "buildcounter": {
-    "version": "1.0.0",
-    "count": 29
+    "version": "1.0.1",
+    "count": 1
   }
 }
