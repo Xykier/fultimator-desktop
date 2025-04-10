@@ -20,6 +20,7 @@ import CustomHeader from "../../common/CustomHeader";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import { Add } from "@mui/icons-material";
 import { globalConfirm } from "../../../utility/globalConfirm";
+//import MarkdownEditor from "../../common/MarkdownEditor";
 
 export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
@@ -30,6 +31,11 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
   const [clockName, setClockName] = useState("");
   const [clockSections, setClockSections] = useState(4);
+
+  /*const handleMarkdownChange = (newMarkdown) => {
+    // Store or process the markdown content
+    console.log(newMarkdown);
+  };*/
 
   const handleNoteNameChange = (key) => (e) => {
     setPlayer((prevState) => {
@@ -244,6 +250,10 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             )}
           </Grid>
         ))}
+        {/*<MarkdownEditor
+          initialValue="# Start writing here"
+          onChange={handleMarkdownChange}
+        />*/}
       </Grid>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle variant="h3">{t("Add Clock")}</DialogTitle>
@@ -279,8 +289,12 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary" variant="contained" >{t("Cancel")}</Button>
-          <Button onClick={handleConfirm} color="primary" variant="contained">{t("Add")}</Button>
+          <Button onClick={handleClose} color="secondary" variant="contained">
+            {t("Cancel")}
+          </Button>
+          <Button onClick={handleConfirm} color="primary" variant="contained">
+            {t("Add")}
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>
