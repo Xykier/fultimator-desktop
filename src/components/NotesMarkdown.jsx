@@ -1,22 +1,41 @@
-import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import { Typography, Box, Link } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import React, { useMemo } from "react";
+import ReactMarkdown from "react-markdown";
+import { Typography, Box, Link } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import remarkGfm from "remark-gfm"; // GitHub-flavored markdown
+import rehypeRaw from "rehype-raw"; // Raw HTML
+import remarkParse from "remark-parse"; // Parse nested markdown
+import rehypeReact from "rehype-react"; // To render HTML as React components
 
 /**
  * NotesMarkdown Component
- * 
- * This component provides custom styling for different markdown elements such as paragraphs,
- * headers, lists, tables, and links, using Material UI components and styles. It uses 
- * ReactMarkdown to render markdown syntax with styled components based on the current theme.
  */
 const NotesMarkdown = ({ children, ...props }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark"; // Check if the current theme is dark
+  const isDark = theme.palette.mode === "dark";
+
+  // Preprocess custom blocks: {{type ...}} and allow nested markdown
+  const processedMarkdown = useMemo(() => {
+    const calloutRegex =
+      /\{\{(primary|secondary|ternary|quaternary|warning|info|success|danger)\s+([\s\S]+?)\}\}/g;
+
+    // Replace custom block syntax with HTML div elements with the class `callout-{type}`
+    const intermediate = (children || "").replace(
+      calloutRegex,
+      (_, type, content) => {
+        return `<div class="callout-${type}">${content.trim()}</div>`;
+      }
+    );
+
+    // Return the processed markdown, including HTML for custom blocks
+    return intermediate;
+  }, [children]);
 
   return (
     <ReactMarkdown
       {...props}
+      remarkPlugins={[remarkGfm, remarkParse]}
+      rehypePlugins={[rehypeRaw, rehypeReact]}
       components={{
         // Custom styling for paragraphs (p)
         p: ({ ...props }) => (
@@ -37,14 +56,7 @@ const NotesMarkdown = ({ children, ...props }) => {
 
         // Custom styling for h1 headers
         h1: ({ children, ...props }) => (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              my: 3,
-            }}
-            {...props}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", my: 3 }} {...props}>
             <Box
               sx={{
                 flex: 1,
@@ -113,10 +125,48 @@ const NotesMarkdown = ({ children, ...props }) => {
               mt: 2,
               mb: 1,
               color: isDark ? "#fff" : "#000",
-              backgroundColor: theme.palette.ternary.main,
+              backgroundColor: theme.palette.ternary?.main ?? "#e0e0e0",
               borderBottom: isDark
                 ? `2px solid ${theme.palette.primary.light}`
                 : `2px solid ${theme.palette.primary.main}`,
+            }}
+            {...props}
+          />
+        ),
+
+        // Custom styling for h4 headers
+        h4: ({ ...props }) => (
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "'Antonio', sans-serif",
+              fontWeight: "normal",
+              fontSize: "1em",
+              textTransform: "uppercase",
+              pl: 2,
+              py: 1,
+              mt: 2,
+              color: isDark ? "#fff" : "#000",
+              backgroundColor: theme.palette.ternary?.main ?? "#e0e0e0",
+            }}
+            {...props}
+          />
+        ),
+
+        // Custom styling for h5 headers
+        h5: ({ ...props }) => (
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "'Antonio', sans-serif",
+              fontWeight: "normal",
+              fontSize: "0.9em",
+              textTransform: "uppercase",
+              pl: 2,
+              py: 1,
+              mt: 2,
+              color: "#fff",
+              backgroundColor: theme.palette.primary?.main ?? "#e0e0e0",
             }}
             {...props}
           />
@@ -146,7 +196,7 @@ const NotesMarkdown = ({ children, ...props }) => {
 
         // Custom styling for ordered lists (ol)
         ol: ({ children, start = 1, ...props }) => {
-          let itemIndex = start - 1; // Convert to 0-based index
+          let itemIndex = start - 1;
           return (
             <ol
               style={{
@@ -159,16 +209,14 @@ const NotesMarkdown = ({ children, ...props }) => {
               }}
               {...props}
             >
-              {React.Children.map(children, (child) => {
-                if (React.isValidElement(child)) {
-                  // Clone the child and pass the current index for ordered list
-                  return React.cloneElement(child, {
-                    ordered: true,
-                    index: itemIndex++,
-                  });
-                }
-                return child;
-              })}
+              {React.Children.map(children, (child) =>
+                React.isValidElement(child)
+                  ? React.cloneElement(child, {
+                      ordered: true,
+                      index: itemIndex++,
+                    })
+                  : child
+              )}
             </ol>
           );
         },
@@ -186,13 +234,11 @@ const NotesMarkdown = ({ children, ...props }) => {
             }}
             {...props}
           >
-            {React.Children.map(children, (child) => {
-              if (React.isValidElement(child)) {
-                // Clone the child and pass the ordered flag as false for unordered list
-                return React.cloneElement(child, { ordered: false });
-              }
-              return child;
-            })}
+            {React.Children.map(children, (child) =>
+              React.isValidElement(child)
+                ? React.cloneElement(child, { ordered: false })
+                : child
+            )}
           </ul>
         ),
 
@@ -243,9 +289,10 @@ const NotesMarkdown = ({ children, ...props }) => {
           <th
             style={{
               textAlign: "left",
-              padding: "6px 12px",
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.primary.contrastText,
+              padding: "8px 12px",
+              backgroundColor: theme.palette.secondary.main,
+              color: theme.palette.secondary.contrastText,
+              borderBottom: `1px solid ${theme.palette.primary.main}`,
             }}
             {...props}
           />
@@ -255,7 +302,7 @@ const NotesMarkdown = ({ children, ...props }) => {
         td: ({ ...props }) => (
           <td
             style={{
-              padding: "6px 12px",
+              padding: "8px 12px",
               borderBottom: `1px solid ${theme.palette.divider}`,
               backgroundColor: isDark
                 ? theme.palette.background.paper
@@ -281,9 +328,144 @@ const NotesMarkdown = ({ children, ...props }) => {
             {...props}
           />
         ),
+
+        // Custom styling for blockquotes
+        blockquote: ({ children, ...props }) => (
+          <Box
+            component="blockquote"
+            sx={{
+              borderLeft: `4px solid ${theme.palette.divider}`,
+              margin: "1em 0",
+              padding: "0.5em 1em",
+              fontStyle: "italic",
+              backgroundColor: isDark
+                ? theme.palette.background.default
+                : theme.palette.action.hover,
+              color: theme.palette.text.secondary,
+            }}
+            {...props}
+          >
+            {children}
+          </Box>
+        ),
+
+        // Custom styling for code blocks
+        code: ({ inline, children, ...props }) => {
+          if (inline) {
+            return (
+              <Box
+                component="code"
+                sx={{
+                  fontFamily: "monospace",
+                  backgroundColor: isDark
+                    ? theme.palette.grey[800]
+                    : theme.palette.grey[200],
+                  color: isDark
+                    ? theme.palette.secondary.light
+                    : theme.palette.primary.dark,
+                  padding: "0.1em 0.4em",
+                  borderRadius: "4px",
+                  fontSize: "0.875em",
+                }}
+                {...props}
+              >
+                {children}
+              </Box>
+            );
+          }
+          // Let fenced code blocks be handled by `pre`
+          return <code {...props}>{children}</code>;
+        },
+
+        // Custom styling for fenced code blocks
+        pre: ({ children, ...props }) => (
+          <Box
+            component="pre"
+            sx={{
+              fontFamily: "monospace",
+              backgroundColor: isDark
+                ? theme.palette.grey[900]
+                : theme.palette.grey[100],
+              color: theme.palette.text.primary,
+              padding: 2,
+              borderRadius: 2,
+              overflowX: "auto",
+              marginY: 2,
+            }}
+            {...props}
+          >
+            {children}
+          </Box>
+        ),
+
+        // Custom styling for callout blocks
+        div: ({ className, children, ...props }) => {
+          if (className?.startsWith("callout-")) {
+            const type = className.split("-")[1];
+
+            // Destructure the theme palette for easy access
+            const {
+              primary,
+              secondary,
+              ternary,
+              quaternary,
+              warning,
+              info,
+              success,
+              error,
+            } = theme.palette;
+
+            // Define the colors for each type
+            const colors = {
+              primary: primary,
+              secondary: secondary,
+              ternary: ternary,
+              quaternary: quaternary,
+              warning: warning,
+              info: info,
+              success: success,
+              danger: error,
+            };
+
+            // Get the selected color or default to the info palette
+            const selectedColor = colors[type] || info;
+
+            // Define the background gradient logic
+            const backgroundColor =
+              type === "ternary" || type === "quaternary"
+                ? selectedColor?.main || "#e0e0e0"
+                : isDark
+                ? `linear-gradient(to right, ${selectedColor.dark}, ${selectedColor.light})`
+                : `linear-gradient(to right, ${selectedColor.main}, ${selectedColor.light})`;
+
+            return (
+              <Box
+                sx={{
+                  background: backgroundColor,
+                  paddingX: 2,
+                  paddingY: "0.1em",
+                  marginY: 2,
+                  color:
+                    type === "primary" ||
+                    type === "info" ||
+                    type === "success" ||
+                    type === "danger" ||
+                    type === "warning"
+                      ? "#fff"
+                      : theme.palette.text.primary,
+                }}
+                {...props}
+              >
+                <ReactMarkdown>{children}</ReactMarkdown>
+              </Box>
+            );
+          }
+
+          return <div {...props}>{children}</div>;
+        },
       }}
     >
-      {children}
+      {processedMarkdown}
     </ReactMarkdown>
   );
 };
