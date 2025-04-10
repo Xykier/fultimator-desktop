@@ -11,6 +11,7 @@ import {
   Tab,
   Typography,
   Popover,
+  useMediaQuery,
 } from "@mui/material";
 import {
   FormatBold,
@@ -26,8 +27,12 @@ import {
   TextFields,
 } from "@mui/icons-material";
 import NotesMarkdown from "./NotesMarkdown"; // Using your existing component for preview
+import { useTheme } from "@mui/material/styles";
 
 const MarkdownEditor = ({ initialValue = "", onChange }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [value, setValue] = useState(initialValue);
   const [view, setView] = useState("edit"); // 'edit' or 'preview'
   const [anchorEl, setAnchorEl] = useState(null);
@@ -425,17 +430,27 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
   );
 
   return (
-    <Paper elevation={3} sx={{ mb: 4, width: "100%" }}>
+    <Paper elevation={3} sx={{ mb: 4, width: "100%", height: "100%" }}>
       <Tabs
         value={view}
         onChange={handleTabChange}
         indicatorColor="primary"
-        textColor="primary"
+        textColor="inherit"
         variant="fullWidth"
+        sx={{
+          backgroundColor: isDark
+            ? theme.palette.background.paper
+            : theme.palette.grey[100],
+          color: isDark ? theme.palette.grey[100] : theme.palette.text.primary,
+          borderRadius: 1,
+          boxShadow: isDark
+            ? "0 2px 4px rgba(0,0,0,0.6)"
+            : "0 2px 4px rgba(0,0,0,0.1)",
+        }}
       >
         <Tab value="edit" label="Edit" />
         <Tab value="preview" label="Preview" />
-        <Tab value="split" label="Split View" />
+        {!isMobile && <Tab value="split" label="Split View" />}
       </Tabs>
 
       <Box p={2}>
@@ -493,7 +508,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                 p: 2,
                 minHeight: "238px",
                 flex: view === "split" ? 1 : "auto",
-                maxHeight: "600px",
+                maxHeight: "calc(100vh - 200px)",
                 overflow: "auto",
               }}
             >

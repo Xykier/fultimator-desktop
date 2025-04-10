@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslate } from "../../../translation/translate";
-import NotesMarkdown from "../../NotesMarkdown";
+import NotesMarkdown from "../../common/NotesMarkdown";
 import Clock from "./Clock";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";

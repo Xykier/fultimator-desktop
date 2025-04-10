@@ -13,29 +13,33 @@ import {
   DialogContentText,
   DialogTitle,
   Typography,
+  AppBar,
+  Toolbar,
+  Box,
+  Tooltip,
 } from "@mui/material";
 import { useTranslate } from "../../../translation/translate";
-import CustomTextarea from "../../common/CustomTextarea";
 import CustomHeader from "../../common/CustomHeader";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
-import { Add } from "@mui/icons-material";
+import { Add, Close, Edit, Save } from "@mui/icons-material";
 import { globalConfirm } from "../../../utility/globalConfirm";
-//import MarkdownEditor from "../../common/MarkdownEditor";
+import MarkdownEditor from "../../common/MarkdownEditor";
+import NotesMarkdown from "../../common/NotesMarkdown";
 
 export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
 
-  const [open, setOpen] = useState(false);
+  const [clockDialogOpen, setClockDialogOpen] = useState(false);
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
   const [clockName, setClockName] = useState("");
   const [clockSections, setClockSections] = useState(4);
 
-  /*const handleMarkdownChange = (newMarkdown) => {
-    // Store or process the markdown content
-    console.log(newMarkdown);
-  };*/
+  // New states for markdown editor dialog
+  const [editedMarkdown, setEditedMarkdown] = useState(null);
+  const [editorDialogOpen, setEditorDialogOpen] = useState(false);
+  const [currentEditingNote, setCurrentEditingNote] = useState(null);
 
   const handleNoteNameChange = (key) => (e) => {
     setPlayer((prevState) => {
@@ -45,12 +49,33 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
     });
   };
 
-  const handleNoteDescriptionChange = (key) => (e) => {
-    setPlayer((prevState) => {
-      const newState = { ...prevState };
-      newState.notes[key].description = e.target.value;
-      return newState;
-    });
+  const handleMarkdownChange = (newMarkdown) => {
+    if (currentEditingNote !== null) {
+      setEditedMarkdown(newMarkdown);
+    }
+  };
+
+  const openMarkdownEditor = (index) => {
+    setCurrentEditingNote(index);
+    setEditorDialogOpen(true);
+    setEditedMarkdown(player.notes[index].description);
+  };
+
+  const saveMarkdown = () => {
+    if (currentEditingNote !== null) {
+      setPlayer((prevState) => {
+        const newState = { ...prevState };
+        newState.notes[currentEditingNote].description = editedMarkdown;
+        return newState;
+      });
+    }
+    closeMarkdownEditor(); // Now close the dialog after saving
+  };
+  
+  const closeMarkdownEditor = () => {
+    setEditorDialogOpen(false); // Close the dialog after saving
+    setCurrentEditingNote(null); // Reset current editing note
+    setEditedMarkdown(null); // Reset edited markdown
   };
 
   const removeItem = (key) => async () => {
@@ -68,24 +93,23 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
 
   const handleAddClock = (index) => {
     setSelectedNoteIndex(index);
-    setOpen(true);
+    setClockDialogOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseClockDialog = () => {
+    setClockDialogOpen(false);
     setSelectedNoteIndex(null);
     setClockName("");
     setClockSections(4);
   };
 
-  const handleConfirm = () => {
+  const handleConfirmClock = () => {
     if (!clockName.trim()) {
       if (window.electron) {
         window.electron.alert(t("Clock name is required."));
       } else {
         alert(t("Clock name is required."));
       }
-
       return;
     }
 
@@ -95,7 +119,6 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
       } else {
         alert(t("Sections must be between 2 and 30."));
       }
-
       return;
     }
 
@@ -111,7 +134,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
       });
       return newState;
     });
-    handleClose();
+    handleCloseClockDialog();
   };
 
   const handleRemoveClock = (noteIndex, clockIndex) => {
@@ -157,21 +180,36 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           />
         </Grid>
         {player.notes.map((note, index) => (
-          <Grid
-            container
-            spacing={1}
-            sx={{ py: 1 }}
-            //alignItems="center"
-            key={index}
-          >
+          <Grid container spacing={1} sx={{ py: 1 }} key={index}>
             {isEditMode && (
-              <Grid item sx={{ p: 0, m: 0 }}>
-                <IconButton onClick={removeItem(index)}>
-                  <RemoveCircleOutline />
-                </IconButton>
+              <Grid
+                item
+                xs={1}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  p: 0,
+                  m: 0,
+                }}
+              >
+                <Tooltip title={t("Delete")}>
+                  <IconButton
+                    onClick={removeItem(index)}
+                    size="small"
+                    sx={{
+                      color: theme.palette.error.main,
+                      "&:hover": {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                    }}
+                  >
+                    <RemoveCircleOutline />
+                  </IconButton>
+                </Tooltip>
               </Grid>
             )}
-            <Grid item xs={7}>
+            <Grid item xs={isEditMode ? 11 : 12}>
               <TextField
                 id="name"
                 label={t("Note Name") + ":"}
@@ -181,18 +219,59 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                 InputProps={{
                   readOnly: !isEditMode,
                 }}
+                sx={{
+                  width: "100%",
+                }}
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextarea
-                id="description"
-                label={t("Description") + ":"}
-                value={note.description}
-                onChange={handleNoteDescriptionChange(index)}
-                maxLength={5000}
-                maxRows={10}
-                readOnly={!isEditMode}
-              />
+              {/* Markdown display box and edit button */}
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: theme.palette.divider,
+                  borderRadius: 1,
+                  p: 2,
+                  mt: 1,
+                  position: "relative",
+                  minHeight: "100px",
+                  backgroundColor: theme.palette.background.paper,
+                }}
+              >
+                <Box sx={{ maxHeight: "300px", overflow: "auto" }}>
+                  {note.description ? (
+                    <NotesMarkdown>{note.description}</NotesMarkdown>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontStyle: "italic" }}
+                    >
+                      {t("No content")}
+                    </Typography>
+                  )}
+                </Box>
+                {isEditMode && (
+                  <Tooltip title={t("Edit")} placement="top">
+                    <IconButton
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        borderRadius: 0,
+                        color: "#fff",
+                        backgroundColor: theme.palette.primary.main,
+                        "&:hover": {
+                          backgroundColor: theme.palette.primary.dark,
+                        },
+                      }}
+                      onClick={() => openMarkdownEditor(index)}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
             </Grid>
             {isEditMode && (
               <Grid item xs={12}>
@@ -250,12 +329,10 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             )}
           </Grid>
         ))}
-        {/*<MarkdownEditor
-          initialValue="# Start writing here"
-          onChange={handleMarkdownChange}
-        />*/}
       </Grid>
-      <Dialog open={open} onClose={handleClose}>
+
+      {/* Clock Dialog */}
+      <Dialog open={clockDialogOpen} onClose={handleCloseClockDialog}>
         <DialogTitle variant="h3">{t("Add Clock")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -289,13 +366,57 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary" variant="contained">
+          <Button
+            onClick={handleCloseClockDialog}
+            color="secondary"
+            variant="contained"
+          >
             {t("Cancel")}
           </Button>
-          <Button onClick={handleConfirm} color="primary" variant="contained">
+          <Button
+            onClick={handleConfirmClock}
+            color="primary"
+            variant="contained"
+          >
             {t("Add")}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Fullscreen Markdown Editor Dialog */}
+      <Dialog
+        fullScreen
+        open={editorDialogOpen}
+        onClose={closeMarkdownEditor}
+      >
+        <AppBar sx={{ position: "relative" }}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={closeMarkdownEditor}
+              aria-label="close"
+            >
+              <Close />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h4" component="div">
+              {currentEditingNote !== null && player.notes[currentEditingNote]
+                ? `${t("Edit")}: ${player.notes[currentEditingNote].name}`
+                : t("Edit Note")}
+            </Typography>
+            <Button startIcon={<Save />} color="inherit" variant ="outlined" onClick={saveMarkdown}>
+              {t("Save")}
+            </Button>
+          </Toolbar>
+        </AppBar>
+        <Box sx={{ height: "calc(100vh - 64px)", overflow: "hidden" }}>
+          {currentEditingNote !== null && (
+            <MarkdownEditor
+              initialValue={player.notes[currentEditingNote].description || ""}
+              onChange={handleMarkdownChange}
+            />
+          )}
+        </Box>
       </Dialog>
     </Paper>
   );
