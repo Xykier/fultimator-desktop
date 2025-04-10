@@ -1,8 +1,15 @@
 import React, { Fragment } from "react";
-import { Paper, Grid, Typography, Divider, IconButton } from "@mui/material";
+import {
+  Paper,
+  Grid,
+  Typography,
+  Divider,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useTranslate } from "../../../translation/translate";
-import ReactMarkdown from "react-markdown";
+import NotesMarkdown from "../../NotesMarkdown";
 import Clock from "./Clock";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useCustomTheme } from "../../../hooks/useCustomTheme";
@@ -13,31 +20,6 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
   const custom = useCustomTheme();
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
-
-  const StyledMarkdown = ({ children, ...props }) => {
-      return (
-        <div style={{ whiteSpace: "pre-line", display: "inline", margin: 0, padding: 1 }}>
-          <ReactMarkdown
-            {...props}
-            components={{
-              p: (props) => <p style={{ margin: 0, padding: 0 }} {...props} />,
-              ul: (props) => <ul style={{ margin: 0, padding: 0 }} {...props} />,
-              li: (props) => <li style={{ margin: 0, padding: 0 }} {...props} />,
-              ol: (props) => <ol style={{ margin: 0, padding: 0 }} {...props} />,
-              strong: (props) => (
-                <strong style={{ fontWeight: "bold" }} {...props} />
-              ),
-              em: (props) => <em style={{ fontStyle: "italic" }} {...props} />,
-              span: (props) => (
-                <span style={{ margin: 0, padding: 0 }} {...props} />
-              ),
-            }}
-          >
-            {children}
-          </ReactMarkdown>
-        </div>
-      );
-    };
 
   const handleClockStateChange = (noteIndex, clockIndex, newState) => {
     setPlayer((prevPlayer) => {
@@ -98,21 +80,23 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
               {player.notes.map((note, noteIndex) => (
                 <Fragment key={noteIndex}>
                   <Grid item xs={12} key={noteIndex}>
-                    <Typography
-                      variant="h2"
-                      fontWeight={"bold"}
-                      sx={{ textTransform: "uppercase" }}
-                    >
-                      {note.name + ": "}
-                    </Typography>
-                    <StyledMarkdown
+                    {note.name.length > 0 && (
+                      <Typography
+                        variant="h2"
+                        fontWeight={"bold"}
+                        sx={{ textTransform: "uppercase", marginBottom: "1em" }}
+                      >
+                        {note.name + ": "}
+                      </Typography>
+                    )}
+                    <NotesMarkdown
                       sx={{
                         fontFamily: "PT Sans Narrow",
                         fontSize: "1rem",
                       }}
                     >
                       {note.description}
-                    </StyledMarkdown>
+                    </NotesMarkdown>
                     <Grid
                       container
                       justifyContent="center"
@@ -141,6 +125,7 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
                               {clock.name}
                             </Typography>
                             <Clock
+                              isCharacterSheet={isCharacterSheet}
                               numSections={clock.sections}
                               size={200}
                               state={clock.state}
@@ -152,17 +137,25 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
                                 )
                               }
                             />
-                            <Grid container justifyContent="center">
-                              <IconButton
-                                color="primary"
-                                onClick={() =>
-                                  resetClockState(noteIndex, clockIndex)
-                                }
-                                sx={{ mt: 1 }}
-                              >
-                                <RestartAltIcon />
-                              </IconButton>
-                            </Grid>
+                            {!isCharacterSheet && (
+                              <Grid container justifyContent="center">
+                                <Tooltip title={t("Reset Clock")}>
+                                  <IconButton
+                                    color={
+                                      theme.palette.mode === "dark"
+                                        ? "white"
+                                        : "primary"
+                                    }
+                                    onClick={() =>
+                                      resetClockState(noteIndex, clockIndex)
+                                    }
+                                    sx={{ mt: 1 }}
+                                  >
+                                    <RestartAltIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </Grid>
+                            )}
                           </Grid>
                         ))}
                     </Grid>

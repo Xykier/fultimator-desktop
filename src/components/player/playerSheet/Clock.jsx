@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useTheme } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 function calculateCoordinates(centerX, centerY, radius, angleInDegrees) {
   const angleInRadians = (angleInDegrees - 90) * (Math.PI / 180);
@@ -10,11 +10,15 @@ function calculateCoordinates(centerX, centerY, radius, angleInDegrees) {
   };
 }
 
-const Clock = ({ numSections, size, state, setState }) => {
+const Clock = ({ numSections, size, state, setState, isCharacterSheet }) => {
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
-  const secondary = theme.palette.secondary.main;
-  const hoveredActiveColor = theme.palette.info.main; // Define a new color in the theme
+  const isDarkMode = theme.palette.mode === "dark";
+  
+  // Colors based on dark or light mode
+  const primary = isDarkMode ? theme.palette.primary.light : theme.palette.primary.main;
+  const secondary = isDarkMode ? theme.palette.secondary.light : theme.palette.secondary.main;
+  const strokeColor = theme.palette.text.primary;
+  const hoveredActiveColor = theme.palette.info.main; // Info color for hover
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
@@ -25,11 +29,15 @@ const Clock = ({ numSections, size, state, setState }) => {
   };
 
   const handleMouseEnter = (index) => {
-    setHoveredIndex(index);
+    if (!isCharacterSheet) {
+      setHoveredIndex(index);
+    }
   };
 
   const handleMouseLeave = () => {
-    setHoveredIndex(null);
+    if (!isCharacterSheet) {
+      setHoveredIndex(null);
+    }
   };
 
   const sections = [];
@@ -51,12 +59,16 @@ const Clock = ({ numSections, size, state, setState }) => {
     const isActive = state[i];
     let fill = "transparent";
 
-    if (isHovered && isActive) {
-      fill = hoveredActiveColor;
-    } else if (isHovered) {
-      fill = secondary;
-    } else if (isActive) {
-      fill = primary;
+    if (isCharacterSheet) {
+      fill = isActive ? primary : "transparent";
+    } else {
+      if (isHovered && isActive) {
+        fill = hoveredActiveColor;
+      } else if (isHovered) {
+        fill = secondary;
+      } else if (isActive) {
+        fill = primary;
+      }
     }
 
     sections.push(
@@ -64,12 +76,12 @@ const Clock = ({ numSections, size, state, setState }) => {
         key={i}
         d={pathData}
         fill={fill}
-        stroke="black"
+        stroke={strokeColor}
         strokeWidth="1"
         onClick={() => handleClick(i)}
         onMouseEnter={() => handleMouseEnter(i)}
         onMouseLeave={handleMouseLeave}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: isCharacterSheet ? "default" : "pointer" }}
       />
     );
   }
