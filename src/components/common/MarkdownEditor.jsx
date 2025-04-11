@@ -12,6 +12,7 @@ import {
   Typography,
   Popover,
   useMediaQuery,
+  Grid,
 } from "@mui/material";
 import {
   FormatBold,
@@ -24,10 +25,24 @@ import {
   TableChart,
   FormatColorText,
   HorizontalRule,
-  TextFields,
+  Category,
 } from "@mui/icons-material";
 import NotesMarkdown from "./NotesMarkdown"; // Using your existing component for preview
 import { useTheme } from "@mui/material/styles";
+import { TypeIcon, typeList } from "../types"; // Import TypeIcon and typeList
+import {
+  D4Icon,
+  D6Icon,
+  D8Icon,
+  D10Icon,
+  D12Icon,
+  D20Icon,
+  Martial,
+  MeleeIcon,
+  DistanceIcon,
+  SpellIcon,
+  OffensiveSpellIcon,
+} from "../icons";
 
 const MarkdownEditor = ({ initialValue = "", onChange }) => {
   const theme = useTheme();
@@ -86,6 +101,12 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
   const handlePopoverClose = () => {
     setAnchorEl(null);
     setPopoverContent(null);
+  };
+
+  // Function to insert type icon
+  const insertIcon = (type) => {
+    insertAtCursor(`[ICON:${type}]`);
+    handlePopoverClose();
   };
 
   const buttons = [
@@ -383,51 +404,110 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
           </Box>
         ),
     },
+    {
+      tooltip: "Insert Icon",
+      icon: <Category />,
+      action: (event) =>
+        handlePopoverOpen(
+          event,
+          <Box p={2} sx={{ maxWidth: 320 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Insert Icon
+            </Typography>
+            <Grid container spacing={1}>
+              {/* Type Icons */}
+              {typeList.map((type) => (
+                <Grid item key={type} xs={3}>
+                  <Tooltip
+                    title={type.charAt(0).toUpperCase() + type.slice(1)}
+                    enterDelay={500}
+                    leaveDelay={30}
+                    enterNextDelay={500}
+                  >
+                    <IconButton
+                      onClick={() => insertIcon(type)}
+                      sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        borderRadius: "8px",
+                        padding: 1,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <TypeIcon type={type} />
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+              ))}
+
+              {/* Dice Icons */}
+              {["d4", "d6", "d8", "d10", "d12", "d20"].map((dice) => (
+                <Grid item key={dice} xs={3}>
+                  <Tooltip
+                    title={dice.toUpperCase()}
+                    enterDelay={500}
+                    leaveDelay={30}
+                    enterNextDelay={500}
+                  >
+                    <IconButton
+                      onClick={() => insertIcon(dice)}
+                      sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        borderRadius: "8px",
+                        padding: 1,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {dice === "d4" && <D4Icon />}
+                      {dice === "d6" && <D6Icon />}
+                      {dice === "d8" && <D8Icon />}
+                      {dice === "d10" && <D10Icon />}
+                      {dice === "d12" && <D12Icon />}
+                      {dice === "d20" && <D20Icon />}
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+              ))}
+              {/* Other Icons */}
+              {["melee", "ranged", "magic", "spell", "martial"].map((icon) => (
+                <Grid item key={icon} xs={3}>
+                  <Tooltip
+                    title={icon.charAt(0).toUpperCase() + icon.slice(1)}
+                    enterDelay={500}
+                    leaveDelay={30}
+                    enterNextDelay={500}
+                  >
+                    <IconButton
+                      onClick={() => insertIcon(icon)}
+                      sx={{
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        borderRadius: "8px",
+                        padding: 1,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {icon === "melee" && <MeleeIcon />}
+                      {icon === "ranged" && <DistanceIcon />}
+                      {icon === "spell" && <OffensiveSpellIcon />}
+                      {icon === "magic" && <SpellIcon />}
+                      {icon === "martial" && <Martial />}
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        ),
+    },
   ];
-
-  const cheatSheet = (
-    <Box p={2} sx={{ width: 400, maxHeight: 600, overflow: "auto" }}>
-      <Typography variant="h6" gutterBottom>
-        Markdown Cheat Sheet
-      </Typography>
-
-      <Typography variant="subtitle1" sx={{ mt: 2 }}>
-        Basic Syntax
-      </Typography>
-      <Box
-        component="pre"
-        sx={{ bgcolor: "background.paper", p: 1, borderRadius: 1 }}
-      >
-        # Heading 1 ## Heading 2 ### Heading 3 #### Heading 4 ##### Heading 5
-        **Bold text** *Italic text* - Bullet point 1. Numbered list
-        {">"} Blockquote [Link text](URL) --- Horizontal rule 【Bracketed text】
-      </Box>
-
-      <Typography variant="subtitle1" sx={{ mt: 2 }}>
-        Custom Callout Blocks
-      </Typography>
-      <Box
-        component="pre"
-        sx={{ bgcolor: "background.paper", p: 1, borderRadius: 1 }}
-      >
-        {"{{primary This is a primary callout}}"}
-
-        {"{{secondary Secondary callout text}}"}
-
-        {"{{warning Warning message!}}"}
-
-        {"{{info Information block}}"}
-
-        {"{{success Success message}}"}
-
-        {"{{danger Danger/error message}}"}
-
-        {"{{ternary Ternary styling}}"}
-
-        {"{{quaternary Quaternary styling}}"}
-      </Box>
-    </Box>
-  );
 
   return (
     <Paper elevation={3} sx={{ mb: 4, width: "100%", height: "100%" }}>
@@ -468,15 +548,6 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
               </IconButton>
             </Tooltip>
           ))}
-          <Tooltip title="Markdown Cheat Sheet">
-            <IconButton
-              size="small"
-              onClick={(e) => handlePopoverOpen(e, cheatSheet)}
-              sx={{ mr: 0.5, mb: 0.5 }}
-            >
-              <TextFields />
-            </IconButton>
-          </Tooltip>
         </Box>
 
         <Box sx={{ display: view === "split" ? "flex" : "block", gap: 2 }}>

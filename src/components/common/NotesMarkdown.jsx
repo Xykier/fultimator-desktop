@@ -6,6 +6,20 @@ import remarkGfm from "remark-gfm"; // GitHub-flavored markdown
 import rehypeRaw from "rehype-raw"; // Raw HTML
 import remarkParse from "remark-parse"; // Parse nested markdown
 import rehypeReact from "rehype-react"; // To render HTML as React components
+import { TypeIcon } from "../types";
+import {
+  D4Icon,
+  D6Icon,
+  D8Icon,
+  D10Icon,
+  D12Icon,
+  D20Icon,
+  Martial,
+  MeleeIcon,
+  DistanceIcon,
+  SpellIcon,
+  OffensiveSpellIcon,
+} from "../icons";
 
 /**
  * NotesMarkdown Component
@@ -14,25 +28,49 @@ const NotesMarkdown = ({ children, ...props }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  // Preprocess custom blocks: {{type ...}} and allow nested markdown
+  // Preprocess custom blocks: {{type ...}} and icons [ICON:type] and [ICON:dice]
   const processedMarkdown = useMemo(() => {
+    if (!children) return "";
+
+    // Handle callout blocks
     const calloutRegex =
       /\{\{(primary|secondary|ternary|quaternary|warning|info|success|danger)\n([\s\S]*?)\n?\}\}/g;
 
     // Replace custom block syntax with HTML div elements with the class `callout-{type}`
-    const intermediate = (children || "").replace(
-      calloutRegex,
-      (_, type, content) => {
-        // Check if the content contains nested callouts or tables
-        if (content.includes("{{") || content.includes("<table")) {
-          // If a nested callout or table is found, don't render it
-          return `<div class="callout-${type}">Content not supported</div>`;
-        }
-        return `<div class="callout-${type}">${content.trim()}</div>`;
+    let intermediate = children.replace(calloutRegex, (_, type, content) => {
+      // Check if the content contains nested callouts or tables
+      if (content.includes("{{") || content.includes("<table")) {
+        // If a nested callout or table is found, don't render it
+        return `<div class="callout-${type}">Content not supported</div>`;
       }
+      return `<div class="callout-${type}">${content.trim()}</div>`;
+    });
+
+    // Handle type icons with [ICON:type] syntax
+    const typeIconRegex =
+      /\[ICON:(physical|wind|bolt|dark|earth|fire|ice|light|poison)\]/g;
+    intermediate = intermediate.replace(
+      typeIconRegex,
+      (_, type) => `<span class="type-icon" data-type="${type}"></span>`
     );
 
-    // Return the processed markdown, including HTML for custom blocks
+    // Handle dice icons with [ICON:d4], [ICON:d6], etc. syntax
+    const diceIconRegex = /\[ICON:(d4|d6|d8|d10|d12|d20)\]/gi;
+    intermediate = intermediate.replace(
+      diceIconRegex,
+      (_, dice) =>
+        `<span class="dice-icon" data-dice="${dice.toLowerCase()}"></span>`
+    );
+
+    // Handle other icons with [ICON:...] "melee", "ranged", "magic", "spell", "martial"
+    const otherIconRegex = /\[ICON:(melee|ranged|magic|spell|martial)\]/gi;
+    intermediate = intermediate.replace(
+      otherIconRegex,
+      (_, icon) =>
+        `<span class="other-icon" data-icon="${icon.toLowerCase()}"></span>`
+    );
+
+    // Return the processed markdown, including HTML for custom blocks and icons
     return intermediate;
   }, [children]);
 
@@ -403,6 +441,59 @@ const NotesMarkdown = ({ children, ...props }) => {
           </Box>
         ),
 
+        // Custom styling for spans (used for icons)
+        span: ({ ...props }) => {
+          if (props.className === "type-icon" && props["data-type"]) {
+            return (
+              <TypeIcon
+                type={props["data-type"]}
+                sx={{ fontSize: "1.2rem", verticalAlign: "text-bottom" }}
+              />
+            );
+          }
+          if (props.className === "dice-icon" && props["data-dice"]) {
+            const dice = props["data-dice"].toLowerCase();
+            return (
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  verticalAlign: "text-bottom",
+                  mx: "2px",
+                }}
+              >
+                {dice === "d4" && <D4Icon fontSize="small" />}
+                {dice === "d6" && <D6Icon fontSize="small" />}
+                {dice === "d8" && <D8Icon fontSize="small" />}
+                {dice === "d10" && <D10Icon fontSize="small" />}
+                {dice === "d12" && <D12Icon fontSize="small" />}
+                {dice === "d20" && <D20Icon fontSize="small" />}
+              </Box>
+            );
+          }
+          if (props.className === "other-icon" && props["data-icon"]) {
+            const icon = props["data-icon"].toLowerCase();
+            return (
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  verticalAlign: "text-bottom",
+                  mx: "2px",
+                }}
+              >
+                {icon === "melee" && <MeleeIcon fontSize="small" />}
+                {icon === "ranged" && <DistanceIcon fontSize="small" />}
+                {icon === "magic" && <SpellIcon fontSize="small" />}
+                {icon === "spell" && <OffensiveSpellIcon fontSize="small" />}
+                {icon === "martial" && <Martial fontSize="small" />}
+              </Box>
+            );
+          }
+
+          return <span {...props} />;
+        },
+
         // Custom styling for callout blocks
         div: ({ className, children, ...props }) => {
           if (className?.startsWith("callout-")) {
@@ -442,8 +533,13 @@ const NotesMarkdown = ({ children, ...props }) => {
                 sx={{
                   background: backgroundColor,
                   paddingX: 2,
-                  paddingY: "0.1em",
+                  paddingY: 2,
                   marginY: 2,
+                  display: "block",
+                  lineHeight: 1.6,
+                  "& .MuiTypography-root": {
+                    marginBottom: "0.5em",
+                  },
                   color:
                     type === "primary" ||
                     type === "info" ||
