@@ -569,6 +569,10 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                   fontFamily: "monospace",
                 },
               }}
+              inputProps={{
+                maxLength: 5000,
+              }}
+                
             />
           )}
 

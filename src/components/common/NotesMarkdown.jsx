@@ -6,6 +6,9 @@ import remarkGfm from "remark-gfm"; // GitHub-flavored markdown
 import rehypeRaw from "rehype-raw"; // Raw HTML
 import remarkParse from "remark-parse"; // Parse nested markdown
 import rehypeReact from "rehype-react"; // To render HTML as React components
+import remarkCustomCallouts from "../../utility/remarkCustomCallouts";
+import remarkDirective from "remark-directive";
+
 import { TypeIcon } from "../types";
 import {
   D4Icon,
@@ -41,9 +44,9 @@ const NotesMarkdown = ({ children, ...props }) => {
       // Check if the content contains nested callouts or tables
       if (content.includes("{{") || content.includes("<table")) {
         // If a nested callout or table is found, don't render it
-        return `<div class="callout-${type}">Content not supported</div>`;
+        return `:::callout-${type}\nContent not supported\n:::`;
       }
-      return `<div class="callout-${type}">${content.trim()}</div>`;
+      return `:::callout-${type}\n${content.trim()}\n:::`;
     });
 
     // Handle type icons with [ICON:type] syntax
@@ -77,7 +80,12 @@ const NotesMarkdown = ({ children, ...props }) => {
   return (
     <ReactMarkdown
       {...props}
-      remarkPlugins={[remarkGfm, remarkParse]}
+      remarkPlugins={[
+        remarkDirective,
+        remarkGfm,
+        remarkParse,
+        remarkCustomCallouts,
+      ]}
       rehypePlugins={[rehypeRaw, rehypeReact]}
       components={{
         // Custom styling for paragraphs (p)
@@ -532,14 +540,11 @@ const NotesMarkdown = ({ children, ...props }) => {
               <Box
                 sx={{
                   background: backgroundColor,
-                  paddingX: 2,
-                  paddingY: 2,
+                  paddingX: 0,
+                  paddingY: 1,
                   marginY: 2,
                   display: "block",
                   lineHeight: 1.6,
-                  "& .MuiTypography-root": {
-                    marginBottom: "0.5em",
-                  },
                   color:
                     type === "primary" ||
                     type === "info" ||
@@ -549,13 +554,8 @@ const NotesMarkdown = ({ children, ...props }) => {
                       ? "#fff"
                       : theme.palette.text.primary,
                 }}
-                {...props}
               >
-                {typeof children === "string" ? (
-                  <ReactMarkdown>{children}</ReactMarkdown>
-                ) : (
-                  children
-                )}
+                {children}
               </Box>
             );
           }
