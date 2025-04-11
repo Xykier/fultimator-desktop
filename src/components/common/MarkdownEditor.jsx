@@ -372,7 +372,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                   color={type === "danger" ? "error" : type}
                   variant="contained"
                   onClick={() => {
-                    insertAtCursor(`{{${type} `, "}}\n");
+                    insertAtCursor(`{{${type}\n `, "\n}}\n");
                     handlePopoverClose();
                   }}
                 >

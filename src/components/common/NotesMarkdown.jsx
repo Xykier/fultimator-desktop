@@ -17,12 +17,17 @@ const NotesMarkdown = ({ children, ...props }) => {
   // Preprocess custom blocks: {{type ...}} and allow nested markdown
   const processedMarkdown = useMemo(() => {
     const calloutRegex =
-      /\{\{(primary|secondary|ternary|quaternary|warning|info|success|danger)\s+([\s\S]+?)\}\}/g;
+      /\{\{(primary|secondary|ternary|quaternary|warning|info|success|danger)\n([\s\S]*?)\n?\}\}/g;
 
     // Replace custom block syntax with HTML div elements with the class `callout-{type}`
     const intermediate = (children || "").replace(
       calloutRegex,
       (_, type, content) => {
+        // Check if the content contains nested callouts or tables
+        if (content.includes("{{") || content.includes("<table")) {
+          // If a nested callout or table is found, don't render it
+          return `<div class="callout-${type}">Content not supported</div>`;
+        }
         return `<div class="callout-${type}">${content.trim()}</div>`;
       }
     );
@@ -402,8 +407,6 @@ const NotesMarkdown = ({ children, ...props }) => {
         div: ({ className, children, ...props }) => {
           if (className?.startsWith("callout-")) {
             const type = className.split("-")[1];
-
-            // Destructure the theme palette for easy access
             const {
               primary,
               secondary,
@@ -415,22 +418,18 @@ const NotesMarkdown = ({ children, ...props }) => {
               error,
             } = theme.palette;
 
-            // Define the colors for each type
             const colors = {
-              primary: primary,
-              secondary: secondary,
-              ternary: ternary,
-              quaternary: quaternary,
-              warning: warning,
-              info: info,
-              success: success,
+              primary,
+              secondary,
+              ternary,
+              quaternary,
+              warning,
+              info,
+              success,
               danger: error,
             };
 
-            // Get the selected color or default to the info palette
             const selectedColor = colors[type] || info;
-
-            // Define the background gradient logic
             const backgroundColor =
               type === "ternary" || type === "quaternary"
                 ? selectedColor?.main || "#e0e0e0"
@@ -456,7 +455,11 @@ const NotesMarkdown = ({ children, ...props }) => {
                 }}
                 {...props}
               >
-                <ReactMarkdown>{children}</ReactMarkdown>
+                {typeof children === "string" ? (
+                  <ReactMarkdown>{children}</ReactMarkdown>
+                ) : (
+                  children
+                )}
               </Box>
             );
           }
