@@ -48,7 +48,8 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
 
   return (
     <>
-      {player.notes.length > 0 && (
+      {player.notes.filter((note) => note.showInPlayerSheet !== false).length >
+        0 && (
         <>
           <Divider sx={{ my: 1 }} />
           <Paper
@@ -77,96 +78,105 @@ export default function PlayerNotes({ player, setPlayer, isCharacterSheet }) {
             </Typography>
 
             <Grid container spacing={2} sx={{ padding: "1em" }}>
-              {player.notes.map((note, noteIndex) => (
-                <Fragment key={noteIndex}>
-                  <Grid item xs={12} key={noteIndex}>
-                    {note.name.length > 0 && (
-                      <Typography
-                        variant="h2"
-                        fontWeight={"bold"}
-                        sx={{ textTransform: "uppercase", marginBottom: "1em" }}
+              {player.notes
+                .filter((note) => note.showInPlayerSheet !== false) // treat undefined as true
+                .map((note, noteIndex) => (
+                  <Fragment key={noteIndex}>
+                    <Grid item xs={12} key={noteIndex}>
+                      {note.name.length > 0 && (
+                        <Typography
+                          variant="h2"
+                          fontWeight={"bold"}
+                          sx={{
+                            textTransform: "uppercase",
+                            marginBottom: "1em",
+                          }}
+                        >
+                          {note.name + ": "}
+                        </Typography>
+                      )}
+                      <NotesMarkdown
+                        sx={{
+                          fontFamily: "PT Sans Narrow",
+                          fontSize: "1rem",
+                        }}
                       >
-                        {note.name + ": "}
-                      </Typography>
-                    )}
-                    <NotesMarkdown
-                      sx={{
-                        fontFamily: "PT Sans Narrow",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      {note.description}
-                    </NotesMarkdown>
-                    <Grid
-                      container
-                      justifyContent="center"
-                      spacing={2}
-                      sx={{ mt: 2 }}
-                    >
-                      {/* Render the clocks */}
-                      {note.clocks &&
-                        note.clocks.map((clock, clockIndex) => (
-                          <Grid
-                            item
-                            xs={12}
-                            sm={6}
-                            key={clockIndex}
-                            sx={{ textAlign: "center", py: 2 }}
-                          >
-                            <Typography
-                              variant="h4"
-                              sx={{
-                                mb: 1,
-                                fontWeight: "bold",
-                                fontSize: "1.2em",
-                                textTransform: "uppercase",
-                              }}
+                        {note.description}
+                      </NotesMarkdown>
+                      <Grid
+                        container
+                        justifyContent="center"
+                        spacing={2}
+                        sx={{ mt: 2 }}
+                      >
+                        {/* Render the clocks */}
+                        {note.clocks &&
+                          note.clocks.map((clock, clockIndex) => (
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
+                              key={clockIndex}
+                              sx={{ textAlign: "center", py: 2 }}
                             >
-                              {clock.name}
-                            </Typography>
-                            <Clock
-                              isCharacterSheet={isCharacterSheet}
-                              numSections={clock.sections}
-                              size={200}
-                              state={clock.state}
-                              setState={(newState) =>
-                                handleClockStateChange(
-                                  noteIndex,
-                                  clockIndex,
-                                  newState
-                                )
-                              }
-                            />
-                            {!isCharacterSheet && (
-                              <Grid container justifyContent="center">
-                                <Tooltip title={t("Reset Clock")}>
-                                  <IconButton
-                                    color={
-                                      theme.palette.mode === "dark"
-                                        ? "white"
-                                        : "primary"
-                                    }
-                                    onClick={() =>
-                                      resetClockState(noteIndex, clockIndex)
-                                    }
-                                    sx={{ mt: 1 }}
-                                  >
-                                    <RestartAltIcon />
-                                  </IconButton>
-                                </Tooltip>
-                              </Grid>
-                            )}
-                          </Grid>
-                        ))}
+                              <Typography
+                                variant="h4"
+                                sx={{
+                                  mb: 1,
+                                  fontWeight: "bold",
+                                  fontSize: "1.2em",
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                {clock.name}
+                              </Typography>
+                              <Clock
+                                isCharacterSheet={isCharacterSheet}
+                                numSections={clock.sections}
+                                size={200}
+                                state={clock.state}
+                                setState={(newState) =>
+                                  handleClockStateChange(
+                                    noteIndex,
+                                    clockIndex,
+                                    newState
+                                  )
+                                }
+                              />
+                              {!isCharacterSheet && (
+                                <Grid container justifyContent="center">
+                                  <Tooltip title={t("Reset Clock")}>
+                                    <IconButton
+                                      color={
+                                        theme.palette.mode === "dark"
+                                          ? "white"
+                                          : "primary"
+                                      }
+                                      onClick={() =>
+                                        resetClockState(noteIndex, clockIndex)
+                                      }
+                                      sx={{ mt: 1 }}
+                                    >
+                                      <RestartAltIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Grid>
+                              )}
+                            </Grid>
+                          ))}
+                      </Grid>
                     </Grid>
-                  </Grid>
-                  {noteIndex < player.notes.length - 1 && (
-                    <Grid item xs={12} key={`divider-${noteIndex}`}>
-                      <Divider sx={{ my: 2 }} />
-                    </Grid>
-                  )}
-                </Fragment>
-              ))}
+                    {noteIndex <
+                      player.notes.filter(
+                        (note) => note.showInPlayerSheet !== false
+                      ).length -
+                        1 && (
+                      <Grid item xs={12} key={`divider-${noteIndex}`}>
+                        <Divider sx={{ my: 2 }} />
+                      </Grid>
+                    )}
+                  </Fragment>
+                ))}
             </Grid>
           </Paper>
         </>

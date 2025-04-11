@@ -17,6 +17,8 @@ import {
   Toolbar,
   Box,
   Tooltip,
+  FormControlLabel,
+  Switch
 } from "@mui/material";
 import { useTranslate } from "../../../translation/translate";
 import CustomHeader from "../../common/CustomHeader";
@@ -71,7 +73,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
     }
     closeMarkdownEditor(); // Now close the dialog after saving
   };
-  
+
   const closeMarkdownEditor = () => {
     setEditorDialogOpen(false); // Close the dialog after saving
     setCurrentEditingNote(null); // Reset current editing note
@@ -145,6 +147,14 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
     });
   };
 
+  const handleToggleShowInSheet = (index) => (e) => {
+    setPlayer((prevState) => {
+      const newState = { ...prevState };
+      newState.notes[index].showInPlayerSheet = e.target.checked;
+      return newState;
+    });
+  };
+
   return (
     <Paper
       elevation={3}
@@ -169,6 +179,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                         name: "",
                         description: "",
                         clocks: [],
+                        showInPlayerSheet: true,
                       });
                       return newState;
                     });
@@ -322,6 +333,19 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                   </Grid>
                 </Grid>
               ))}
+                                {isEditMode && (
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={note.showInPlayerSheet ?? true}
+                            onChange={handleToggleShowInSheet(index)}
+                          />
+                        }
+                        label={t("Show in Player Sheet")}
+                      />
+                    </Grid>
+                  )}
             {index !== player.notes.length - 1 && (
               <Grid item xs={12}>
                 <Divider />
@@ -384,11 +408,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
       </Dialog>
 
       {/* Fullscreen Markdown Editor Dialog */}
-      <Dialog
-        fullScreen
-        open={editorDialogOpen}
-        onClose={closeMarkdownEditor}
-      >
+      <Dialog fullScreen open={editorDialogOpen} onClose={closeMarkdownEditor}>
         <AppBar sx={{ position: "relative" }}>
           <Toolbar>
             <IconButton
@@ -404,7 +424,12 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                 ? `${t("Edit")}: ${player.notes[currentEditingNote].name}`
                 : t("Edit Note")}
             </Typography>
-            <Button startIcon={<Save />} color="inherit" variant ="outlined" onClick={saveMarkdown}>
+            <Button
+              startIcon={<Save />}
+              color="inherit"
+              variant="outlined"
+              onClick={saveMarkdown}
+            >
               {t("Save")}
             </Button>
           </Toolbar>
