@@ -35,59 +35,77 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleFocus = useCallback((e: React.FocusEvent<HTMLTextAreaElement>) => {
-    setIsFocused(true);
-    if (onFocus) onFocus(e);
-  }, [onFocus]);
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      setIsFocused(true);
+      if (onFocus) onFocus(e);
+    },
+    [onFocus]
+  );
 
-  const handleBlur = useCallback((e: React.FocusEvent<HTMLTextAreaElement>) => {
-    setIsFocused(false);
-    if (onBlur) onBlur(e);
-  }, [onBlur]);
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      setIsFocused(false);
+      if (onBlur) onBlur(e);
+    },
+    [onBlur]
+  );
 
-  const handleMouseOver = useCallback((e: React.MouseEvent<HTMLTextAreaElement>) => {
-    setIsHovered(true);
-    if (onMouseOver) onMouseOver(e);
-  }, [onMouseOver]);
+  const handleMouseOver = useCallback(
+    (e: React.MouseEvent<HTMLTextAreaElement>) => {
+      setIsHovered(true);
+      if (onMouseOver) onMouseOver(e);
+    },
+    [onMouseOver]
+  );
 
-  const handleMouseOut = useCallback((e: React.MouseEvent<HTMLTextAreaElement>) => {
-    setIsHovered(false);
-    if (onMouseOut) onMouseOut(e);
-  }, [onMouseOut]);
+  const handleMouseOut = useCallback(
+    (e: React.MouseEvent<HTMLTextAreaElement>) => {
+      setIsHovered(false);
+      if (onMouseOut) onMouseOut(e);
+    },
+    [onMouseOut]
+  );
 
-  const handleFormat = useCallback((format: string) => {
-    const textarea = textareaRef.current;
+  const handleFormat = useCallback(
+    (format: string) => {
+      const textarea = textareaRef.current;
 
-    if (!textarea) return;
+      if (!textarea) return;
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = value.substring(start, end);
-    let formattedText = "";
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = value.substring(start, end);
+      let formattedText = "";
 
-    switch (format) {
-      case "bold":
-        formattedText = `**${selectedText}**`;
-        break;
-      case "italic":
-        formattedText = `*${selectedText}*`;
-        break;
-      case "brackets":
-        formattedText = `【${selectedText}】`;
-        break;
-      default:
-        break;
-    }
+      switch (format) {
+        case "bold":
+          formattedText = `**${selectedText}**`;
+          break;
+        case "italic":
+          formattedText = `*${selectedText}*`;
+          break;
+        case "brackets":
+          formattedText = `【${selectedText}】`;
+          break;
+        default:
+          break;
+      }
 
-    const newText = `${value.substring(0, start)}${formattedText}${value.substring(end)}`;
+      const newText = `${value.substring(
+        0,
+        start
+      )}${formattedText}${value.substring(end)}`;
 
-    onChange({
-      target: { value: newText },
-    } as React.ChangeEvent<HTMLTextAreaElement>);
+      onChange({
+        target: { value: newText },
+      } as React.ChangeEvent<HTMLTextAreaElement>);
 
-    textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
-    textarea.focus();
-  }, [value, onChange]);
+      textarea.setSelectionRange(start + 2, start + 2 + selectedText.length);
+      textarea.focus();
+    },
+    [value, onChange]
+  );
 
   const { fontFamily, fontSize } = theme.typography.body1;
 
@@ -98,14 +116,26 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
     lineHeight: fontSize,
     fontFamily: fontFamily,
     borderRadius: "4px",
-    border: isFocused ? "none" : `1px solid ${isDarkMode ? "rgba(255, 255, 255, 0.23)" : "rgba(0, 0, 0, 0.23)"}`,
+    border: isFocused
+      ? "none"
+      : `1px solid ${
+          isDarkMode ? "rgba(255, 255, 255, 0.23)" : "rgba(0, 0, 0, 0.23)"
+        }`,
     outline: isHovered && !isFocused ? `1px solid white` : "none",
     resize: "vertical",
-    boxShadow: isFocused ? `0 0 0 1px ${isDarkMode ? "#ffffff": theme.primary}` : "none",
-    backgroundColor: readOnly ? "#f5f5f5" : `${theme.transparent}`,
+    boxShadow: isFocused
+      ? `0 0 0 1px ${isDarkMode ? "#ffffff" : theme.primary}`
+      : "none",
+    backgroundColor: isDarkMode
+      ? readOnly
+        ? "rgba(43, 43, 43, 0.5)"
+        : "#2b2b2b"
+      : readOnly
+      ? "#f5f5f5"
+      : theme.transparent,
     cursor: readOnly ? "not-allowed" : "text",
     color: isDarkMode ? "white" : "black",
-    transition: 'border 0.3s ease, box-shadow 0.3s ease',
+    transition: "border 0.3s ease, box-shadow 0.3s ease",
     display: "flex",
     alignItems: "center",
   };
@@ -114,13 +144,19 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
     position: "absolute",
     padding: "0 2px",
     top: isFocused || value ? "-8px" : "16px",
-    backgroundColor: isDarkMode ? "#252525" : "white",
+    backgroundColor: isDarkMode ? "#2b2b2b" : "white",
     left: "14px",
     transition: "top 0.2s ease, font-size 0.2s ease",
     fontSize: isFocused || value ? "0.8rem" : "1rem",
     lineHeight: fontSize,
     fontFamily: fontFamily,
-    color: isFocused ? (isDarkMode ? 'rgba(255, 255, 255, 0.87)' : 'black') : (isDarkMode ? '#b0b0b0' : 'black'),
+    color: isFocused
+      ? isDarkMode
+        ? "rgba(255, 255, 255, 0.87)"
+        : "black"
+      : isDarkMode
+      ? "#b0b0b0"
+      : "black",
     pointerEvents: "none",
     borderRadius: "4px",
   };
@@ -139,10 +175,12 @@ const CustomTextarea: React.FC<CustomTextareaProps> = ({
     top: "-10px",
     right: "10px",
     display: "flex",
-    border: isFocused 
-    ? `1px solid ${isDarkMode ? 'rgba(255, 255, 255, 0.87)' : 'rgba(0, 0, 0, 0.87)'}` 
-    : `1px solid ${isDarkMode ? '#b0b0b0' : theme.ternary}`,
-  outline: isHovered && !isFocused ? `1px solid white` : "none",
+    border: isFocused
+      ? `1px solid ${
+          isDarkMode ? "rgba(255, 255, 255, 0.87)" : "rgba(0, 0, 0, 0.87)"
+        }`
+      : `1px solid ${isDarkMode ? "#b0b0b0" : theme.ternary}`,
+    outline: isHovered && !isFocused ? `1px solid white` : "none",
     borderRadius: "50px",
     overflow: "hidden",
     backgroundColor: isDarkMode ? "#252525" : `${theme.ternary}`,
