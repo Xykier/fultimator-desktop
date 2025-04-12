@@ -43,6 +43,7 @@ import {
   SpellIcon,
   OffensiveSpellIcon,
 } from "../icons";
+import { useTranslate } from "../../translation/translate";
 
 const MarkdownEditor = ({ initialValue = "", onChange }) => {
   const theme = useTheme();
@@ -53,6 +54,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [popoverContent, setPopoverContent] = useState(null);
   const textFieldRef = useRef(null);
+  const { t } = useTranslate();
 
   const handleChange = (event) => {
     const newValue = event.target.value;
@@ -111,62 +113,62 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
 
   const buttons = [
     {
-      tooltip: "Bold",
+      tooltip: t("mkeditor_tooltip_bold"),
       icon: <FormatBold />,
       action: () => insertAtCursor("**", "**"),
     },
     {
-      tooltip: "Italic",
+      tooltip: t("mkeditor_tooltip_italic"),
       icon: <FormatItalic />,
       action: () => insertAtCursor("*", "*"),
     },
     {
-      tooltip: "Heading 1",
+      tooltip: t("mkeditor_tooltip_h1"),
       icon: <Title sx={{ transform: "scale(1.2)" }} />,
       action: () => insertAtCursor("# "),
     },
     {
-      tooltip: "Heading 2",
+      tooltip: t("mkeditor_tooltip_h2"),
       icon: <Title />,
       action: () => insertAtCursor("## "),
     },
     {
-      tooltip: "Heading 3",
+      tooltip: t("mkeditor_tooltip_h3"),
       icon: <Title sx={{ transform: "scale(0.9)" }} />,
       action: () => insertAtCursor("### "),
     },
     {
-      tooltip: "Heading 4",
+      tooltip: t("mkeditor_tooltip_h4"),
       icon: <Title sx={{ transform: "scale(0.8)" }} />,
       action: () => insertAtCursor("#### "),
     },
     {
-      tooltip: "Heading 5",
+      tooltip: t("mkeditor_tooltip_h5"),
       icon: <Title sx={{ transform: "scale(0.7)" }} />,
       action: () => insertAtCursor("##### "),
     },
     {
-      tooltip: "Bullet List",
+      tooltip: t("mkeditor_tooltip_bullet_list"),
       icon: <FormatListBulleted />,
       action: () => insertAtCursor("- "),
     },
     {
-      tooltip: "Numbered List",
+      tooltip: t("mkeditor_tooltip_numbered_list"),
       icon: <FormatListNumbered />,
       action: () => insertAtCursor("1. "),
     },
     {
-      tooltip: "Blockquote",
+      tooltip: t("mkeditor_tooltip_blockquote"),
       icon: <FormatQuote />,
       action: () => insertAtCursor("> "),
     },
     {
-      tooltip: "Link",
+      tooltip: t("mkeditor_tooltip_link"),
       icon: <LinkIcon />,
       action: () => insertAtCursor("[", "](url)"),
     },
     {
-      tooltip: "Japanese Brackets 【】",
+      tooltip: t("mkeditor_tooltip_jp_brackets"),
       icon: (
         <Box
           sx={{
@@ -188,19 +190,19 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
       action: () => insertAtCursor("【", "】"),
     },
     {
-      tooltip: "Table",
+      tooltip: t("mkeditor_tooltip_table"),
       icon: <TableChart />,
       action: (event) =>
         handlePopoverOpen(
           event,
           <Box p={2} sx={{ width: 300 }}>
             <Typography variant="subtitle2" gutterBottom>
-              Insert Table
+              {t("mkeditor_table_title")}
             </Typography>
 
             {/* Predefined table sizes */}
             <Typography variant="body2" sx={{ mb: 1 }}>
-              Quick tables:
+              {t("mkeditor_table_quick")}
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
               {[
@@ -256,7 +258,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
 
             {/* Custom table builder */}
             <Typography variant="body2" sx={{ mb: 1 }}>
-              Custom size:
+              {t("mkeditor_table_custom")}
             </Typography>
             <Box
               sx={{
@@ -270,7 +272,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <TextField
                   id="table-cols"
-                  label="Columns"
+                  label={t("mkeditor_table_columns")}
                   type="number"
                   size="small"
                   defaultValue={3}
@@ -280,7 +282,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                 <Typography>×</Typography>
                 <TextField
                   id="table-rows"
-                  label="Rows"
+                  label={t("mkeditor_table_rows")}
                   type="number"
                   size="small"
                   defaultValue={3}
@@ -326,13 +328,13 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                   handlePopoverClose();
                 }}
               >
-                Create
+                {t("mkeditor_table_create")}
               </Button>
             </Box>
 
             {/* Option for empty table with just headers */}
             <Button
-              variant= {isDark ? "outlined" : "text"}
+              variant={isDark ? "outlined" : "text"}
               size="small"
               fullWidth
               color={isDark ? "inherit" : "primary"}
@@ -358,25 +360,25 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                 handlePopoverClose();
               }}
             >
-              Create empty table
+              {t("mkeditor_table_empty")}
             </Button>
           </Box>
         ),
     },
     {
-      tooltip: "Horizontal Rule",
+      tooltip: t("mkeditor_tooltip_hr"),
       icon: <HorizontalRule />,
       action: () => insertAtCursor("\n---\n"),
     },
     {
-      tooltip: "Callout Blocks",
+      tooltip: t("mkeditor_tooltip_callout"),
       icon: <FormatColorText />,
       action: (event) =>
         handlePopoverOpen(
           event,
           <Box p={2} sx={{ maxWidth: 300 }}>
             <Typography variant="subtitle2" gutterBottom>
-              Insert Callout Block
+              {t("mkeditor_callout_title")}
             </Typography>
             <ButtonGroup orientation="vertical" variant="outlined" fullWidth>
               {[
@@ -398,7 +400,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
                     handlePopoverClose();
                   }}
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                  {t(`mkeditor_callout_${type}`)}
                 </Button>
               ))}
             </ButtonGroup>
@@ -406,21 +408,21 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
         ),
     },
     {
-      tooltip: "Insert Icon",
+      tooltip: t("mkeditor_tooltip_icon"),
       icon: <Category />,
       action: (event) =>
         handlePopoverOpen(
           event,
           <Box p={2} sx={{ maxWidth: 320 }}>
             <Typography variant="subtitle2" gutterBottom>
-              Insert Icon
+              {t("mkeditor_tooltip_icon")}
             </Typography>
             <Grid container spacing={1}>
               {/* Type Icons */}
               {typeList.map((type) => (
                 <Grid item key={type} xs={3}>
                   <Tooltip
-                    title={type.charAt(0).toUpperCase() + type.slice(1)}
+                    title={t(type).charAt(0).toUpperCase() + t(type).slice(1)}
                     enterDelay={500}
                     leaveDelay={30}
                     enterNextDelay={500}
@@ -478,7 +480,17 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
               {["melee", "ranged", "magic", "spell", "martial"].map((icon) => (
                 <Grid item key={icon} xs={3}>
                   <Tooltip
-                    title={icon.charAt(0).toUpperCase() + icon.slice(1)}
+                    title={
+                      icon === "melee"
+                        ? t("Melee")
+                        : icon === "ranged"
+                        ? t("Ranged")
+                        : icon === "magic"
+                        ? t("Spell")
+                        : icon === "spell"
+                        ? t("offensive_spell")
+                        : t("martial")
+                    }
                     enterDelay={500}
                     leaveDelay={30}
                     enterNextDelay={500}
@@ -529,9 +541,9 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
             : "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        <Tab value="edit" label="Edit" />
-        <Tab value="preview" label="Preview" />
-        {!isMobile && <Tab value="split" label="Split View" />}
+        <Tab value="edit" label={t("mkeditor_tab_edit")} />
+        <Tab value="preview" label={t("mkeditor_tab_preview")} />
+        {!isMobile && <Tab value="split" label={t("mkeditor_tab_split")} />}
       </Tabs>
 
       <Box p={2}>
@@ -562,7 +574,7 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
               value={value}
               onChange={handleChange}
               variant="outlined"
-              placeholder="Write your text here..."
+              placeholder={t("mkeditor_placeholder")}
               sx={{
                 fontFamily: "monospace",
                 flex: view === "split" ? 1 : "auto",
@@ -573,7 +585,6 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
               inputProps={{
                 maxLength: 5000,
               }}
-                
             />
           )}
 

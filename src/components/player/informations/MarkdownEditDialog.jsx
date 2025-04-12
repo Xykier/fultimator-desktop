@@ -41,7 +41,7 @@ export default function MarkdownEditDialog({
             variant="outlined"
             onClick={onSave}
           >
-            {t("Save")}
+            {t("mkeditor_save_note")}
           </Button>
         </Toolbar>
       </AppBar>

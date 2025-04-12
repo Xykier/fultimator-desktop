@@ -117,7 +117,7 @@ export default function NoteClocksManager({
             }
             sx={{ fontWeight: "bold" }}
           >
-            {t("Add Progress Clock")}
+            {t("clocks_add_button")}
           </Button>
           {note.clocks && note.clocks.length >= 4 && (
             <Typography
@@ -128,7 +128,7 @@ export default function NoteClocksManager({
                 color: theme.palette.text.secondary,
               }}
             >
-              {t("Maximum of 4 clocks per note reached")}
+              {t("clocks_max_limit")}
             </Typography>
           )}
         </Grid>
@@ -137,7 +137,7 @@ export default function NoteClocksManager({
       {note.clocks && note.clocks.length > 0 && (
         <Grid item xs={12}>
           <Typography variant="h4" sx={{ mb: 2, fontWeight: "bold" }}>
-            {t("Progress Clocks")}
+          {t("clocks_section_title")}
           </Typography>
           <Grid container spacing={3}>
             {note.clocks.map((clock, clockIndex) => (
@@ -153,7 +153,7 @@ export default function NoteClocksManager({
                   }}
                 >
                   {isEditMode && (
-                    <Tooltip title={t("Remove")}>
+                    <Tooltip title={t("clocks_remove_tooltip")}>
                       <IconButton
                         onClick={() => handleRemoveClock(clockIndex)}
                         sx={{
@@ -185,7 +185,7 @@ export default function NoteClocksManager({
                       color="text.secondary"
                       sx={{ fontSize: "0.8rem" }}
                     >
-                      {t("Sections")}:{" "}
+                      {t("clocks_sections_label")}:{" "}
                       {clock.state.filter((state) => state).length}/
                       {clock.sections}
                     </Typography>
@@ -212,7 +212,7 @@ export default function NoteClocksManager({
                         right: 8,
                       }}
                     >
-                      <Tooltip title={`${t("Reset")} ${clock.name}`} arrow>
+                      <Tooltip title={`${t("clocks_reset_tooltip")} ${clock.name}`} arrow>
                         <IconButton
                           color={
                             theme.palette.mode === "dark" ? "#fff" : "primary"
@@ -250,7 +250,7 @@ export default function NoteClocksManager({
           sx={{ borderBottom: `1px solid ${theme.palette.divider}`, pb: 2 }}
         >
           <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
-            {t("Add Progress Clock")}
+            {t("clocks_add_button")}
           </Typography>
         </DialogTitle>
         <DialogContent sx={{ pt: 3 }}>
@@ -260,7 +260,7 @@ export default function NoteClocksManager({
                 autoFocus
                 margin="normal"
                 id="clockName"
-                label={t("Clock Name")}
+                label={t("clocks_name_label")}
                 type="text"
                 fullWidth
                 variant="outlined"
@@ -277,7 +277,7 @@ export default function NoteClocksManager({
                     variant="subtitle1"
                     sx={{ fontWeight: "bold", mr: 1 }}
                   >
-                    {t("Clock Sections")}
+                    {t("clocks_sections_title")}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -302,7 +302,7 @@ export default function NoteClocksManager({
                 variant="subtitle1"
                 sx={{ mb: 2, textAlign: "center", fontWeight: "medium" }}
               >
-                {t("Preview")}
+                {t("clocks_preview_title")}
               </Typography>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Clock
@@ -322,7 +322,7 @@ export default function NoteClocksManager({
                   color: theme.palette.text.secondary,
                 }}
               >
-                {t("Click sections to see how the clock works")}
+                {t("clocks_preview_hint")}
               </Typography>
             </Grid>
           </Grid>
@@ -335,7 +335,7 @@ export default function NoteClocksManager({
             color="secondary"
             variant="contained"
           >
-            {t("Cancel")}
+            {t("clocks_cancel_button")}
           </Button>
           <Button
             onClick={handleConfirmClock}
@@ -343,7 +343,7 @@ export default function NoteClocksManager({
             variant="contained"
             disabled={!clockName.trim()}
           >
-            {t("Add Clock")}
+            {t("clocks_confirm_add")}
           </Button>
         </DialogActions>
       </Dialog>

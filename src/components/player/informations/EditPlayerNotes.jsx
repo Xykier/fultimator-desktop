@@ -17,7 +17,10 @@ import {
   MenuItem,
   Fade,
 } from "@mui/material";
-import { useTranslate } from "../../../translation/translate";
+import {
+  useTranslate,
+  replacePlaceholders,
+} from "../../../translation/translate";
 import CustomHeader from "../../common/CustomHeader";
 import {
   MoreVert,
@@ -91,10 +94,14 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   };
 
   const removeItem = async (key) => {
-    const noteName = player.notes[key].name || t("Unnamed Note");
-    const confirmDelete = await globalConfirm(
-      t(`Are you sure you want to delete the note "${noteName}"?`)
-    );
+    const noteName = player.notes[key].name || t("notes_unnamed");
+    const rawMessage = t("notes_delete_confirm");
+    const populatedMessage = replacePlaceholders(rawMessage, {
+      "note-name": noteName,
+    });
+
+    const confirmDelete = await globalConfirm(populatedMessage);
+
     if (confirmDelete) {
       setPlayer((prevState) => {
         const newState = { ...prevState };
@@ -232,8 +239,12 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             <Paper
               sx={{ p: 3, textAlign: "center", bgcolor: "background.default" }}
             >
-              <Typography variant="body1" color="text.secondary" sx={{fontStyle: "italic"}}>
-                {t("No notes yet. Click the + button to add your first note.")}
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ fontStyle: "italic" }}
+              >
+                {t("notes_empty_state")}
               </Typography>
             </Paper>
           </Grid>
@@ -267,14 +278,14 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         {!isEditMode ? (
                           <Typography variant="h6">
-                            {note.name || t("Unnamed Note")}
+                            {note.name || t("notes_unnamed")}
                           </Typography>
                         ) : (
                           <TextField
                             id={`note-name-${index}`}
                             value={note.name}
                             onChange={handleNoteNameChange(index)}
-                            placeholder={t("Note Name")}
+                            placeholder={t("notes_name_placeholder")}
                             onClick={(e) => e.stopPropagation()}
                             inputProps={{ maxLength: 50 }}
                             variant="standard"
@@ -283,7 +294,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                           />
                         )}
                         {!note.showInPlayerSheet && (
-                          <Tooltip title={t("Hidden from Player Sheet")}>
+                          <Tooltip title={t("notes_hidden_tooltip")}>
                             <VisibilityOff
                               sx={{
                                 ml: 1,
@@ -337,12 +348,15 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
                               color="text.secondary"
                               sx={{ fontStyle: "italic" }}
                             >
-                              {t("No content")}
+                              {t("notes_no_content")}
                             </Typography>
                           )}
                         </Box>
                         {isEditMode && (
-                          <Tooltip title={t("Edit")} placement="top">
+                          <Tooltip
+                            title={t("notes_edit_tooltip")}
+                            placement="top"
+                          >
                             <IconButton
                               sx={{
                                 position: "absolute",
@@ -397,7 +411,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
       >
         <MenuItem onClick={() => handleMenuAction("edit")}>
           <Edit fontSize="small" sx={{ mr: 1 }} />
-          {t("Edit Content")}
+          {t("notes_menu_edit")}
         </MenuItem>
         <MenuItem
           onClick={() => handleMenuAction("toggleVisibility")}
@@ -407,12 +421,12 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           player.notes[activeNoteIndex]?.showInPlayerSheet ? (
             <>
               <VisibilityOff fontSize="small" sx={{ mr: 1 }} />
-              {t("Hide from Player Sheet")}
+              {t("notes_menu_hide")}
             </>
           ) : (
             <>
               <Visibility fontSize="small" sx={{ mr: 1 }} />
-              {t("Show in Player Sheet")}
+              {t("notes_menu_show")}
             </>
           )}
         </MenuItem>
@@ -422,7 +436,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           disabled={activeNoteIndex === 0 || activeNoteIndex === null}
         >
           <ArrowUpward fontSize="small" sx={{ mr: 1 }} />
-          {t("Move Up")}
+          {t("notes_menu_move_up")}
         </MenuItem>
         <MenuItem
           onClick={() => handleMenuAction("moveDown")}
@@ -432,7 +446,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           }
         >
           <ArrowDownward fontSize="small" sx={{ mr: 1 }} />
-          {t("Move Down")}
+          {t("notes_menu_move_down")}
         </MenuItem>
         <Divider />
         <MenuItem
@@ -440,7 +454,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           sx={{ color: theme.palette.error.main }}
         >
           <Delete fontSize="small" sx={{ mr: 1 }} />
-          {t("Delete Note")}
+          {t("notes_menu_delete")}
         </MenuItem>
       </Menu>
 
@@ -457,10 +471,10 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
         }
         title={
           currentEditingNote !== null && player.notes[currentEditingNote]
-            ? `${t("Edit")}: ${
-                player.notes[currentEditingNote].name || t("Unnamed Note")
+            ? `${t("notes_dialog_edit")}: ${
+                player.notes[currentEditingNote].name || t("notes_unnamed")
               }`
-            : t("Edit Note")
+            : t("notes_dialog_edit_title")
         }
         t={t}
       />
