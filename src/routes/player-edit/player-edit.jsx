@@ -49,7 +49,7 @@ import PlayerNotes from "../../components/player/playerSheet/PlayerNotes";
 import PlayerCompanion from "../../components/player/playerSheet/PlayerCompanion";
 import { useTranslate } from "../../translation/translate";
 import { styled } from "@mui/system";
-import { BugReport, Save, Info } from "@mui/icons-material";
+import { BugReport, Save, Info, KeyboardArrowUp } from "@mui/icons-material";
 import deepEqual from "deep-equal";
 import PlayerRituals from "../../components/player/playerSheet/PlayerRituals";
 import PlayerQuirk from "../../components/player/playerSheet/PlayerQuirk";
@@ -76,6 +76,8 @@ export default function PlayerEdit() {
   const secondary = theme.palette.secondary.main;
   const ternary = theme.palette.ternary.main;
   const isSmallScreen = useMediaQuery("(max-width: 899px)");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollTopSave] = useState(true);
 
   let params = useParams(); // URL parameters hook
   const pcId = parseInt(params.playerId, 10);
@@ -84,7 +86,6 @@ export default function PlayerEdit() {
   const [playerTemp, setPlayerTemp] = useState(null); // Temporary Character State
   const [isUpdated, setIsUpdated] = useState(false); // State for unsaved changes
 
-  const [showScrollTop] = useState(true);
   const [openTab, setOpenTab] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [battleMode, setBattleMode] = useState(false);
@@ -95,6 +96,15 @@ export default function PlayerEdit() {
   );
 
   const [isBugDialogOpen, setIsBugDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 100); // adjust threshold as needed
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Effect to fetch PC data from IndexedDB
   useEffect(() => {
@@ -541,27 +551,50 @@ export default function PlayerEdit() {
         </Button>
         <Box sx={{ height: "15vh" }} />
       </Tabs>
-      {/* Save Button, shown if there are unsaved changes */}
-      {isUpdated && isOwner && (
-        <Grid style={{ position: "fixed", bottom: 20, right: 10, zIndex: 100 }}>
-          <Fade in={showScrollTop} timeout={300}>
-            <Tooltip title="Save" placement="bottom">
+      {/* Save and Return to Top Buttons */}
+      <Grid
+        style={{
+          position: "fixed",
+          bottom: 20,
+          right: 10,
+          zIndex: 100,
+          display: "flex",
+          flexDirection: "column-reverse", // stack vertically with save at bottom
+          alignItems: "flex-end",
+          gap: "10px",
+        }}
+      >
+        {isUpdated && isOwner && (
+          <Fade in={showScrollTopSave} timeout={300}>
+            <Tooltip title="Save" placement="left">
               <Fab
                 color="primary"
                 aria-label="save"
                 onClick={savePlayer}
                 disabled={!isUpdated}
                 size="medium"
-                style={{
-                  marginLeft: "5px",
-                }}
               >
                 <Save />
               </Fab>
             </Tooltip>
           </Fade>
-        </Grid>
-      )}
+        )}
+
+        {showScrollTop && (
+          <Fade in={true} timeout={300}>
+            <Tooltip title="Return to top" placement="left">
+              <Fab
+                color="primary"
+                aria-label="return-to-top"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                size="medium"
+              >
+                <KeyboardArrowUp />
+              </Fab>
+            </Tooltip>
+          </Fade>
+        )}
+      </Grid>
       <HelpFeedbackDialog
         open={isBugDialogOpen}
         onClose={handleBugDialogClose}
