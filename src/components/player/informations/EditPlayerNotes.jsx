@@ -6,42 +6,52 @@ import {
   TextField,
   useTheme,
   Paper,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Typography,
-  AppBar,
-  Toolbar,
   Box,
   Tooltip,
-  FormControlLabel,
-  Switch
+  Card,
+  CardContent,
+  CardHeader,
+  Collapse,
+  Menu,
+  MenuItem,
+  Fade,
 } from "@mui/material";
 import { useTranslate } from "../../../translation/translate";
 import CustomHeader from "../../common/CustomHeader";
-import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
-import { Add, Close, Edit, Save } from "@mui/icons-material";
+import {
+  MoreVert,
+  Add,
+  Edit,
+  Delete,
+  ArrowUpward,
+  ArrowDownward,
+  ExpandMore,
+  ExpandLess,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import { globalConfirm } from "../../../utility/globalConfirm";
-import MarkdownEditor from "../../common/MarkdownEditor";
 import NotesMarkdown from "../../common/NotesMarkdown";
+import MarkdownEditDialog from "./MarkdownEditDialog";
+import NoteClocksManager from "./NoteClocksManager";
 
 export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
   const { t } = useTranslate();
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
 
-  const [clockDialogOpen, setClockDialogOpen] = useState(false);
-  const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
-  const [clockName, setClockName] = useState("");
-  const [clockSections, setClockSections] = useState(4);
-
-  // New states for markdown editor dialog
-  const [editedMarkdown, setEditedMarkdown] = useState(null);
+  // State for markdown editor dialog
   const [editorDialogOpen, setEditorDialogOpen] = useState(false);
   const [currentEditingNote, setCurrentEditingNote] = useState(null);
+  const [editedMarkdown, setEditedMarkdown] = useState(null);
+
+  // State for expanded notes
+  const [expandedNotes, setExpandedNotes] = useState({});
+
+  // State for note menu
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [activeNoteIndex, setActiveNoteIndex] = useState(null);
 
   const handleNoteNameChange = (key) => (e) => {
     setPlayer((prevState) => {
@@ -71,18 +81,19 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
         return newState;
       });
     }
-    closeMarkdownEditor(); // Now close the dialog after saving
+    closeMarkdownEditor();
   };
 
   const closeMarkdownEditor = () => {
-    setEditorDialogOpen(false); // Close the dialog after saving
-    setCurrentEditingNote(null); // Reset current editing note
-    setEditedMarkdown(null); // Reset edited markdown
+    setEditorDialogOpen(false);
+    setCurrentEditingNote(null);
+    setEditedMarkdown(null);
   };
 
-  const removeItem = (key) => async () => {
+  const removeItem = async (key) => {
+    const noteName = player.notes[key].name || t("Unnamed Note");
     const confirmDelete = await globalConfirm(
-      t("Are you sure you want to delete this note?")
+      t(`Are you sure you want to delete the note "${noteName}"?`)
     );
     if (confirmDelete) {
       setPlayer((prevState) => {
@@ -93,66 +104,106 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
     }
   };
 
-  const handleAddClock = (index) => {
-    setSelectedNoteIndex(index);
-    setClockDialogOpen(true);
-  };
-
-  const handleCloseClockDialog = () => {
-    setClockDialogOpen(false);
-    setSelectedNoteIndex(null);
-    setClockName("");
-    setClockSections(4);
-  };
-
-  const handleConfirmClock = () => {
-    if (!clockName.trim()) {
-      if (window.electron) {
-        window.electron.alert(t("Clock name is required."));
-      } else {
-        alert(t("Clock name is required."));
-      }
-      return;
-    }
-
-    if (clockSections < 2 || clockSections > 30) {
-      if (window.electron) {
-        window.electron.alert(t("Sections must be between 2 and 30."));
-      } else {
-        alert(t("Sections must be between 2 and 30."));
-      }
-      return;
-    }
-
-    setPlayer((prevState) => {
-      const newState = { ...prevState };
-      if (!newState.notes[selectedNoteIndex].clocks) {
-        newState.notes[selectedNoteIndex].clocks = [];
-      }
-      newState.notes[selectedNoteIndex].clocks.push({
-        name: clockName,
-        sections: clockSections,
-        state: new Array(clockSections).fill(false),
-      });
-      return newState;
-    });
-    handleCloseClockDialog();
-  };
-
-  const handleRemoveClock = (noteIndex, clockIndex) => {
-    setPlayer((prevState) => {
-      const newState = { ...prevState };
-      newState.notes[noteIndex].clocks.splice(clockIndex, 1);
-      return newState;
-    });
-  };
-
   const handleToggleShowInSheet = (index) => (e) => {
     setPlayer((prevState) => {
       const newState = { ...prevState };
       newState.notes[index].showInPlayerSheet = e.target.checked;
       return newState;
     });
+  };
+
+  const addNewNote = () => {
+    const newNote = {
+      name: "",
+      description: "",
+      clocks: [],
+      showInPlayerSheet: true,
+    };
+
+    setPlayer((prevState) => {
+      const newState = { ...prevState };
+      newState.notes.push(newNote);
+      return newState;
+    });
+
+    // Automatically expand the new note
+    setTimeout(() => {
+      const newIndex = player.notes.length;
+      toggleExpandNote(newIndex);
+    }, 100);
+  };
+
+  const moveNoteUp = (index) => {
+    if (index === 0) return;
+
+    setPlayer((prevState) => {
+      const newState = { ...prevState };
+      const notes = [...newState.notes];
+      [notes[index - 1], notes[index]] = [notes[index], notes[index - 1]];
+      newState.notes = notes;
+      return newState;
+    });
+  };
+
+  const moveNoteDown = (index) => {
+    if (index === player.notes.length - 1) return;
+
+    setPlayer((prevState) => {
+      const newState = { ...prevState };
+      const notes = [...newState.notes];
+      [notes[index], notes[index + 1]] = [notes[index + 1], notes[index]];
+      newState.notes = notes;
+      return newState;
+    });
+  };
+
+  // Menu handling
+  const openNoteMenu = (event, index) => {
+    setMenuAnchorEl(event.currentTarget);
+    setActiveNoteIndex(index);
+  };
+
+  const closeNoteMenu = () => {
+    setMenuAnchorEl(null);
+    setActiveNoteIndex(null);
+  };
+
+  const handleMenuAction = (action) => {
+    if (activeNoteIndex === null) return;
+
+    switch (action) {
+      case "edit":
+        openMarkdownEditor(activeNoteIndex);
+        break;
+      case "delete":
+        removeItem(activeNoteIndex);
+        break;
+      case "moveUp":
+        moveNoteUp(activeNoteIndex);
+        break;
+      case "moveDown":
+        moveNoteDown(activeNoteIndex);
+        break;
+      case "toggleVisibility":
+        handleToggleShowInSheet(activeNoteIndex)({
+          target: {
+            checked: !player.notes[activeNoteIndex].showInPlayerSheet,
+          },
+        });
+        break;
+      default:
+        break;
+    }
+
+    closeNoteMenu();
+  };
+
+  // Toggle note expansion
+  const toggleExpandNote = (index) => {
+    setExpandedNotes((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   return (
@@ -170,279 +221,249 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
           <CustomHeader
             type="top"
             headerText={t("Notes")}
-            addItem={
-              isEditMode
-                ? () => {
-                    setPlayer((prevState) => {
-                      const newState = { ...prevState };
-                      newState.notes.push({
-                        name: "",
-                        description: "",
-                        clocks: [],
-                        showInPlayerSheet: true,
-                      });
-                      return newState;
-                    });
-                  }
-                : null
-            }
+            addItem={isEditMode ? addNewNote : null}
             showIconButton={isEditMode}
             icon={Add}
           />
         </Grid>
-        {player.notes.map((note, index) => (
-          <Grid container spacing={1} sx={{ py: 1 }} key={index}>
-            {isEditMode && (
-              <Grid
-                item
-                xs={1}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 0,
-                  m: 0,
-                }}
-              >
-                <Tooltip title={t("Delete")}>
-                  <IconButton
-                    onClick={removeItem(index)}
-                    size="small"
+
+        {player.notes.length === 0 ? (
+          <Grid item xs={12} sx={{ mt: 2 }}>
+            <Paper
+              sx={{ p: 3, textAlign: "center", bgcolor: "background.default" }}
+            >
+              <Typography variant="body1" color="text.secondary">
+                {t("No notes yet. Click the + button to add your first note.")}
+              </Typography>
+            </Paper>
+          </Grid>
+        ) : (
+          player.notes.map((note, index) => (
+            <Grid item xs={12} key={index} sx={{ mt: index > 0 ? 2 : 1 }}>
+              <Fade in={true} timeout={300}>
+                <Card
+                  elevation={1}
+                  sx={{
+                    transition: "all 0.3s ease",
+                    borderLeft: note.showInPlayerSheet
+                      ? `4px solid ${theme.palette.primary.main}`
+                      : `4px solid ${theme.palette.grey[500]}`,
+                    opacity: !isEditMode && !note.showInPlayerSheet ? 0.7 : 1,
+                  }}
+                >
+                  <CardHeader
                     sx={{
-                      color: theme.palette.error.main,
+                      cursor: "pointer",
+                      py: 1,
+                      bgcolor: expandedNotes[index]
+                        ? theme.palette.action.selected
+                        : "transparent",
                       "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
+                        bgcolor: theme.palette.action.hover,
                       },
                     }}
-                  >
-                    <RemoveCircleOutline />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-            )}
-            <Grid item xs={isEditMode ? 11 : 12}>
-              <TextField
-                id="name"
-                label={t("Note Name") + ":"}
-                value={note.name}
-                onChange={handleNoteNameChange(index)}
-                inputProps={{ maxLength: 50 }}
-                InputProps={{
-                  readOnly: !isEditMode,
-                }}
-                sx={{
-                  width: "100%",
-                }}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              {/* Markdown display box and edit button */}
-              <Box
-                sx={{
-                  border: "1px solid",
-                  borderColor: theme.palette.divider,
-                  borderRadius: 1,
-                  p: 2,
-                  mt: 1,
-                  position: "relative",
-                  minHeight: "100px",
-                  backgroundColor: theme.palette.background.paper,
-                }}
-              >
-                <Box sx={{ maxHeight: "300px", overflow: "auto" }}>
-                  {note.description ? (
-                    <NotesMarkdown>{note.description}</NotesMarkdown>
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ fontStyle: "italic" }}
-                    >
-                      {t("No content")}
-                    </Typography>
-                  )}
-                </Box>
-                {isEditMode && (
-                  <Tooltip title={t("Edit")} placement="top">
-                    <IconButton
-                      sx={{
-                        position: "absolute",
-                        top: 8,
-                        right: 8,
-                        borderRadius: 0,
-                        color: "#fff",
-                        backgroundColor: theme.palette.primary.main,
-                        "&:hover": {
-                          backgroundColor: theme.palette.primary.dark,
-                        },
-                      }}
-                      onClick={() => openMarkdownEditor(index)}
-                    >
-                      <Edit />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-            </Grid>
-            {isEditMode && (
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  onClick={() => handleAddClock(index)}
-                  disabled={note.clocks && note.clocks.length >= 4}
-                >
-                  {t("Add Clock")}
-                </Button>
-              </Grid>
-            )}
-            {note.clocks &&
-              note.clocks.map((clock, clockIndex) => (
-                <Grid item xs={12} sm={6} md={4} key={clockIndex}>
-                  <Grid
-                    container
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{
-                      py: 1,
-                      bgcolor: theme.palette.background.paper,
-                      border: `1px solid ${theme.palette.divider}`,
-                      borderRadius: 1,
-                      p: 1,
-                    }}
-                  >
-                    <Grid item xs={10}>
-                      <Typography variant="body2">
-                        <strong style={{ fontSize: "1.4em" }}>
-                          {clock.name}
-                        </strong>{" "}
-                        ({t("Clock Sections")}: {clock.sections})
-                      </Typography>
-                    </Grid>
-                    {isEditMode && (
-                      <Grid item xs={2}>
-                        <IconButton
-                          onClick={() => handleRemoveClock(index, clockIndex)}
-                          sx={{
-                            color: theme.palette.error.main,
-                          }}
-                        >
-                          <RemoveCircleOutline />
-                        </IconButton>
-                      </Grid>
-                    )}
-                  </Grid>
-                </Grid>
-              ))}
-                                {isEditMode && (
-                    <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={note.showInPlayerSheet ?? true}
-                            onChange={handleToggleShowInSheet(index)}
+                    onClick={() => toggleExpandNote(index)}
+                    title={
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {!isEditMode ? (
+                          <Typography variant="h6">
+                            {note.name || t("Unnamed Note")}
+                          </Typography>
+                        ) : (
+                          <TextField
+                            id={`note-name-${index}`}
+                            value={note.name}
+                            onChange={handleNoteNameChange(index)}
+                            placeholder={t("Note Name")}
+                            onClick={(e) => e.stopPropagation()}
+                            inputProps={{ maxLength: 50 }}
+                            variant="standard"
+                            fullWidth
+                            sx={{ fontSize: "1.25rem" }}
                           />
-                        }
-                        label={t("Show in Player Sheet")}
-                      />
-                    </Grid>
-                  )}
-            {index !== player.notes.length - 1 && (
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-            )}
-          </Grid>
-        ))}
+                        )}
+                        {!note.showInPlayerSheet && (
+                          <Tooltip title={t("Hidden from Player Sheet")}>
+                            <VisibilityOff
+                              sx={{
+                                ml: 1,
+                                color: theme.palette.text.disabled,
+                                fontSize: "0.9rem",
+                              }}
+                            />
+                          </Tooltip>
+                        )}
+                      </Box>
+                    }
+                    action={
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        {expandedNotes[index] ? <ExpandLess /> : <ExpandMore />}
+
+                        {isEditMode && (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openNoteMenu(e, index);
+                            }}
+                          >
+                            <MoreVert fontSize="small" />
+                          </IconButton>
+                        )}
+                      </Box>
+                    }
+                  />
+
+                  <Collapse in={expandedNotes[index]}>
+                    <CardContent>
+                      <Box
+                        sx={{
+                          border: "1px solid",
+                          borderColor: theme.palette.divider,
+                          borderRadius: 1,
+                          p: 2,
+                          mb: 2,
+                          position: "relative",
+                          minHeight: "100px",
+                          backgroundColor: theme.palette.background.paper,
+                        }}
+                      >
+                        <Box sx={{ maxHeight: "300px", overflow: "auto" }}>
+                          {note.description ? (
+                            <NotesMarkdown>{note.description}</NotesMarkdown>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontStyle: "italic" }}
+                            >
+                              {t("No content")}
+                            </Typography>
+                          )}
+                        </Box>
+                        {isEditMode && (
+                          <Tooltip title={t("Edit")} placement="top">
+                            <IconButton
+                              sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                color: "#fff",
+                                backgroundColor: theme.palette.primary.main,
+                                "&:hover": {
+                                  backgroundColor: theme.palette.primary.dark,
+                                },
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openMarkdownEditor(index);
+                              }}
+                            >
+                              <Edit />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+
+                      {/* Clock management section */}
+                      <Grid container spacing={2} sx={{ mt: 2 }}>
+                        <NoteClocksManager
+                          isEditMode={isEditMode}
+                          note={note}
+                          noteIndex={index}
+                          setPlayer={setPlayer}
+                          t={t}
+                          theme={theme}
+                        />
+                      </Grid>
+                    </CardContent>
+                  </Collapse>
+                </Card>
+              </Fade>
+              {index !== player.notes.length - 1 && !expandedNotes[index] && (
+                <Divider sx={{ mt: 2 }} />
+              )}
+            </Grid>
+          ))
+        )}
       </Grid>
 
-      {/* Clock Dialog */}
-      <Dialog open={clockDialogOpen} onClose={handleCloseClockDialog}>
-        <DialogTitle variant="h3">{t("Add Clock")}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {t("Enter the clock details below:")}
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="clockName"
-            label={t("Clock Name")}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={clockName}
-            onChange={(e) => setClockName(e.target.value)}
-            inputProps={{ maxLength: 30 }}
-          />
-          <TextField
-            margin="dense"
-            id="clockSections"
-            label={t("Clock Sections")}
-            type="number"
-            fullWidth
-            variant="outlined"
-            value={clockSections}
-            onChange={(e) => {
-              const value = parseInt(e.target.value, 10);
-              setClockSections(value);
-            }}
-            inputProps={{ min: 2, max: 30 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseClockDialog}
-            color="secondary"
-            variant="contained"
-          >
-            {t("Cancel")}
-          </Button>
-          <Button
-            onClick={handleConfirmClock}
-            color="primary"
-            variant="contained"
-          >
-            {t("Add")}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Fullscreen Markdown Editor Dialog */}
-      <Dialog fullScreen open={editorDialogOpen} onClose={closeMarkdownEditor}>
-        <AppBar sx={{ position: "relative" }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={closeMarkdownEditor}
-              aria-label="close"
-            >
-              <Close />
-            </IconButton>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h4" component="div">
-              {currentEditingNote !== null && player.notes[currentEditingNote]
-                ? `${t("Edit")}: ${player.notes[currentEditingNote].name}`
-                : t("Edit Note")}
-            </Typography>
-            <Button
-              startIcon={<Save />}
-              color="inherit"
-              variant="outlined"
-              onClick={saveMarkdown}
-            >
-              {t("Save")}
-            </Button>
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ height: "calc(100vh - 64px)", overflow: "hidden" }}>
-          {currentEditingNote !== null && (
-            <MarkdownEditor
-              initialValue={player.notes[currentEditingNote].description || ""}
-              onChange={handleMarkdownChange}
-            />
+      {/* Note Menu */}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={closeNoteMenu}
+        TransitionComponent={Fade}
+      >
+        <MenuItem onClick={() => handleMenuAction("edit")}>
+          <Edit fontSize="small" sx={{ mr: 1 }} />
+          {t("Edit Content")}
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleMenuAction("toggleVisibility")}
+          disabled={activeNoteIndex === null}
+        >
+          {activeNoteIndex !== null &&
+          player.notes[activeNoteIndex]?.showInPlayerSheet ? (
+            <>
+              <VisibilityOff fontSize="small" sx={{ mr: 1 }} />
+              {t("Hide from Player Sheet")}
+            </>
+          ) : (
+            <>
+              <Visibility fontSize="small" sx={{ mr: 1 }} />
+              {t("Show in Player Sheet")}
+            </>
           )}
-        </Box>
-      </Dialog>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => handleMenuAction("moveUp")}
+          disabled={activeNoteIndex === 0 || activeNoteIndex === null}
+        >
+          <ArrowUpward fontSize="small" sx={{ mr: 1 }} />
+          {t("Move Up")}
+        </MenuItem>
+        <MenuItem
+          onClick={() => handleMenuAction("moveDown")}
+          disabled={
+            activeNoteIndex === player.notes.length - 1 ||
+            activeNoteIndex === null
+          }
+        >
+          <ArrowDownward fontSize="small" sx={{ mr: 1 }} />
+          {t("Move Down")}
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => handleMenuAction("delete")}
+          sx={{ color: theme.palette.error.main }}
+        >
+          <Delete fontSize="small" sx={{ mr: 1 }} />
+          {t("Delete Note")}
+        </MenuItem>
+      </Menu>
+
+      {/* Markdown Editor Dialog */}
+      <MarkdownEditDialog
+        open={editorDialogOpen}
+        onClose={closeMarkdownEditor}
+        onSave={saveMarkdown}
+        onChange={handleMarkdownChange}
+        initialValue={
+          currentEditingNote !== null
+            ? player.notes[currentEditingNote]?.description || ""
+            : ""
+        }
+        title={
+          currentEditingNote !== null && player.notes[currentEditingNote]
+            ? `${t("Edit")}: ${
+                player.notes[currentEditingNote].name || t("Unnamed Note")
+              }`
+            : t("Edit Note")
+        }
+        t={t}
+      />
     </Paper>
   );
 }
