@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 
 function calculateCoordinates(centerX, centerY, radius, angleInDegrees) {
@@ -21,6 +21,22 @@ const Clock = ({ numSections, size, state, setState, isCharacterSheet }) => {
   const hoveredActiveColor = theme.palette.info.main; // Info color for hover
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchedIndex, setTouchedIndex] = useState(null);
+
+  // Detect if the device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const handleClick = (index) => {
     const updatedSections = [...state];
@@ -29,14 +45,36 @@ const Clock = ({ numSections, size, state, setState, isCharacterSheet }) => {
   };
 
   const handleMouseEnter = (index) => {
-    if (!isCharacterSheet) {
+    if (!isCharacterSheet && !isMobile) {
       setHoveredIndex(index);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isCharacterSheet) {
+    if (!isCharacterSheet && !isMobile) {
       setHoveredIndex(null);
+    }
+  };
+
+  // Touch handlers for mobile
+  const handleTouchStart = (index) => {
+    if (!isCharacterSheet && isMobile) {
+      setTouchedIndex(index);
+    }
+  };
+
+  const handleTouchEnd = (index) => {
+    if (!isCharacterSheet && isMobile) {
+      if (touchedIndex === index) {
+        handleClick(index);
+      }
+      setTouchedIndex(null);
+    }
+  };
+
+  const handleTouchCancel = () => {
+    if (!isCharacterSheet && isMobile) {
+      setTouchedIndex(null);
     }
   };
 
@@ -56,12 +94,23 @@ const Clock = ({ numSections, size, state, setState, isCharacterSheet }) => {
     `;
 
     const isHovered = hoveredIndex === i;
+    const isTouched = touchedIndex === i;
     const isActive = state[i];
     let fill = "transparent";
 
     if (isCharacterSheet) {
       fill = isActive ? primary : "transparent";
+    } else if (isMobile) {
+      // Different handling for mobile
+      if (isTouched && isActive) {
+        fill = hoveredActiveColor;
+      } else if (isActive) {
+        fill = primary;
+      } else if (isTouched) {
+        fill = secondary;
+      }
     } else {
+      // Desktop behavior
       if (isHovered && isActive) {
         fill = hoveredActiveColor;
       } else if (isHovered) {
@@ -78,9 +127,12 @@ const Clock = ({ numSections, size, state, setState, isCharacterSheet }) => {
         fill={fill}
         stroke={strokeColor}
         strokeWidth="1"
-        onClick={() => handleClick(i)}
+        onClick={() => !isMobile && handleClick(i)}
         onMouseEnter={() => handleMouseEnter(i)}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={() => handleTouchStart(i)}
+        onTouchEnd={() => handleTouchEnd(i)}
+        onTouchCancel={handleTouchCancel}
         style={{ cursor: isCharacterSheet ? "default" : "pointer" }}
       />
     );
