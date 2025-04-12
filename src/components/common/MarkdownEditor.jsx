@@ -332,9 +332,10 @@ const MarkdownEditor = ({ initialValue = "", onChange }) => {
 
             {/* Option for empty table with just headers */}
             <Button
-              variant="text"
+              variant= {isDark ? "outlined" : "text"}
               size="small"
               fullWidth
+              color={isDark ? "inherit" : "primary"}
               onClick={() => {
                 const cols =
                   parseInt(document.getElementById("table-cols").value) || 3;

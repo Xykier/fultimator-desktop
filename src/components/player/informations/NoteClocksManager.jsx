@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import Clock from "../playerSheet/Clock";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 export default function NoteClocksManager({
   isEditMode,
@@ -90,6 +91,17 @@ export default function NoteClocksManager({
     });
   };
 
+  const resetClockState = (noteIndex, clockIndex) => {
+    setPlayer((prevState) => {
+      const newState = { ...prevState };
+      const sections = newState.notes[noteIndex].clocks[clockIndex].sections;
+      newState.notes[noteIndex].clocks[clockIndex].state = new Array(
+        sections
+      ).fill(false);
+      return newState;
+    });
+  };
+
   return (
     <>
       {isEditMode && (
@@ -147,7 +159,7 @@ export default function NoteClocksManager({
                         sx={{
                           position: "absolute",
                           top: 8,
-                          right: 8,
+                          left: 8,
                           color: theme.palette.error.main,
                         }}
                         size="small"
@@ -168,8 +180,14 @@ export default function NoteClocksManager({
                     >
                       {clock.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{fontSize: "0.8rem"}}>
-                      {t("Sections")}: {clock.sections}
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontSize: "0.8rem" }}
+                    >
+                      {t("Sections")}:{" "}
+                      {clock.state.filter((state) => state).length}/
+                      {clock.sections}
                     </Typography>
                   </Box>
 
@@ -186,6 +204,33 @@ export default function NoteClocksManager({
                       isCharacterSheet={false}
                     />
                   </Box>
+                  {isEditMode && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                      }}
+                    >
+                      <Tooltip title={`${t("Reset")} ${clock.name}`} arrow>
+                        <IconButton
+                          color={
+                            theme.palette.mode === "dark" ? "#fff" : "primary"
+                          }
+                          onClick={() => resetClockState(noteIndex, clockIndex)}
+                          sx={{
+                            bgcolor: "background.default",
+                            "&:hover": {
+                              bgcolor: "action.selected",
+                            },
+                          }}
+                          size="small"
+                        >
+                          <RestartAltIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
                 </Paper>
               </Grid>
             ))}

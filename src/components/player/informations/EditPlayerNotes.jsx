@@ -232,7 +232,7 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             <Paper
               sx={{ p: 3, textAlign: "center", bgcolor: "background.default" }}
             >
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body1" color="text.secondary" sx={{fontStyle: "italic"}}>
                 {t("No notes yet. Click the + button to add your first note.")}
               </Typography>
             </Paper>
