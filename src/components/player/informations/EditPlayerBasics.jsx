@@ -9,7 +9,6 @@ import {
   Paper,
   Button,
   InputAdornment,
-  Snackbar,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -19,13 +18,13 @@ import {
 import { useTranslate } from "../../../translation/translate";
 import CustomTextarea from "../../common/CustomTextarea";
 import CustomHeader from "../../common/CustomHeader";
-import ZenitIcon  from "../../svgs/zenit.svg?react";
-import ExpIcon  from "../../svgs/exp.svg?react";
-import ExpDisabledIcon  from "../../svgs/exp_disabled.svg?react";
-import FabulaIcon  from "../../svgs/fabula.svg?react";
-import { Code } from "@mui/icons-material";
+import ZenitIcon from "../../svgs/zenit.svg?react";
+import ExpIcon from "../../svgs/exp.svg?react";
+import ExpDisabledIcon from "../../svgs/exp_disabled.svg?react";
+import FabulaIcon from "../../svgs/fabula.svg?react";
 import ReactMarkdown from "react-markdown";
 import Confetti from "react-confetti";
+import { ImageHandler } from "./ImageHandler";
 
 export default function EditPlayerBasics({
   player,
@@ -37,17 +36,7 @@ export default function EditPlayerBasics({
   const theme = useTheme();
   const secondary = theme.palette.secondary.main;
 
-  const [imgUrlTemp, setImgUrlTemp] = React.useState(player.info.imgurl);
-
-  const [isImageError, setIsImageError] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState("");
-  const [open, setOpen] = React.useState(false);
-
   const [showConfetti, setShowConfetti] = useState(false);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const onChange = useCallback(
     (key) => (e) => {
@@ -72,36 +61,6 @@ export default function EditPlayerBasics({
     [setPlayer]
   );
 
-  const checkImageSize = useCallback(async (imageUrl) => {
-    try {
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        setIsImageError(true);
-        setErrorMessage(
-          `Failed to fetch image: ${response.status} ${response.statusText}`
-        );
-        throw new Error(
-          `Failed to fetch image: ${response.status} ${response.statusText}`
-        );
-      }
-      const blob = await response.blob();
-      if (blob.size > 5 * 1024 * 1024) {
-        // 5MB
-        setIsImageError(true);
-        setErrorMessage("Error: Image size is too large, max 5MB");
-        return false;
-      } else {
-        setIsImageError(false);
-        setErrorMessage("");
-        return true;
-      }
-    } catch (error) {
-      console.error("Error: ", error);
-      setIsImageError(true);
-      setErrorMessage(`Error: ${error.message}`);
-    }
-  }, []);
-
   const handleLevelUp = () => {
     setShowConfetti(true);
   };
@@ -125,9 +84,10 @@ export default function EditPlayerBasics({
           <CustomHeader
             type="top"
             headerText={t("Basic Information")}
-            addItem={() => console.log(player)}
-            icon={Code}
-            customTooltip="Console.log Player Object"
+            //addItem={() => console.log(player)}
+            //icon={Code}
+            //customTooltip="Console.log Player Object"
+            showIconButton = {false}
           />
         </Grid>
         <Grid item xs={12} sm={4}>
@@ -287,73 +247,13 @@ export default function EditPlayerBasics({
             />
           </FormControl>
         </Grid>
-        {isEditMode ? (
-          <>
-            <Grid item xs={12} sm={8}>
-              <TextField
-                id="imgurl"
-                label={t("Image URL") + ":"}
-                value={imgUrlTemp}
-                onChange={(e) => {
-                  setImgUrlTemp(e.target.value);
-                  setIsImageError(false);
-                  setErrorMessage("");
-                }}
-                fullWidth
-                error={imgUrlTemp.length > 0 && isImageError}
-                helperText={
-                  isImageError && imgUrlTemp.length > 0 ? errorMessage : null
-                }
-              />
-            </Grid>
-            <Grid item xs={6} sm={2}>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  checkImageSize(imgUrlTemp).then((result) => {
-                    if (result) {
-                      setPlayer((prevState) => {
-                        const newState = { ...prevState };
-                        newState.info.imgurl = imgUrlTemp;
-                        return newState;
-                      });
-                      setOpen(true);
-                    } else {
-                      console.log("Error on uploading image");
-                    }
-                  });
-                }}
-                sx={{ height: "56px", width: "100%" }}
-              >
-                {t("Update Image")}
-              </Button>
-              <Snackbar
-                open={open}
-                autoHideDuration={3000}
-                onClose={handleClose}
-                message={t("Image uploaded successfully!")}
-              />
-            </Grid>
-            <Grid item xs={6} sm={2}>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setImgUrlTemp("");
-                  setIsImageError(false);
-                  setErrorMessage("");
-                  setPlayer((prevState) => {
-                    const newState = { ...prevState };
-                    newState.info.imgurl = "";
-                    return newState;
-                  });
-                }}
-                sx={{ height: "56px", width: "100%" }}
-              >
-                {t("Remove Image")}
-              </Button>
-            </Grid>
-          </>
-        ) : null}
+        <Grid item xs={12}>
+          <ImageHandler
+            player={player}
+            setPlayer={setPlayer}
+            isEditMode={isEditMode}
+          />
+        </Grid>
       </Grid>
       {showConfetti && <Confetti />}
     </Paper>
@@ -501,8 +401,16 @@ function ExpAdornment({
           <p>{t("Do you want to use 10 EXP to level up?")}</p>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={handleClose} color="error">{t("Cancel")}</Button>
-          <Button variant="contained" onClick={handleLevelUpConfirm} color= "primary">{t("Level Up")}</Button>
+          <Button variant="contained" onClick={handleClose} color="error">
+            {t("Cancel")}
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleLevelUpConfirm}
+            color="primary"
+          >
+            {t("Level Up")}
+          </Button>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -579,7 +487,9 @@ function ExpAdornment({
           </ul>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={handleClose} color="primary" >{t("OK")}</Button>
+          <Button variant="contained" onClick={handleClose} color="primary">
+            {t("OK")}
+          </Button>
         </DialogActions>
       </Dialog>
       <style>

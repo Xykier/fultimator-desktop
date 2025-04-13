@@ -17,7 +17,22 @@ enum ExportAction {
 
 function Export({ name = "", dataType, data = {} }: Props) {
   const { t } = useTranslate();
-  const [downloadJSON, copyToClipboard] = useDownloadJSON(name, { ...data, dataType });
+
+  // Create sanitized data copy (remove imgurl if pc and imgurl is data url aka. uploaded image)
+  const sanitizedData = { ...data };
+  if (dataType === "pc" && sanitizedData.info) {
+    sanitizedData.info = {
+      ...sanitizedData.info,
+      imgurl: sanitizedData.info.imgurl?.startsWith("data:image")
+        ? ""
+        : sanitizedData.info.imgurl,
+    };
+  }
+
+  const [downloadJSON, copyToClipboard] = useDownloadJSON(name, {
+    ...sanitizedData,
+    dataType,
+  });
 
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [exportAnchor, setExportAnchor] = useState(null);
@@ -62,7 +77,6 @@ function Export({ name = "", dataType, data = {} }: Props) {
         </IconButton>
       </Tooltip>
 
-      {/* Menu component shows a modal in the whole screen. Can't rely on mouseover or mouseleave events */}
       <Menu
         anchorEl={exportAnchor}
         open={isExportMenuOpen}
