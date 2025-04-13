@@ -229,8 +229,9 @@ export default function EditPlayerNotes({ player, setPlayer, isEditMode }) {
             type="top"
             headerText={t("Notes")}
             addItem={isEditMode ? addNewNote : null}
-            showIconButton={isEditMode}
+            showIconButton={isEditMode && player.notes.length < 10}
             icon={Add}
+            disableIconButton={!isEditMode || player.notes.length >= 10}
           />
         </Grid>
 
