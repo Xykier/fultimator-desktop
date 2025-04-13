@@ -29,6 +29,13 @@ function Export({ name = "", dataType, data = {} }: Props) {
     };
   }
 
+  // Create sanitized data copy (remove imgurl if npc and imgurl is data url aka. uploaded image)
+  if (dataType === "npc") {
+    sanitizedData.imgurl = sanitizedData.imgurl?.startsWith("data:image")
+      ? ""
+      : sanitizedData.imgurl;
+  }
+
   const [downloadJSON, copyToClipboard] = useDownloadJSON(name, {
     ...sanitizedData,
     dataType,

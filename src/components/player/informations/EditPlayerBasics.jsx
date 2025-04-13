@@ -24,7 +24,7 @@ import ExpDisabledIcon from "../../svgs/exp_disabled.svg?react";
 import FabulaIcon from "../../svgs/fabula.svg?react";
 import ReactMarkdown from "react-markdown";
 import Confetti from "react-confetti";
-import { ImageHandler } from "./ImageHandler";
+import { PlayerImageHandler } from "./PlayerImageHandler";
 
 export default function EditPlayerBasics({
   player,
@@ -248,7 +248,7 @@ export default function EditPlayerBasics({
           </FormControl>
         </Grid>
         <Grid item xs={12}>
-          <ImageHandler
+          <PlayerImageHandler
             player={player}
             setPlayer={setPlayer}
             isEditMode={isEditMode}

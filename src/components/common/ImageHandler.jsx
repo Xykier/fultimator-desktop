@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Grid,
   TextField,
@@ -25,45 +25,50 @@ import {
   Refresh,
   Help,
 } from "@mui/icons-material";
-import { useTranslate } from "../../../translation/translate";
+import { useTranslate, replacePlaceholders } from "../../translation/translate";
 
-export function ImageHandler({ player, setPlayer, isEditMode }) {
+export function ImageHandler({
+  imageUrl,
+  onImageUpdate,
+  title = "Image",
+  entityType = "entity",
+  helperText = null,
+  fileUploadId = "file-upload",
+  isEditMode = true,
+  additionalInfo = null,
+}) {
   const { t } = useTranslate();
 
-  // The current player image
+  // The current image
   const [storedImage, setStoredImage] = useState({
-    url: player.info.imgurl || "",
-    isDataUrl: player.info.imgurl?.startsWith("data:image") || false,
+    url: imageUrl || "",
+    isDataUrl: imageUrl?.startsWith("data:image") || false,
   });
 
   // Store URL and uploaded image separately
   const [urlImage, setUrlImage] = useState(
-    player.info.imgurl && !player.info.imgurl.startsWith("data:image")
-      ? player.info.imgurl
-      : ""
+    imageUrl && !imageUrl.startsWith("data:image") ? imageUrl : ""
   );
   const [uploadedImage, setUploadedImage] = useState(
-    player.info.imgurl && player.info.imgurl.startsWith("data:image")
-      ? player.info.imgurl
-      : ""
+    imageUrl && imageUrl.startsWith("data:image") ? imageUrl : ""
   );
 
   // UI state
   const [imageMode, setImageMode] = useState(
-    player.info.imgurl?.startsWith("data:image") ? "upload" : "url"
+    imageUrl?.startsWith("data:image") ? "upload" : "url"
   );
   const [isImageError, setIsImageError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [previewStatus, setPreviewStatus] = useState(
-    player.info.imgurl ? "success" : "initial"
+    imageUrl ? "success" : "initial"
   );
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // Reset states when player object changes
+  // Reset states when imageUrl changes
   useEffect(() => {
-    const newImageUrl = player.info.imgurl || "";
+    const newImageUrl = imageUrl || "";
     const isDataUrl = newImageUrl.startsWith("data:image");
 
     setStoredImage({
@@ -82,7 +87,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
     setPreviewStatus(newImageUrl ? "success" : "initial");
     setIsImageError(false);
     setErrorMessage("");
-  }, [player.info.imgurl]);
+  }, [imageUrl]);
 
   // Get the currently active image based on mode
   const getCurrentImage = () => {
@@ -249,13 +254,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
     }
 
     if (isValid) {
-      setPlayer((prevState) => ({
-        ...prevState,
-        info: {
-          ...prevState.info,
-          imgurl: currentImage,
-        },
-      }));
+      onImageUpdate(currentImage);
 
       setStoredImage({
         url: currentImage,
@@ -263,9 +262,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
       });
 
       setSuccessMessage(
-        imageMode === "url"
-          ? t("Image URL updated successfully!")
-          : t("Image uploaded successfully!")
+        imageMode === "url" ? t("success_url_updated") : t("success_uploaded")
       );
       setShowSuccessMessage(true);
     }
@@ -283,22 +280,16 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
     setIsImageError(false);
     setErrorMessage("");
 
-    // Only update the player if they currently have an image
-    if (player.info.imgurl) {
-      setPlayer((prevState) => ({
-        ...prevState,
-        info: {
-          ...prevState.info,
-          imgurl: "",
-        },
-      }));
+    // Only update if there is currently an image
+    if (imageUrl) {
+      onImageUpdate("");
 
       setStoredImage({
         url: "",
         isDataUrl: false,
       });
 
-      setSuccessMessage(t("Image removed successfully!"));
+      setSuccessMessage(t("success_removed"));
       setShowSuccessMessage(true);
     }
   };
@@ -335,12 +326,13 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
       sx={{
         p: 2,
         mt: 2,
+        mb: 2,
         borderRadius: "8px",
         bgcolor: "background.paper",
       }}
     >
       <Typography variant="h4" component="h3" sx={{ mb: 2 }}>
-        {t("Character Image")}
+        {t(title)}
       </Typography>
 
       <Grid container spacing={2}>
@@ -356,7 +348,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
             >
               <ToggleButton value="url" aria-label="url">
                 <LinkIcon sx={{ mr: 1 }} />
-                {t("URL")}
+                {t("image_url_mode")}
                 {storedImage.url && !storedImage.isDataUrl && (
                   <Box
                     component="span"
@@ -373,7 +365,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
               </ToggleButton>
               <ToggleButton value="upload" aria-label="upload">
                 <FileUpload sx={{ mr: 1 }} />
-                {t("Upload")}
+                {t("image_upload_mode")}
                 {storedImage.url && storedImage.isDataUrl && (
                   <Box
                     component="span"
@@ -395,12 +387,8 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                 <div>
                   <Typography variant="body2">
                     {imageMode === "url"
-                      ? t(
-                          "Use an image URL from the web - can be shared with the character JSON"
-                        )
-                      : t(
-                          "Upload an image from your computer - stored locally only"
-                        )}
+                      ? replacePlaceholders(t("tooltip_url_mode"), { entity: t(entityType) })
+                      : replacePlaceholders(t("note_uploaded_images"), { entity: t(entityType) })}
                   </Typography>
                 </div>
               }
@@ -416,12 +404,12 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
           {imageMode === "url" ? (
             <TextField
               id="imgurl"
-              label={t("Image URL")}
+              label={t("image_url_label")}
               value={urlImage}
               onChange={handleUrlChange}
               fullWidth
               error={isImageError}
-              helperText={isImageError ? errorMessage : null}
+              helperText={isImageError ? errorMessage : helperText}
               variant="outlined"
               placeholder="https://example.com/image.png"
               InputProps={{
@@ -432,7 +420,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                 ),
                 endAdornment: urlImage && (
                   <InputAdornment position="end">
-                    <Tooltip title={t("Preview image")}>
+                    <Tooltip title={t("preview_image_tooltip")}>
                       <IconButton
                         edge="end"
                         onClick={() => validateUrlImage(urlImage)}
@@ -455,11 +443,11 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                 <input
                   accept="image/*"
                   style={{ display: "none" }}
-                  id="file-upload"
+                  id={fileUploadId}
                   type="file"
                   onChange={handleFileUpload}
                 />
-                <label htmlFor="file-upload">
+                <label htmlFor={fileUploadId}>
                   <Button
                     variant="outlined"
                     component="span"
@@ -468,8 +456,8 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                     sx={{ height: "56px" }}
                   >
                     {uploadedImage
-                      ? t("Change Image File")
-                      : t("Choose Image File")}
+                      ? t("button_change_image")
+                      : t("button_choose_image")}
                   </Button>
                 </label>
 
@@ -481,7 +469,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                       fontSize="small"
                     />
                     <Typography variant="body2" color="textSecondary">
-                      {t("Image loaded successfully")}
+                      {t("image_upload_success")}
                     </Typography>
                   </Box>
                 )}
@@ -498,9 +486,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                 color="textSecondary"
                 sx={{ mt: 1, display: "block" }}
               >
-                {t(
-                  "Note: Uploaded images are stored locally in your app and are not shared with the character JSON."
-                )}
+                {replacePlaceholders(t("note_uploaded_images"), { entity: t(entityType) })}
               </Typography>
             </Box>
           )}
@@ -514,8 +500,8 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
               sx={{ flexGrow: 1 }}
             >
               {imageMode === "url"
-                ? t("Set URL Image")
-                : t("Use Uploaded Image")}
+                ? t("button_set_url_image")
+                : t("button_use_uploaded_image")}
             </Button>
             <Button
               variant="outlined"
@@ -532,32 +518,35 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
           {storedImage.url && (
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                {t("Current character image")}:{" "}
+                {replacePlaceholders(t("current_image_label"), { entity: t(entityType) })}:{" "}
                 {storedImage.isDataUrl
-                  ? t("Local uploaded image")
-                  : t("URL image")}
+                  ? t("local_image_type")
+                  : t("url_image_type")}
               </Typography>
               {imageMode === "url" && storedImage.isDataUrl && (
                 <Typography variant="caption" color="textSecondary">
-                  {t("Switch to Upload mode to see your current image")}
+                  {t("switch_to_upload_mode")}
                 </Typography>
               )}
               {imageMode === "upload" && !storedImage.isDataUrl && (
                 <Typography variant="caption" color="textSecondary">
-                  {t("Switch to URL mode to see your current image")}
+                  {t("switch_to_url_mode")}
                 </Typography>
               )}
             </Alert>
           )}
+
+          {additionalInfo}
         </Grid>
 
         <Grid item xs={12} md={4}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            {t("Preview")}
+            {t("preview_title")}
           </Typography>
           <Box
             sx={{
-              border: "1px solid #ccc",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: 2,
               p: 1,
               height: "200px",
@@ -575,14 +564,14 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
               <Box sx={{ textAlign: "center" }}>
                 <ErrorIcon color="error" sx={{ fontSize: 40, mb: 1 }} />
                 <Typography variant="body2" color="error">
-                  {errorMessage || t("Failed to load image")}
+                  {errorMessage || t("error_load_failed")}
                 </Typography>
               </Box>
             )}
 
             {previewStatus === "initial" && !getCurrentImage() && (
               <Typography variant="body2" color="textSecondary">
-                {t("No image selected")}
+                {t("preview_no_image")}
               </Typography>
             )}
 
@@ -590,7 +579,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
               <Fade in={previewStatus === "success"}>
                 <img
                   src={getPreviewImage()}
-                  alt={t("Character preview")}
+                  alt={replacePlaceholders(t("preview_alt_text"), { entity: t(entityType) })}
                   style={{
                     maxWidth: "100%",
                     maxHeight: "100%",
@@ -599,7 +588,7 @@ export function ImageHandler({ player, setPlayer, isEditMode }) {
                   onError={() => {
                     setPreviewStatus("error");
                     setIsImageError(true);
-                    setErrorMessage(t("Failed to load image"));
+                    setErrorMessage(t("error_load_failed"));
                   }}
                   onLoad={() => setPreviewStatus("success")}
                 />
