@@ -51,7 +51,7 @@ export default function EditAttacks({ npc, setNpc }) {
 
   const addAttack = () => {
     setNpc((prevState) => {
-      const newState = Object.assign({}, prevState);
+      const newState = JSON.parse(JSON.stringify(prevState));
       if (!newState.attacks) {
         newState.attacks = [];
       }
