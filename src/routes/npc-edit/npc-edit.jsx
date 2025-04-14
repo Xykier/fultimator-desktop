@@ -149,7 +149,7 @@ export default function NpcEdit() {
 
   // Download image hook and reference
   const prettyRef = useRef();
-  const [downloadImage] = useDownloadImage(npc?.name, prettyRef);
+  const [downloadImage, downloadSnackbar] = useDownloadImage(npc?.name, prettyRef);
 
   // Function to save NPC
   const saveNpc = useCallback(() => {
@@ -392,6 +392,7 @@ export default function NpcEdit() {
             </Fab>
           </Fade>
         </Grid>
+        {downloadSnackbar}
       </Layout>
     </NpcProvider>
   );

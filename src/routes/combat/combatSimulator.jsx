@@ -70,7 +70,7 @@ const CombatSim = () => {
   // Study and Download image states
   const [selectedStudy, setSelectedStudy] = useState(0); // Study dropdown value
   const ref = useRef(); // Reference for the NPC sheet image download
-  const [downloadImage] = useDownloadImage(selectedNPC?.name, ref); // Download image hook
+  const [downloadImage, downloadSnackbar] = useDownloadImage(selectedNPC?.name, ref); // Download image hook
 
   // Logs states
   const [logs, setLogs] = useState([]);
@@ -978,6 +978,7 @@ const CombatSim = () => {
         setIsGuarding={setIsGuarding}
         inputRef={inputRef}
       />
+      {downloadSnackbar}
     </Box>
   );
 };

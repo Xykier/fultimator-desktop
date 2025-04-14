@@ -49,7 +49,7 @@ function PrettySingle({ armor, showActions }) {
       : `backgroundColor: "white", background: "white"`;
 
   const ref = useRef();
-  const [downloadImage] = useDownloadImage(armor.name, ref);
+  const [downloadImage, downloadSnackbar] = useDownloadImage(armor.name, ref);
 
   const StyledMarkdown = ({ children, ...props }) => {
     return (
@@ -225,6 +225,7 @@ function PrettySingle({ armor, showActions }) {
           <Export name={`${armor.name}`} dataType="armor" data={armor} />
         </div>
       )}
+      {downloadSnackbar}
     </>
   );
 }

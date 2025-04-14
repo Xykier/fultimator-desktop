@@ -36,7 +36,7 @@ function Export({ name = "", dataType, data = {} }: Props) {
       : sanitizedData.imgurl;
   }
 
-  const [downloadJSON, copyToClipboard] = useDownloadJSON(name, {
+  const [downloadJSON, copyToClipboard, downloadSnackbar] = useDownloadJSON(name, {
     ...sanitizedData,
     dataType,
   });
@@ -104,6 +104,7 @@ function Export({ name = "", dataType, data = {} }: Props) {
           {t("copy_json_clipboard")}
         </MenuItem>
       </Menu>
+      {downloadSnackbar}
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         open={isSnackbarOpen}

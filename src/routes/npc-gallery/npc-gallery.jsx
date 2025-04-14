@@ -743,7 +743,7 @@ function Personal() {
 function Npc({ npc, copyNpc, deleteNpc, collapseGet, filterParams }) {
   const { t } = useTranslate();
   const ref = useRef();
-  const [downloadImage] = useDownloadImage(npc.name, ref);
+  const [downloadImage, downloadSnackbar] = useDownloadImage(npc.name, ref);
 
   const [collapse, setCollapse] = useState(false);
 
@@ -803,6 +803,7 @@ function Npc({ npc, copyNpc, deleteNpc, collapseGet, filterParams }) {
         </IconButton>
       </Tooltip>
       <Export name={`${npc.name}`} dataType="npc" data={npc} />
+      {downloadSnackbar}
     </Grid>
   );
 }

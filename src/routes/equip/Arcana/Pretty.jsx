@@ -45,7 +45,7 @@ function PrettySingle({ arcana, showActions, rework }) {
       : `backgroundColor: "white", background: "white"`;
 
   const ref = useRef();
-  const [downloadImage] = useDownloadImage(arcana.name, ref);
+  const [downloadImage, downloadSnackbar] = useDownloadImage(arcana.name, ref);
 
   const StyledMarkdown = ({ children, ...props }) => {
     return (
@@ -470,6 +470,7 @@ function PrettySingle({ arcana, showActions, rework }) {
           <Export name={`${arcana.name}`} dataType="arcana" data={arcana} />
         </div>
       )}
+      {downloadSnackbar}
     </>
   );
 }

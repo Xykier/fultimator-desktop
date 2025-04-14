@@ -44,7 +44,7 @@ function PrettySingle({ accessory, showActions }) {
       : `backgroundColor: "white", background: "white"`;
 
   const ref = useRef();
-  const [downloadImage] = useDownloadImage(accessory.name, ref);
+  const [downloadImage, downloadSnackbar] = useDownloadImage(accessory.name, ref);
 
   const StyledMarkdown = ({ children, ...props }) => {
     return (
@@ -175,6 +175,7 @@ function PrettySingle({ accessory, showActions }) {
           />
         </div>
       )}
+      {downloadSnackbar}
     </>
   );
 }

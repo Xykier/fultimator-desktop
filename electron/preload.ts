@@ -41,4 +41,6 @@ contextBridge.exposeInMainWorld("electron", {
   checkAuth: () => ipcRenderer.invoke("check-auth"),
   openExternal: (url: string) => shell.openExternal(url),
   checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
+  openFile: (filePath: string) => ipcRenderer.invoke("open-file", filePath),
+  showFileInFolder: (filePath: string) => ipcRenderer.invoke("show-file-in-folder", filePath),
 });

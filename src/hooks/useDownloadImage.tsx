@@ -1,10 +1,11 @@
 import { useCallback } from "react";
 import html2canvas from "html2canvas";
 import { useCustomTheme } from "./useCustomTheme";
+import useDownload from "./useDownload";
 
-// Type the `ref` parameter to be a React.RefObject<HTMLDivElement> or another appropriate element type
 const useDownloadImage = (name: string, ref: React.RefObject<HTMLDivElement>) => {
   const theme = useCustomTheme();
+  const [download, snackbar] = useDownload();
   
   const downloadImage = useCallback(async () => {
     const background = theme.mode === 'dark' ? `#1f1f1f` : `#ffffff`;
@@ -19,17 +20,14 @@ const useDownloadImage = (name: string, ref: React.RefObject<HTMLDivElement>) =>
         });
         const dataURL = canvas.toDataURL('image/png', 1.0);
         const formattedName = name.replace(/\s+/g, '_').toLowerCase();
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = `${formattedName}.png`;
-        link.click();
+        await download(dataURL, `${formattedName}.png`);
       } catch (error) {
         console.error('Failed to capture screenshot:', error);
       }
     }
-  }, [name, ref, theme.mode]);
+  }, [name, ref, theme.mode, download]);
 
-  return [downloadImage];
+  return [downloadImage, snackbar] as const;
 };
 
 export default useDownloadImage;

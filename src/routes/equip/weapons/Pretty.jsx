@@ -55,7 +55,7 @@ function PrettySingle({ weapon, showActions }) {
       : `backgroundColor: "white", background: "white"`;
 
   const ref = useRef();
-  const [downloadImage] = useDownloadImage(weapon.name, ref);
+  const [downloadImage, downloadSnackbar] = useDownloadImage(weapon.name, ref);
 
   const StyledMarkdown = ({ children, ...props }) => {
     return (
@@ -249,6 +249,7 @@ function PrettySingle({ weapon, showActions }) {
           <Export name={`${weapon.name}`} dataType="weapon" data={weapon} />
         </div>
       )}
+      {downloadSnackbar}
     </>
   );
 }

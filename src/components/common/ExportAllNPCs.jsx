@@ -9,14 +9,15 @@ import {
   CircularProgress,
 } from "@mui/material";
 import JSZip from "jszip";
-import useDownload from "../../hooks/useDownload";
 import { useTranslate } from "../../translation/translate";
 import { Download } from "@mui/icons-material";
+import DownloadSnackbar from "./DownloadSnackbar";
 
 function ExportAllNPCs({ npcs }) {
   const [open, setOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [download] = useDownload();
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [downloadedFilePath, setDownloadedFilePath] = useState("");
   const { t } = useTranslate();
 
   const handleOpen = () => setOpen(true);
@@ -33,8 +34,18 @@ function ExportAllNPCs({ npcs }) {
     });
 
     const zipBlob = await zip.generateAsync({ type: "blob" });
-    const zipUrl = URL.createObjectURL(zipBlob);
-    download(zipUrl, "npcs.zip");
+    const buffer = await zipBlob.arrayBuffer();
+    const fileName = "npcs.zip";
+    
+    try {
+      // Save file using Electron
+      const filePath = await window.electron.saveFile(fileName, new Uint8Array(buffer));
+      setDownloadedFilePath(filePath);
+      setShowSnackbar(true);
+    } catch (error) {
+      console.error('Failed to save file:', error);
+    }
+
     setIsExporting(false);
     handleClose();
   };
@@ -51,6 +62,7 @@ function ExportAllNPCs({ npcs }) {
       >
         {t("export_npcs_button")}
       </Button>
+
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle variant="h3">
           {t("export_all_npcs_dialog_title")}
@@ -83,6 +95,12 @@ function ExportAllNPCs({ npcs }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <DownloadSnackbar
+        open={showSnackbar}
+        onClose={() => setShowSnackbar(false)}
+        filePath={downloadedFilePath}
+      />
     </>
   );
 }

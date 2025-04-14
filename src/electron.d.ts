@@ -14,6 +14,8 @@ declare global {
       checkAuth(): Promise<{ isAuthenticated: boolean; tokens?: any }>;
       openExternal(url: string): void;
       checkForUpdates(): Promise<void>;
+      openFile(filePath: string): Promise<void>;
+      showFileInFolder(filePath: string): Promise<void>;
     };
   }
 }

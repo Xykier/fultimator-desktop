@@ -1,5 +1,5 @@
 // electron/ipc-handlers.ts
-import { app, ipcMain, dialog, BrowserWindow } from "electron";
+import { app, ipcMain, dialog, BrowserWindow, shell } from "electron";
 import fs from "fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,7 +29,9 @@ function removeExistingHandlers() {
     "read-file",
     "get-version",
     "list-files",
-    "check-for-updates"
+    "check-for-updates",
+    "open-file",
+    "show-file-in-folder"
   ];
   handlers.forEach((channel) => {
     ipcMain.removeHandler(channel);
@@ -94,14 +96,27 @@ export function setupIpcHandlers(mainWindow: BrowserWindow) {
     return await listGoogleDriveFiles();
   });
 
-  // Handle file save
+  // Handle file save with native dialog
   ipcMain.handle("save-file", async (event, { fileName, buffer }) => {
     try {
-      const filePath = path.join(app.getPath("documents"), fileName);
+      const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+        defaultPath: path.join(app.getPath("downloads"), fileName),
+        filters: [
+          { name: 'All Files', extensions: ['*'] },
+          { name: 'JSON', extensions: ['json'] },
+          { name: 'Images', extensions: ['png', 'jpg', 'jpeg'] },
+          { name: 'ZIP', extensions: ['zip'] }
+        ]
+      });
+
+      if (canceled || !filePath) {
+        return null;
+      }
+
       fs.writeFileSync(filePath, Buffer.from(buffer));
       return filePath;
     } catch (error) {
-      console.error("Error saving file", error);
+      console.error("Failed to save file:", error);
       throw error;
     }
   });
@@ -127,6 +142,33 @@ export function setupIpcHandlers(mainWindow: BrowserWindow) {
   // Handle update check request
   ipcMain.handle("check-for-updates", async () => {
     return checkForUpdates(mainWindow);
+  });
+
+  // Handle file open
+  ipcMain.handle("open-file", async (event, filePath) => {
+    try {
+      await shell.openPath(filePath);
+      return true;
+    } catch (error) {
+      console.error("Failed to open file", error);
+      throw new Error("Failed to open file");
+    }
+  });
+
+  // Handle showing a file in folder
+  ipcMain.handle("show-file-in-folder", async (event, filePath: string) => {
+    try {
+      await shell.showItemInFolder(filePath);
+      return true;
+    } catch (error) {
+      console.error("Failed to show file in folder:", error);
+      throw error;
+    }
+  });
+
+  // Handle getting system paths
+  ipcMain.handle("get-path", (event, pathName) => {
+    return app.getPath(pathName);
   });
 
 }
