@@ -342,7 +342,7 @@ export default function NpcSelector({
                   <ListItem
                     button
                     onClick={() => handleSelectNPC(npc.id)}
-                    sx={{ padding: "5px 10px" }}
+                    sx={{ padding: "5px 10px", cursor: "pointer" }}
                   >
                     <Box
                       sx={{

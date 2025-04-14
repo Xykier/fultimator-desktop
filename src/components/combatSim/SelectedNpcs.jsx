@@ -179,6 +179,7 @@ export default function SelectedNpcs({
                     paddingY: 1,
                     flexDirection: "row",
                     overflow: "hidden",
+                    cursor: npc.id ? "pointer" : "default",
                   }}
                 >
                   {/* Left: Index */}
@@ -490,7 +491,7 @@ export default function SelectedNpcs({
                         <>
                           <IconButton
                             edge="end"
-                            color="primary"
+                            color={ isDarkMode ? "secondary" : "primary"}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleMoveUp(npc.combatId);
@@ -508,7 +509,7 @@ export default function SelectedNpcs({
                           </IconButton>
                           <IconButton
                             edge="end"
-                            color="primary"
+                            color={ isDarkMode ? "secondary" : "primary"}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleMoveDown(npc.combatId);
