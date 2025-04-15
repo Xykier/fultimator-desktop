@@ -10,7 +10,7 @@ import {
   Paper,
   useMediaQuery,
   Tooltip,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -108,6 +108,26 @@ function Home() {
           />
         ))}
       </div>
+
+      {/* Placeholder Button for campaings section */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "2em",
+        }}
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={() => {
+            navigate("/campaigns");
+          }}
+        >
+          {t("campaigns")}
+        </Button>
+      </Box>
 
       <Box
         sx={{
@@ -252,7 +272,7 @@ function Home() {
                 />
                 {t("extra_resources")}
               </Typography>
-              <Stack spacing={2} >
+              <Stack spacing={2}>
                 <Typography variant="body1">
                   {t("contact_runty")}
                   <Tooltip title="Email contactrunty@iCloud.com" arrow>
