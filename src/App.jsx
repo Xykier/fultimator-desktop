@@ -43,6 +43,7 @@ const CombatSimulatorEncounters = React.lazy(() =>
 );
 const Generator = React.lazy(() => import("./routes/generator/generator"));
 const CampaignList = React.lazy(() => import("./routes/campaign/campaignList"));
+const CampaignDashboard = React.lazy(() => import("./routes/campaign/campaignDashboard"));
 
 const themes = {
   Fabula: { light: lightFabula, dark: darkFabula },
@@ -138,6 +139,14 @@ const App = () => {
                 element={
                   <Suspense fallback={<LoadingPage />}>
                     <CampaignList />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/campaign/:campaignId"
+                element={
+                  <Suspense fallback={<LoadingPage />}>
+                    <CampaignDashboard />
                   </Suspense>
                 }
               />
