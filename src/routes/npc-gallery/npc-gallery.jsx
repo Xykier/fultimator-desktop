@@ -354,7 +354,14 @@ function Personal() {
 
           if (species && item.species !== species) return false;
 
-          if (rank && item.rank !== rank) return false;
+          if (rank) {
+            if (rank === 'championAll') {
+              const championRanks = Array(6).fill(0).map((_, i) => `champion${i+1}`);
+              if (!championRanks.includes(item.rank)) return false;
+            } else {
+              if (rank && item.rank !== rank) return false;
+            }
+          }
 
           return true;
         })
@@ -485,6 +492,7 @@ function Personal() {
                   <MenuItem value={""}>{t("All")}</MenuItem>
                   <MenuItem value={"soldier"}>{t("Soldier")}</MenuItem>
                   <MenuItem value={"elite"}>{t("Elite")}</MenuItem>
+                  <MenuItem value={"championAll"}>{t("Champion(All)")}</MenuItem>
                   <MenuItem value={"champion1"}>{t("Champion(1)")}</MenuItem>
                   <MenuItem value={"champion2"}>{t("Champion(2)")}</MenuItem>
                   <MenuItem value={"champion3"}>{t("Champion(3)")}</MenuItem>
