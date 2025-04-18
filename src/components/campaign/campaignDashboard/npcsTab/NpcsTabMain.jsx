@@ -14,8 +14,10 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Paper,
 } from "@mui/material";
 import {
+  CreateNewFolder,
   Link as LinkIcon,
 } from "@mui/icons-material";
 import {
@@ -217,6 +219,7 @@ const NpcsTabMain = ({ campaignId }) => {
   };
 
   return (
+    <Paper elevation={3} sx={{ p: 3 }}>
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <Box
@@ -227,7 +230,7 @@ const NpcsTabMain = ({ campaignId }) => {
             mb: 2,
           }}
         >
-          <Typography variant="h5">Campaign NPCs</Typography>
+          <Typography variant="h4">Campaign NPCs</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               variant="contained"
@@ -242,6 +245,7 @@ const NpcsTabMain = ({ campaignId }) => {
               variant="contained"
               color="primary"
               onClick={() => setNewFolderDialogOpen(true)}
+              startIcon={<CreateNewFolder />}
             >
               Create Folder
             </Button>
@@ -394,6 +398,7 @@ const NpcsTabMain = ({ campaignId }) => {
         </Alert>
       </Snackbar>
     </Grid>
+    </Paper>
   );
 };
 

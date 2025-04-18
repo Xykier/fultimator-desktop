@@ -1,27 +1,67 @@
 import React from "react";
-import {
-  Box,
-  Button,
-  MenuItem,
-} from "@mui/material";
+import { Box, Chip, useTheme, useMediaQuery } from "@mui/material";
+import { Folder } from "@mui/icons-material";
 
 const NpcFolderList = ({ folders, selectedFolderId, setSelectedFolderId }) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
+
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-      <Button
-        variant={selectedFolderId === null ? "contained" : "outlined"}
-        color="primary"
-        onClick={() => setSelectedFolderId(null)}        
+    <Box
+      sx={{
+        mb: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2
+      }}
+    >
+     
+      <Box 
+        sx={{
+          display: 'flex',
+          flexDirection: isSmallScreen ? 'column' : 'row',
+          flexWrap: 'wrap',
+          gap: 1,
+          width: '100%'
+        }}
       >
-        All NPCs
-      </Button>
-      {folders.map(folder => (
-        <MenuItem key={folder.id} onClick={() => setSelectedFolderId(folder.id)}
-          selected={selectedFolderId === folder.id}
-        >
-          {folder.name}
-        </MenuItem>
-      ))}
+        <Chip
+          label="All NPCs"
+          icon={<Folder size={16} />}
+          onClick={() => setSelectedFolderId(null)}
+          color={selectedFolderId === null ? "primary" : "default"}
+          variant={selectedFolderId === null ? "filled" : "outlined"}
+          sx={{
+            fontWeight: selectedFolderId === null ? 500 : 400,
+            width: isSmallScreen ? '100%' : 'auto',
+            '&:hover': {
+              backgroundColor: selectedFolderId === null 
+                ? theme.palette.primary.main 
+                : theme.palette.action.hover
+            }
+          }}
+        />
+        
+        {folders.map(folder => (
+          <Chip
+            key={folder.id}
+            label={folder.name}
+            icon={<Folder size={16} />}
+            onClick={() => setSelectedFolderId(folder.id)}
+            color={selectedFolderId === folder.id ? "primary" : "default"}
+            variant={selectedFolderId === folder.id ? "filled" : "outlined"}
+            sx={{
+              fontWeight: selectedFolderId === folder.id ? 500 : 400,
+              width: isSmallScreen ? '100%' : 'auto',
+              '&:hover': {
+                backgroundColor: selectedFolderId === folder.id 
+                  ? theme.palette.primary.main 
+                  : theme.palette.action.hover
+              }
+            }}
+          />
+        ))}
+      </Box>
     </Box>
   );
 };

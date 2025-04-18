@@ -18,18 +18,19 @@ import {
   DialogContent,
   DialogActions,
   Select,
-  Button
+  Button,
+  Divider
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { FaEdit, FaStickyNote } from "react-icons/fa";
 import NpcPretty from "../../../npc/Pretty";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import FolderIcon from '@mui/icons-material/Folder';
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
+import { LinkOff } from "@mui/icons-material";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   transition: "transform 0.2s, box-shadow 0.2s",
@@ -46,6 +47,7 @@ const AttitudeToggleGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   display: "flex",
   justifyContent: "center",
+  width: "100%",
   "& .MuiToggleButtonGroup-grouped": {
     border: 0,
     "&.Mui-selected": {
@@ -105,18 +107,7 @@ const NpcCard = ({
       if (onSetAttitude) {
         onSetAttitude(npc.id, newAttitude);
       }
-    }
-  };
-
-  // Get color based on attitude for the icon
-  const getAttitudeColor = (attitudeType) => {
-    switch (attitudeType) {
-      case "friendly":
-        return "success.main";
-      case "hostile":
-        return "error.main";
-      default:
-        return "text.secondary";
+      handleClose();
     }
   };
 
@@ -130,40 +121,7 @@ const NpcCard = ({
               collapse={expandedNpcId === npc.id}
               onClick={() => handleExpandNpc(npc.id)}
               attitude={attitude}
-              onAttitudeChange={handleAttitudeChange}
             />
-            
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-              <AttitudeToggleGroup
-                value={attitude}
-                exclusive
-                onChange={handleAttitudeChange}
-                aria-label="NPC attitude"
-                size="small"
-              >
-                <ToggleButton value="friendly" aria-label="friendly attitude">
-                  <Tooltip title="Friendly">
-                    <SentimentSatisfiedAltIcon 
-                      color={attitude === "friendly" ? "success" : "inherit"} 
-                    />
-                  </Tooltip>
-                </ToggleButton>
-                <ToggleButton value="neutral" aria-label="neutral attitude">
-                  <Tooltip title="Neutral">
-                    <SentimentNeutralIcon 
-                      color={attitude === "neutral" ? "primary" : "inherit"} 
-                    />
-                  </Tooltip>
-                </ToggleButton>
-                <ToggleButton value="hostile" aria-label="hostile attitude">
-                  <Tooltip title="Hostile">
-                    <SentimentVeryDissatisfiedIcon 
-                      color={attitude === "hostile" ? "error" : "inherit"} 
-                    />
-                  </Tooltip>
-                </ToggleButton>
-              </AttitudeToggleGroup>
-            </Box>
           </CardContent>
           <CardActions sx={{ justifyContent: "space-between", padding: (theme) => theme.spacing(0, 1, 1) }}>
             <Box>
@@ -213,9 +171,9 @@ const NpcCard = ({
                 </MenuItem>
                 <MenuItem onClick={() => { onUnlink && onUnlink(npc.id); handleClose(); }}>
                   <ListItemIcon>
-                    <DeleteIcon fontSize="small" color="error" />
+                    <LinkOff fontSize="small" color="error" sx={{ mr: 1 }} />
                   </ListItemIcon>
-                  <ListItemText>Remove from Campaign</ListItemText>
+                  <ListItemText>Unlink from Campaign</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={handleMoveFolderOpen}>
                   <ListItemIcon>
@@ -223,6 +181,40 @@ const NpcCard = ({
                   </ListItemIcon>
                   <ListItemText>Move to Folder</ListItemText>
                 </MenuItem>
+                
+                <Divider sx={{ my: 1 }} />
+                
+                <Box sx={{ p: 0 }}>
+                  <AttitudeToggleGroup
+                    value={attitude}
+                    exclusive
+                    onChange={handleAttitudeChange}
+                    aria-label="NPC attitude"
+                    size="small"
+                  >
+                    <ToggleButton value="friendly" aria-label="friendly attitude">
+                      <Tooltip title="Friendly">
+                        <SentimentSatisfiedAltIcon 
+                          color={attitude === "friendly" ? "success" : "inherit"} 
+                        />
+                      </Tooltip>
+                    </ToggleButton>
+                    <ToggleButton value="neutral" aria-label="neutral attitude">
+                      <Tooltip title="Neutral">
+                        <SentimentNeutralIcon 
+                          color={attitude === "neutral" ? "primary" : "inherit"} 
+                        />
+                      </Tooltip>
+                    </ToggleButton>
+                    <ToggleButton value="hostile" aria-label="hostile attitude">
+                      <Tooltip title="Hostile">
+                        <SentimentVeryDissatisfiedIcon 
+                          color={attitude === "hostile" ? "error" : "inherit"} 
+                        />
+                      </Tooltip>
+                    </ToggleButton>
+                  </AttitudeToggleGroup>
+                </Box>
               </Menu>
             </div>
           </CardActions>

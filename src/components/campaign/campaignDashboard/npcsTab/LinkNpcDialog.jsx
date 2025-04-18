@@ -37,7 +37,7 @@ const LinkNpcDialog = ({
             justifyContent: "space-between",
           }}
         >
-          <Typography variant="h6">Link NPCs to Campaign</Typography>
+          <Typography variant="h3">Link NPCs to Campaign</Typography>
           <TextField
             placeholder="Search NPCs..."
             size="small"
@@ -91,12 +91,12 @@ const LinkNpcDialog = ({
                   <ListItemAvatar>
                     <Avatar
                       alt={npc.name}
-                      src={npc.avatar || ""}
+                      src={npc.imgurl || ""}
                       sx={{
-                        bgcolor: npc.avatar ? "transparent" : "primary.main",
+                        bgcolor: npc.imgurl ? "transparent" : "primary.main",
                       }}
                     >
-                      {!npc.avatar && npc.name.charAt(0)}
+                      {!npc.imgurl && npc.name.charAt(0)}
                     </Avatar>
                   </ListItemAvatar>
                   <Box sx={{ flexGrow: 1, mr: 2 }}>
