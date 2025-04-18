@@ -1,11 +1,8 @@
 import React from "react";
-import {
-  Grid,
-  Box,
-  Typography,
-} from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 
 import NpcCard from "./NpcCard";
+import NpcsFolderHeader from "./NpcsFolderHeader";
 
 const NpcList = ({
   displayedNpcs,
@@ -17,9 +14,28 @@ const NpcList = ({
   filterType,
   folders,
   handleMoveNpcToFolder,
+  selectedFolderId,
+  onRenameFolder,
+  onDeleteFolder,
 }) => {
+  // Find the selected folder object if a folder is selected
+  const selectedFolder = selectedFolderId
+    ? folders.find((folder) => folder.id === selectedFolderId)
+    : null;
+
   return (
     <>
+      {/* Folder Header - only shown when a folder is selected */}
+      {selectedFolder && (
+        <Grid item xs={12}>
+          <NpcsFolderHeader
+            selectedFolder={selectedFolder}
+            onRenameFolder={onRenameFolder}
+            onDeleteFolder={onDeleteFolder}
+          />
+        </Grid>
+      )}
+
       {displayedNpcs.length > 0 ? (
         displayedNpcs.map((npc) => (
           <NpcCard
@@ -27,11 +43,11 @@ const NpcList = ({
             npc={npc}
             expandedNpcId={expandedNpcId}
             handleExpandNpc={handleExpandNpc}
-            onEdit={handleEditNpc} // Pass edit handler
-            onUnlink={handleToggleNpc} // Pass unlink handler (uses toggle logic)
-            onSetAttitude={handleSetAttitude} // Pass attitude handler
-            folders={folders} // Pass folders
-            onMoveToFolder={handleMoveNpcToFolder} // Pass move to folder handler
+            onEdit={handleEditNpc}
+            onUnlink={handleToggleNpc}
+            onSetAttitude={handleSetAttitude}
+            folders={folders}
+            onMoveToFolder={handleMoveNpcToFolder}
           />
         ))
       ) : (
@@ -48,11 +64,17 @@ const NpcList = ({
             }}
           >
             <Typography variant="body1" color="text.secondary">
-              {filterType === "all" && "No NPCs match the current search."}
-              {filterType === "friendly" && "No friendly NPCs found."}
-              {filterType === "neutral" && "No neutral NPCs found."}
-              {filterType === "hostile" && "No hostile NPCs found."}
-              {filterType === "villains" && "No villains found."}
+              {selectedFolder
+                ? `No NPCs in folder "${selectedFolder.name}"`
+                : filterType === "all"
+                ? "No NPCs match the current search."
+                : filterType === "friendly"
+                ? "No friendly NPCs found."
+                : filterType === "neutral"
+                ? "No neutral NPCs found."
+                : filterType === "hostile"
+                ? "No hostile NPCs found."
+                : "No villains found."}
             </Typography>
           </Box>
         </Grid>

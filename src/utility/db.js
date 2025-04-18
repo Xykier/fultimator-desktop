@@ -756,32 +756,37 @@ export const updateNpcCampaignAttitude = async (npcId, campaignId, newAttitude) 
 };
 
 export const deleteNpcFolder = async (folderId, campaignId) => {
-  const db = await dbPromise;
-  const tx = db.transaction(
-    [NPC_FOLDER_STORE_NAME, NPC_CAMPAIGN_STORE_NAME],
-    "readwrite"
-  );
-  const folderStore = tx.objectStore(NPC_FOLDER_STORE_NAME);
-  const npcCampaignStore = tx.objectStore(NPC_CAMPAIGN_STORE_NAME);
-  const campaignIndex = npcCampaignStore.index("folderId");
+  try {
+    const db = await dbPromise;
+    const tx = db.transaction(
+      [NPC_FOLDER_STORE_NAME, NPC_CAMPAIGN_STORE_NAME],
+      "readwrite"
+    );
+    const folderStore = tx.objectStore(NPC_FOLDER_STORE_NAME);
+    const npcCampaignStore = tx.objectStore(NPC_CAMPAIGN_STORE_NAME);
+    const campaignIndex = npcCampaignStore.index("folderId");
 
-  // Find NPCs in this folder and move them to root (folderId = null)
-  let cursor = await campaignIndex.openCursor(folderId);
-  while (cursor) {
-    const npcCampaign = cursor.value;
-    // Only update if the NPC is also associated with the current campaign
-    if (npcCampaign.campaignId === campaignId) {
-      const updatedNpcCampaign = { ...npcCampaign, folderId: null };
-      await cursor.update(updatedNpcCampaign);
+    // Find NPCs in this folder and move them to root (folderId = null)
+    let cursor = await campaignIndex.openCursor(folderId);
+    while (cursor) {
+      const npcCampaign = cursor.value;
+      // Only update if the NPC is also associated with the current campaign
+      if (npcCampaign.campaignId === campaignId) {
+        const updatedNpcCampaign = { ...npcCampaign, folderId: null };
+        await cursor.update(updatedNpcCampaign);
+      }
+      cursor = await cursor.continue();
     }
-    cursor = await cursor.continue();
+
+    // Delete the folder
+    await folderStore.delete(folderId);
+
+    await tx.done;
+    console.log(`Deleted folder ${folderId} and moved its NPCs to root.`);
+  } catch (error) {
+    console.error("Error deleting NPC folder:", error);
+    throw new Error("Failed to delete NPC folder: " + error.message);
   }
-
-  // Delete the folder
-  await folderStore.delete(folderId);
-
-  await tx.done;
-  console.log(`Deleted folder ${folderId} and moved its NPCs to root.`);
 };
 
 export const updateNpcCampaignFolder = async (npcId, campaignId, folderId) => {
