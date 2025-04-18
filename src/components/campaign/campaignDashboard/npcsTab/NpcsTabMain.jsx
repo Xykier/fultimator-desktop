@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateNpcCampaignAttitude, updateNpcCampaignFolder } from "../../../../utility/db";
 import {
@@ -54,7 +54,7 @@ const NpcsTabMain = ({ campaignId }) => {
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false); // State for new folder dialog
   const [newFolderName, setNewFolderName] = useState(""); // State for new folder name
 
-  const loadNpcs = async () => {
+  const loadNpcs = useCallback(async () => {
     setLoading(true);
     try {
       const relatedNpcs = await getRelatedNpcs(campaignId);
@@ -80,11 +80,11 @@ const NpcsTabMain = ({ campaignId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [campaignId]);
 
   useEffect(() => {
     loadNpcs();
-  }, [campaignId]);
+  }, [campaignId, loadNpcs]);
 
   const handleAddExistingNpc = () => setOpen(true);
   const handleClose = () => {

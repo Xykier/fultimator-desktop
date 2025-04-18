@@ -100,7 +100,7 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
           unique: false,
         });
       }
-      if (db.objectStoreNames.contains(NPC_FOLDER_STORE_NAME)) {
+      if (!db.objectStoreNames.contains(NPC_FOLDER_STORE_NAME)) {
         const folderStore = db.createObjectStore(NPC_FOLDER_STORE_NAME, {
           keyPath: "id",
           autoIncrement: true,
