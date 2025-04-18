@@ -43,7 +43,7 @@ const LinkNpcDialog = ({
             size="small"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            sx={{ width: "50%" }}
+            sx={{ width: "50%", ml: 2 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
