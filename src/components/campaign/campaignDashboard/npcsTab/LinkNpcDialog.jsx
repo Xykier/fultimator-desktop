@@ -17,6 +17,7 @@ import {
   ListItemAvatar,
 } from "@mui/material";
 import { Search as SearchIcon, Clear as ClearIcon } from "@mui/icons-material";
+import PropTypes from 'prop-types';
 
 const LinkNpcDialog = ({
   open,
@@ -129,6 +130,16 @@ const LinkNpcDialog = ({
       </DialogActions>
     </Dialog>
   );
+};
+
+LinkNpcDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  searchText: PropTypes.string.isRequired,
+  setSearchText: PropTypes.func.isRequired,
+  filteredNpcs: PropTypes.array.isRequired,
+  associatedNpcIds: PropTypes.array.isRequired,
+  handleToggleNpc: PropTypes.func.isRequired,
 };
 
 export default LinkNpcDialog;

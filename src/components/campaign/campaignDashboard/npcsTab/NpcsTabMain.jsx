@@ -12,12 +12,6 @@ import {
   Typography,
   Alert,
   Snackbar,
-  Dialog,
-  DialogTitle,
-  DialogContentText,
-  DialogContent,
-  DialogActions,
-  TextField,
   Paper,
 } from "@mui/material";
 import { CreateNewFolder, Link as LinkIcon } from "@mui/icons-material";
@@ -32,36 +26,40 @@ import {
 } from "../../../../utility/db";
 
 import SearchbarFilter from "./SearchbarFilter";
-import LinkNpcDialog from "./LinkNpcDialog";
 import NpcFolderList from "./NpcFolderList";
 import NpcList from "./NpcList";
+import FolderNameDialogComponent from "./FolderNameDialogComponent";
+import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
+import LinkNpcDialog from "./LinkNpcDialog";
 
 const NpcsTabMain = ({ campaignId }) => {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [isLinkNpcDialogOpen, setIsLinkNpcDialogOpen] = useState(false);
+  const [npcSearchText, setNpcSearchText] = useState("");
   const [allNpcs, setAllNpcs] = useState([]);
   const [associatedNpcIds, setAssociatedNpcIds] = useState([]);
   const [campaignNpcs, setCampaignNpcs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [sortOrder, setSortOrder] = useState("name");
-  const [filterType, setFilterType] = useState("all");
-  const [folders, setFolders] = useState([]); // State for NPC folders
-  const [selectedFolderId, setSelectedFolderId] = useState(null); // State for selected folder
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [npcSortOrder, setNpcSortOrder] = useState("name");
+  const [npcFilterType, setNpcFilterType] = useState("all");
+  const [npcFolders, setNpcFolders] = useState([]); // State for NPC folders
+  const [selectedNpcFolderId, setSelectedNpcFolderId] = useState(null); // State for selected folder
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
   const [expandedNpcId, setExpandedNpcId] = useState(null);
-  const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false); // State for new folder dialog
-  const [newFolderName, setNewFolderName] = useState(""); // State for new folder name
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [folderToDelete, setFolderToDelete] = useState(null);
+  const [isNewFolderDialogOpen, setIsNewFolderDialogOpen] = useState(false); // State for new folder dialog
+  const [newNpcFolderName, setNewNpcFolderName] = useState(""); // State for new folder name
+  const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] =
+    useState(false);
+  const [folderToDeleteConfirmation, setFolderToDeleteConfirmation] =
+    useState(null);
 
   const loadNpcs = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const relatedNpcs = await getRelatedNpcs(campaignId);
       setAssociatedNpcIds(relatedNpcs.map((npc) => npc.id));
@@ -73,18 +71,16 @@ const NpcsTabMain = ({ campaignId }) => {
       // Load folders for the campaign
       try {
         const foldersList = await getNpcFoldersForCampaign(campaignId);
-        setFolders(foldersList);
+        setNpcFolders(foldersList);
       } catch (folderErr) {
         console.error("Error loading NPC folders:", folderErr);
-        setError("Failed to load NPC folders. Please try again.");
+        setLoadError("Failed to load NPC folders. Please try again.");
       }
-
-      setError(null);
     } catch (err) {
       console.error("Error loading NPCs:", err);
-      setError("Failed to load NPCs. Please try again.");
+      setLoadError("Failed to load NPCs. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [campaignId]);
 
@@ -92,10 +88,10 @@ const NpcsTabMain = ({ campaignId }) => {
     loadNpcs();
   }, [campaignId, loadNpcs]);
 
-  const handleAddExistingNpc = () => setOpen(true);
+  const handleAddExistingNpc = () => setIsLinkNpcDialogOpen(true);
   const handleClose = () => {
-    setOpen(false);
-    setSearchText("");
+    setIsLinkNpcDialogOpen(false);
+    setNpcSearchText("");
   };
 
   const handleToggleNpc = async (npcId) => {
@@ -141,11 +137,11 @@ const NpcsTabMain = ({ campaignId }) => {
   };
 
   const handleFilterChange = (event, newValue) => {
-    setFilterType(newValue);
+    setNpcFilterType(newValue);
   };
 
   const handleSortChange = (order) => {
-    setSortOrder(order);
+    setNpcSortOrder(order);
   };
 
   // Function to handle setting NPC attitude
@@ -160,54 +156,53 @@ const NpcsTabMain = ({ campaignId }) => {
     }
   };
 
-  const filteredNpcsForDialog = allNpcs.filter(
-    (
-      npc // Renamed to avoid conflict
-    ) => npc.name.toLowerCase().includes(searchText.toLowerCase())
+  // Filter NPCs for the "Link NPC" dialog based on search text
+  const filteredNpcsForDialog = allNpcs.filter((npc) =>
+    npc.name.toLowerCase().includes(npcSearchText.toLowerCase())
   );
 
-  // Apply search filter first
+  // Apply search filter to campaign NPCs
   const searchedCampaignNpcs = campaignNpcs.filter((npc) =>
-    npc.name.toLowerCase().includes(searchText.toLowerCase())
+    npc.name.toLowerCase().includes(npcSearchText.toLowerCase())
   );
 
-  // Apply sorting to searched campaign NPCs
+  // Apply sorting to the searched campaign NPCs
   const sortedCampaignNpcs = [...searchedCampaignNpcs].sort((a, b) => {
-    if (sortOrder === "name") return a.name.localeCompare(b.name);
-    if (sortOrder === "level") return (a.lvl || 0) - (b.lvl || 0); // Handle potential undefined lvl
-    if (sortOrder === "species")
-      return (a.species || "").localeCompare(b.species || ""); // Handle potential undefined species
+    if (npcSortOrder === "name") return a.name.localeCompare(b.name);
+    if (npcSortOrder === "level") return (a.lvl || 0) - (b.lvl || 0); // Sort by level (handle undefined lvl)
+    if (npcSortOrder === "species")
+      return (a.species || "").localeCompare(b.species || ""); // Sort by species (handle undefined species)
     return 0;
   });
 
-  // Apply folder, attitude/villain filters to sorted campaign NPCs
+  // Apply folder, attitude/villain filters to the sorted campaign NPCs
   const displayedNpcs = sortedCampaignNpcs.filter((npc) => {
-    // Folder filter
-    if (selectedFolderId) {
-      if (selectedFolderId === null && npc.folderId !== null) return false;
-      if (selectedFolderId !== null && npc.folderId !== selectedFolderId)
-        return false;
+    // Filter by folder
+    if (selectedNpcFolderId) {
+      if (selectedNpcFolderId === null && npc.folderId !== null) return false; // Show NPCs without a folder selected
+      if (selectedNpcFolderId !== null && npc.folderId !== selectedNpcFolderId)
+        return false; // Show NPCs in the selected folder
     }
 
-    //Attitude filter
-    if (filterType === "all") return true;
-    if (filterType === "friendly") return npc.attitude === "friendly";
-    if (filterType === "hostile") return npc.attitude === "hostile";
-    if (filterType === "neutral") return npc.attitude === "neutral";
-    if (filterType === "villains") {
-      return ["minor", "major", "supreme"].includes(npc.villain); // Assuming villain is still on the base NPC object
+    // Filter by attitude/villain
+    if (npcFilterType === "all") return true;
+    if (npcFilterType === "friendly") return npc.attitude === "friendly";
+    if (npcFilterType === "hostile") return npc.attitude === "hostile";
+    if (npcFilterType === "neutral") return npc.attitude === "neutral";
+    if (npcFilterType === "villains") {
+      return ["minor", "major", "supreme"].includes(npc.villain); // Show villains (assuming villain is still on the base NPC object)
     }
     return true;
   });
 
   const handleCreateFolder = async () => {
     try {
-      await addNpcFolder({ campaignId: campaignId, name: newFolderName });
+      await addNpcFolder({ campaignId: campaignId, name: newNpcFolderName });
       // Refresh folders list
       const foldersList = await getNpcFoldersForCampaign(campaignId);
-      setFolders(foldersList);
-      setNewFolderDialogOpen(false);
-      setNewFolderName("");
+      setNpcFolders(foldersList);
+      setIsNewFolderDialogOpen(false);
+      setNewNpcFolderName("");
       showSnackbar("Folder created successfully", "success");
     } catch (error) {
       console.error("Error creating folder:", error);
@@ -241,43 +236,43 @@ const NpcsTabMain = ({ campaignId }) => {
   const handleDeleteFolder = (folderId) => {
     // This will use the existing delete folder functionality
     // Just need to trigger the delete dialog
-    const folderToDelete = folders.find((f) => f.id === folderId);
+    const folderToDelete = npcFolders.find((f) => f.id === folderId);
     if (folderToDelete) {
-      setFolderToDelete(folderToDelete);
-      setDeleteDialogOpen(true);
+      setFolderToDeleteConfirmation(folderToDelete);
+      setIsDeleteFolderDialogOpen(true);
     }
   };
 
   const handleConfirmDelete = async () => {
-    if (!folderToDelete) return;
+    if (!folderToDeleteConfirmation) return;
 
-    const folderIdToDelete = folderToDelete.id;
-    const originalFolders = [...folders]; // Create a copy for reverting
+    const folderIdToDelete = folderToDeleteConfirmation.id;
+    const originalFolders = [...npcFolders]; // Create a copy for reverting
 
     // Optimistic update: Remove the folder from the UI immediately
-    setFolders(folders.filter((f) => f.id !== folderIdToDelete));
+    setNpcFolders(npcFolders.filter((f) => f.id !== folderIdToDelete));
 
     try {
       await deleteNpcFolder(folderIdToDelete, campaignId);
 
       // If the deleted folder was selected, reset to "All NPCs" view
-      if (selectedFolderId === folderIdToDelete) {
-        setSelectedFolderId(null);
+      if (selectedNpcFolderId === folderIdToDelete) {
+        setSelectedNpcFolderId(null);
       }
     } catch (error) {
       console.error("Failed to delete folder:", error);
       alert(`Failed to delete folder: ${error.message}`);
       // Revert the optimistic update
-      setFolders(originalFolders);
+      setNpcFolders(originalFolders);
     } finally {
-      setDeleteDialogOpen(false);
-      setFolderToDelete(null);
+      setIsDeleteFolderDialogOpen(false);
+      setFolderToDeleteConfirmation(null);
     }
   };
 
   const handleCancelDelete = () => {
-    setDeleteDialogOpen(false);
-    setFolderToDelete(null);
+    setIsDeleteFolderDialogOpen(false);
+    setFolderToDeleteConfirmation(null);
   };
 
   return (
@@ -306,7 +301,7 @@ const NpcsTabMain = ({ campaignId }) => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => setNewFolderDialogOpen(true)}
+                onClick={() => setIsNewFolderDialogOpen(true)}
                 startIcon={<CreateNewFolder />}
               >
                 Create Folder
@@ -319,11 +314,11 @@ const NpcsTabMain = ({ campaignId }) => {
         {campaignNpcs.length > 0 && (
           <Grid item xs={12}>
             <SearchbarFilter
-              searchText={searchText}
-              setSearchText={setSearchText}
-              sortOrder={sortOrder}
+              searchText={npcSearchText}
+              setSearchText={setNpcSearchText}
+              sortOrder={npcSortOrder}
               handleSortChange={handleSortChange}
-              filterType={filterType}
+              filterType={npcFilterType}
               handleFilterChange={handleFilterChange}
             />
           </Grid>
@@ -332,15 +327,15 @@ const NpcsTabMain = ({ campaignId }) => {
         {/* Display NPC Folders */}
         <Grid item xs={12}>
           <NpcFolderList
-            folders={folders}
-            selectedFolderId={selectedFolderId}
-            setSelectedFolderId={setSelectedFolderId}
-            setFolders={setFolders}
+            folders={npcFolders}
+            selectedFolderId={selectedNpcFolderId}
+            setSelectedFolderId={setSelectedNpcFolderId}
+            setFolders={setNpcFolders}
           />
         </Grid>
 
         {/* Loading state */}
-        {loading && (
+        {isLoading && (
           <Grid item xs={12} sx={{ textAlign: "center", py: 8 }}>
             <CircularProgress />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
@@ -350,10 +345,10 @@ const NpcsTabMain = ({ campaignId }) => {
         )}
 
         {/* Error state */}
-        {error && (
+        {loadError && (
           <Grid item xs={12}>
             <Alert severity="error" sx={{ my: 2 }}>
-              {error}
+              {loadError}
               <Button
                 color="inherit"
                 size="small"
@@ -367,7 +362,7 @@ const NpcsTabMain = ({ campaignId }) => {
         )}
 
         {/* Empty state */}
-        {!loading && !error && campaignNpcs.length === 0 && (
+        {!isLoading && !loadError && campaignNpcs.length === 0 && (
           <Grid item xs={12}>
             <Box
               sx={{
@@ -399,7 +394,7 @@ const NpcsTabMain = ({ campaignId }) => {
         )}
 
         {/* Display NPCs or Empty State for the current filter */}
-        {!loading && !error && campaignNpcs.length > 0 && (
+        {!isLoading && !loadError && campaignNpcs.length > 0 && (
           <NpcList
             displayedNpcs={displayedNpcs}
             expandedNpcId={expandedNpcId}
@@ -407,10 +402,10 @@ const NpcsTabMain = ({ campaignId }) => {
             handleEditNpc={handleEditNpc}
             handleToggleNpc={handleToggleNpc}
             handleSetAttitude={handleSetAttitude}
-            filterType={filterType}
-            folders={folders}
+            filterType={npcFilterType}
+            folders={npcFolders}
             handleMoveNpcToFolder={handleMoveNpcToFolder}
-            selectedFolderId={selectedFolderId}
+            selectedFolderId={selectedNpcFolderId}
             onRenameFolder={handleRenameFolder}
             onDeleteFolder={handleDeleteFolder}
           />
@@ -418,71 +413,33 @@ const NpcsTabMain = ({ campaignId }) => {
 
         {/* Link NPC Dialog */}
         <LinkNpcDialog
-          open={open}
+          open={isLinkNpcDialogOpen}
           handleClose={handleClose}
-          searchText={searchText} // Keep original search text for dialog
-          setSearchText={setSearchText} // Keep original setter for dialog
-          filteredNpcs={filteredNpcsForDialog} // Use the specific filtered list for the dialog
+          searchText={npcSearchText}
+          setSearchText={setNpcSearchText}
+          filteredNpcs={filteredNpcsForDialog}
           associatedNpcIds={associatedNpcIds}
-          handleToggleNpc={handleToggleNpc} // Toggle association logic
+          handleToggleNpc={handleToggleNpc}
         />
 
         {/* Create New Folder Dialog */}
-        <Dialog
-          open={newFolderDialogOpen}
-          onClose={() => setNewFolderDialogOpen(false)}
-        >
-          <DialogTitle>Create New Folder</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Folder Name"
-              type="text"
-              fullWidth
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setNewFolderDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateFolder}>Create</Button>
-          </DialogActions>
-        </Dialog>
+        <FolderNameDialogComponent
+          open={isNewFolderDialogOpen}
+          handleClose={() => setIsNewFolderDialogOpen(false)}
+          handleAction={handleCreateFolder}
+          mode="create"
+          maxLength={50}
+          folderName={newNpcFolderName}
+          setFolderName={setNewNpcFolderName}
+        />
+
         {/* Delete Confirmation Dialog */}
-        <Dialog
-          open={deleteDialogOpen}
-          onClose={handleCancelDelete}
-          aria-labelledby="delete-folder-dialog-title"
-        >
-          <DialogTitle id="delete-folder-dialog-title">
-            Delete Folder
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Deleting the folder "{folderToDelete?.name}" will unlink all NPCs
-              inside from this campaign. The NPCs will remain in your database
-              but will no longer be associated with this folder. Are you sure
-              you want to continue?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCancelDelete} color="primary">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmDelete}
-              color="error"
-              variant="contained"
-              autoFocus
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <DeleteFolderDialogComponent
+          open={isDeleteFolderDialogOpen}
+          handleClose={handleCancelDelete}
+          folderToDelete={folderToDeleteConfirmation}
+          handleConfirmDelete={handleConfirmDelete}
+        />
 
         {/* Feedback snackbar */}
         <Snackbar
