@@ -6,16 +6,9 @@ import {
   updateNpcFolder, // Import updateNpcFolder
 } from "../../../../utility/db";
 import {
-  Box,
-  Button,
-  CircularProgress,
   Grid,
-  Typography,
-  Alert,
-  Snackbar,
   Paper,
 } from "@mui/material";
-import { CreateNewFolder, Link as LinkIcon } from "@mui/icons-material";
 import {
   getRelatedNpcs,
   getNpcs,
@@ -25,13 +18,17 @@ import {
   addNpcFolder, // Import addNpcFolder
   deleteNpcFolder,
 } from "../../../../utility/db";
-
+import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
 import NpcFolderList from "./NpcFolderList";
 import NpcList from "./NpcList";
 import FolderNameDialogComponent from "./FolderNameDialogComponent";
 import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
 import LinkNpcDialog from "./LinkNpcDialog";
+import EmptyNpcsList from "./EmptyNpcsList";
+import NpcListLoading from "./NpcListLoading";
+import NpcListError from "./NpcListError";
+import FeedbackSnackbar from "./FeedbackSnackbar";
 
 const NpcsTabMain = ({ campaignId }) => {
   const navigate = useNavigate();
@@ -308,36 +305,12 @@ const NpcsTabMain = ({ campaignId }) => {
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
       <Grid container spacing={3}>
+        {/* Header */}
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <Typography variant="h4">Campaign NPCs</Typography>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<LinkIcon />}
-                onClick={handleAddExistingNpc}
-                sx={{ mr: 1 }}
-              >
-                Link NPC
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => setIsNewFolderDialogOpen(true)}
-                startIcon={<CreateNewFolder />}
-              >
-                Create Folder
-              </Button>
-            </Box>
-          </Box>
+          <NpcsTabHeader
+            handleAddExistingNpc={handleAddExistingNpc}
+            setIsNewFolderDialogOpen={setIsNewFolderDialogOpen}
+          />
         </Grid>
 
         {/* Search, sort, and filter controls */}
@@ -366,60 +339,22 @@ const NpcsTabMain = ({ campaignId }) => {
 
         {/* Loading state */}
         {isLoading && (
-          <Grid item xs={12} sx={{ textAlign: "center", py: 8 }}>
-            <CircularProgress />
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              Loading NPCs...
-            </Typography>
+          <Grid item xs={12}>
+            <NpcListLoading />
           </Grid>
         )}
 
         {/* Error state */}
         {loadError && (
           <Grid item xs={12}>
-            <Alert severity="error" sx={{ my: 2 }}>
-              {loadError}
-              <Button
-                color="inherit"
-                size="small"
-                onClick={() => window.location.reload()}
-                sx={{ ml: 2 }}
-              >
-                Retry
-              </Button>
-            </Alert>
+            <NpcListError loadError={loadError} loadNpcs={loadNpcs} />
           </Grid>
         )}
 
         {/* Empty state */}
         {!isLoading && !loadError && campaignNpcs.length === 0 && (
           <Grid item xs={12}>
-            <Box
-              sx={{
-                py: 8,
-                textAlign: "center",
-                border: "2px dashed",
-                borderColor: "divider",
-                borderRadius: 2,
-                backgroundColor: "background.paper",
-              }}
-            >
-              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-                No NPCs in this campaign yet
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Add NPCs to bring your campaign world to life
-              </Typography>
-              <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={<LinkIcon />}
-                  onClick={handleAddExistingNpc}
-                >
-                  Link Existing NPC
-                </Button>
-              </Box>
-            </Box>
+            <EmptyNpcsList handleAddExistingNpc={handleAddExistingNpc} />
           </Grid>
         )}
 
@@ -487,20 +422,10 @@ const NpcsTabMain = ({ campaignId }) => {
         />
 
         {/* Feedback snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={4000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={snackbar.severity}
-            sx={{ width: "100%" }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
+        <FeedbackSnackbar
+          snackbar={snackbar}
+          handleSnackbarClose={handleSnackbarClose}
+        />
       </Grid>
     </Paper>
   );
