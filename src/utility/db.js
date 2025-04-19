@@ -107,6 +107,7 @@ const dbPromise = openDB(DB_NAME, DB_VERSION, {
         });
         folderStore.createIndex("campaignId", "campaignId", { unique: false });
         folderStore.createIndex("name", "name", { unique: false });
+        folderStore.createIndex("parentId", "parentId", { unique: false }); // Add parentId index
         console.log("Created 'npcFolderStore' store.");
       }
 
@@ -720,7 +721,9 @@ export const addNpcFolder = async (folder) => {
     throw new Error("campaignId is required to create an NPC folder.");
   }
   const folderToAdd = {
-    ...folder,
+    campaignId: folder.campaignId,
+    name: folder.name,
+    parentId: folder.parentId || null,
     createdAt: new Date().toISOString(),
   };
   return db.add(NPC_FOLDER_STORE_NAME, folderToAdd);
@@ -730,13 +733,31 @@ export const getNpcFoldersForCampaign = async (campaignId) => {
   const db = await dbPromise;
   const tx = db.transaction(NPC_FOLDER_STORE_NAME, "readonly");
   const index = tx.store.index("campaignId");
-  return index.getAll(campaignId);
+  const folders = await index.getAll(campaignId);
+
+  // Function to build the folder hierarchy
+  const buildFolderHierarchy = (parentId) => {
+    return folders
+      .filter((folder) => folder.parentId === parentId)
+      .map((folder) => ({
+        ...folder,
+        children: buildFolderHierarchy(folder.id),
+      }));
+  };
+
+  // Get the root folders (folders with no parent)
+  const rootFolders = buildFolderHierarchy(null);
+
+  return rootFolders;
 };
 
 export const updateNpcFolder = async (folder) => {
   const db = await dbPromise;
   const folderToUpdate = {
-    ...folder,
+    id: folder.id,
+    campaignId: folder.campaignId,
+    name: folder.name,
+    parentId: folder.parentId,
     modifiedAt: new Date().toISOString(),
   };
   await db.put(NPC_FOLDER_STORE_NAME, folderToUpdate);

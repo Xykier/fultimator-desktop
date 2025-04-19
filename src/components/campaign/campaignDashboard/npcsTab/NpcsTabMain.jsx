@@ -21,10 +21,10 @@ import {
 } from "../../../../utility/db";
 import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
-import NpcFolderList from "./NpcFolderList";
 import NpcList from "./NpcList";
 import FolderNameDialogComponent from "./FolderNameDialogComponent";
 import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
+import FolderExplorer from "./FolderExplorer";
 import LinkNpcDialog from "./LinkNpcDialog";
 import EmptyNpcsList from "./EmptyNpcsList";
 import NpcListLoading from "./NpcListLoading";
@@ -204,7 +204,11 @@ const NpcsTabMain = ({ campaignId }) => {
 
   const handleCreateFolder = async () => {
     try {
-      await addNpcFolder({ campaignId: campaignId, name: newNpcFolderName });
+      await addNpcFolder({
+        campaignId: campaignId,
+        name: newNpcFolderName,
+        parentId: selectedNpcFolderId || null, // Use selected folder as parent
+      });
       // Refresh folders list
       const foldersList = await getNpcFoldersForCampaign(campaignId);
       setNpcFolders(foldersList);
@@ -221,7 +225,7 @@ const NpcsTabMain = ({ campaignId }) => {
     try {
       await updateNpcCampaignFolder(npcId, campaignId, folderId);
       showSnackbar("NPC moved to folder successfully", "success");
-      await loadNpcs();
+      await loadNpcs(); // Reload NPCs to reflect the change
     } catch (error) {
       console.error("Error moving NPC to folder:", error);
       showSnackbar("Failed to move NPC to folder", "error");
@@ -288,8 +292,10 @@ const NpcsTabMain = ({ campaignId }) => {
 
     try {
       await updateNpcFolder({
-        ...folderToRename,
+        id: folderToRename.id,
+        campaignId: folderToRename.campaignId,
         name: renamedFolderName.trim(),
+        parentId: folderToRename.parentId,
       });
       showSnackbar("Folder renamed successfully", "success");
       // Refresh folders list
@@ -313,7 +319,7 @@ const NpcsTabMain = ({ campaignId }) => {
         <Grid item xs={12}>
           <NpcsTabHeader
             handleAddExistingNpc={handleAddExistingNpc}
-            setIsNewFolderDialogOpen={setIsNewFolderDialogOpen}
+            setIsNewFolderDialogOpen={() => setIsNewFolderDialogOpen(true)}
           />
         </Grid>
 
@@ -340,7 +346,7 @@ const NpcsTabMain = ({ campaignId }) => {
 
         {/* Display NPC Folders */}
         <Grid item xs={12}>
-          <NpcFolderList
+          <FolderExplorer
             folders={npcFolders}
             selectedFolderId={selectedNpcFolderId}
             setSelectedFolderId={setSelectedNpcFolderId}
@@ -403,6 +409,7 @@ const NpcsTabMain = ({ campaignId }) => {
           open={isNewFolderDialogOpen}
           handleClose={() => setIsNewFolderDialogOpen(false)}
           handleAction={handleCreateFolder}
+          parentId={selectedNpcFolderId}
           mode="create"
           maxLength={50}
           folderName={newNpcFolderName}
