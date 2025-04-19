@@ -866,9 +866,9 @@ const classList = [
     book: "rework",
     benefits: {
       hpplus: 0,
-      mpplus: 5,
+      mpplus: 0,
       ipplus: 0,
-      isCustomBenefit: false,
+      isCustomBenefit: true,
       martials: {
         armor: false,
         shields: false,
@@ -880,7 +880,43 @@ const classList = [
       },
       spellClasses: ["arcanist-rework"],
     },
-    skills: [],
+    skills: [
+      {
+        skillName: "Arcane Regeneration",
+        currentLvl: 0,
+        maxLvl: 6,
+        description: "ArcaneRegenerationRework_desc",
+        specialSkill: "",
+      },
+      {
+        skillName: "Bind and Summon",
+        currentLvl: 0,
+        maxLvl: 1,
+        description: "BindAndSummonRework_desc",
+        specialSkill: "",
+      },
+      {
+        skillName: "Phantom Strength",
+        currentLvl: 0,
+        maxLvl: 6,
+        description: "PhantomStrength_desc",
+        specialSkill: "",
+      },
+      {
+        skillName: "Quick Summoning",
+        currentLvl: 0,
+        maxLvl: 2,
+        description: "QuickSummoning_desc",
+        specialSkill: "",
+      },
+      {
+        skillName: "Ritual Arcanism",
+        currentLvl: 0,
+        maxLvl: 1,
+        description: "RitualArcanism_desc",
+        specialSkill: "Ritual Arcanism",
+      },
+    ],
   },
   {
     name: "Ace of Cards",

@@ -144,7 +144,7 @@ export default function SpellArcanistModal({
               </Grid>
               <Grid item xs={12} sm={12}>
                 <CustomTextarea
-                  label={t("Merge Description")}
+                  label={t("Pulse Description")}
                   fullWidth
                   value={editedSpell.pulseDesc || ""}
                   onChange={(e) => handleChange("pulseDesc", e.target.value)}
