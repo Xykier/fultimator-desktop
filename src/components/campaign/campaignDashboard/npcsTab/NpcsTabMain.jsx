@@ -5,6 +5,7 @@ import {
   updateNpcCampaignFolder,
   updateNpcFolder, // Import updateNpcFolder
 } from "../../../../utility/db";
+import { sortNpcs, filterNpcs } from "../../../../utility/npcUtils";
 import {
   Grid,
   Paper,
@@ -40,7 +41,11 @@ const NpcsTabMain = ({ campaignId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [npcSortOrder, setNpcSortOrder] = useState("name");
+  const [npcSortDirection, setNpcSortDirection] = useState("asc");
   const [npcFilterType, setNpcFilterType] = useState("all");
+  const [npcRank, setNpcRank] = useState("");
+  const [npcSpecies, setNpcSpecies] = useState("");
+  const [npcTag, setNpcTag] = useState("");
   const [npcFolders, setNpcFolders] = useState([]); // State for NPC folders
   const [selectedNpcFolderId, setSelectedNpcFolderId] = useState(null); // State for selected folder
   const [snackbar, setSnackbar] = useState({
@@ -143,8 +148,21 @@ const NpcsTabMain = ({ campaignId }) => {
     setNpcFilterType(newValue);
   };
 
-  const handleSortChange = (order) => {
+  const handleRankChange = (event) => {
+    setNpcRank(event.target.value);
+  };
+
+  const handleSpeciesChange = (event) => {
+    setNpcSpecies(event.target.value);
+  };
+
+  const handleTagChange = (event, newValue) => {
+    setNpcTag(newValue);
+  };
+
+  const handleSortChange = (order, direction) => {
     setNpcSortOrder(order);
+    setNpcSortDirection(direction);
   };
 
   // Function to handle setting NPC attitude
@@ -170,33 +188,18 @@ const NpcsTabMain = ({ campaignId }) => {
   );
 
   // Apply sorting to the searched campaign NPCs
-  const sortedCampaignNpcs = [...searchedCampaignNpcs].sort((a, b) => {
-    if (npcSortOrder === "name") return a.name.localeCompare(b.name);
-    if (npcSortOrder === "level") return (a.lvl || 0) - (b.lvl || 0); // Sort by level (handle undefined lvl)
-    if (npcSortOrder === "species")
-      return (a.species || "").localeCompare(b.species || ""); // Sort by species (handle undefined species)
-    return 0;
-  });
+  const sortedCampaignNpcs = sortNpcs(searchedCampaignNpcs, npcSortOrder, npcSortDirection);
 
   // Apply folder, attitude/villain filters to the sorted campaign NPCs
-  const displayedNpcs = sortedCampaignNpcs.filter((npc) => {
-    // Filter by folder
-    if (selectedNpcFolderId) {
-      if (selectedNpcFolderId === null && npc.folderId !== null) return false; // Show NPCs without a folder selected
-      if (selectedNpcFolderId !== null && npc.folderId !== selectedNpcFolderId)
-        return false; // Show NPCs in the selected folder
-    }
-
-    // Filter by attitude/villain
-    if (npcFilterType === "all") return true;
-    if (npcFilterType === "friendly") return npc.attitude === "friendly";
-    if (npcFilterType === "hostile") return npc.attitude === "hostile";
-    if (npcFilterType === "neutral") return npc.attitude === "neutral";
-    if (npcFilterType === "villains") {
-      return ["minor", "major", "supreme"].includes(npc.villain); // Show villains (assuming villain is still on the base NPC object)
-    }
-    return true;
-  });
+  const displayedNpcs = filterNpcs(
+    sortedCampaignNpcs,
+    selectedNpcFolderId,
+    npcFilterType,
+    npcSearchText,
+    npcTag,
+    npcRank,
+    npcSpecies
+  );
 
   const handleCreateFolder = async () => {
     try {
@@ -317,12 +320,19 @@ const NpcsTabMain = ({ campaignId }) => {
         {campaignNpcs.length > 0 && (
           <Grid item xs={12}>
             <SearchbarFilter
-              searchText={npcSearchText}
-              setSearchText={setNpcSearchText}
-              sortOrder={npcSortOrder}
-              handleSortChange={handleSortChange}
-              filterType={npcFilterType}
-              handleFilterChange={handleFilterChange}
+             searchText={npcSearchText}
+             setSearchText={setNpcSearchText}
+             sortOrder={npcSortOrder}
+             handleSortChange={handleSortChange}
+             filterType={npcFilterType}
+             handleFilterChange={handleFilterChange}
+             npcRank={npcRank}
+             handleRankChange={handleRankChange}
+             npcSpecies={npcSpecies}
+             handleSpeciesChange={handleSpeciesChange}
+             sortDirection={npcSortDirection}
+             npcTag={npcTag}
+             handleTagChange={handleTagChange}
             />
           </Grid>
         )}
