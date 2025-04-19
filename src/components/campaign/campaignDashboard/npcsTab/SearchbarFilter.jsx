@@ -32,16 +32,8 @@ import {
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import {
-  GiRaiseZombie,
-  GiWolfHead,
-  GiRobotGolem,
-  GiEvilBat,
-  GiFire,
-  GiSwordwoman,
-  GiGooeyDaemon,
-  GiRose,
-} from "react-icons/gi"; // Species icons
+
+import { getSpeciesIcon, getRankIcon } from "../../../../libs/npcIcons";
 
 const attitudeOptions = [
   { value: "all", label: "All NPCs", icon: <PeopleIcon fontSize="small" /> },
@@ -61,18 +53,6 @@ const attitudeOptions = [
     icon: <HostileIcon fontSize="small" />,
   },
 ];
-
-// Map species names to icons
-const speciesIconMap = {
-  Beast: GiWolfHead,
-  Construct: GiRobotGolem,
-  Demon: GiEvilBat,
-  Elemental: GiFire,
-  Humanoid: GiSwordwoman,
-  Undead: GiRaiseZombie,
-  Plant: GiRose,
-  Monster: GiGooeyDaemon,
-};
 
 const SearchbarFilter = ({
   searchText,
@@ -306,16 +286,96 @@ const SearchbarFilter = ({
               onChange={handleRankChange}
             >
               <MenuItem value="">All</MenuItem>
-              <MenuItem value="soldier">Soldier</MenuItem>
-              <MenuItem value="elite">Elite</MenuItem>
-              <MenuItem value="champion1">Champion (1)</MenuItem>
-              <MenuItem value="champion2">Champion (2)</MenuItem>
-              <MenuItem value="champion3">Champion (3)</MenuItem>
-              <MenuItem value="champion4">Champion (4)</MenuItem>
-              <MenuItem value="champion5">Champion (5)</MenuItem>
-              <MenuItem value="champion6">Champion (6)</MenuItem>
-              <MenuItem value="companion">Companion</MenuItem>
-              <MenuItem value="groupvehicle">Group Vehicle</MenuItem>
+              <MenuItem value="soldier">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("soldier").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("soldier").color,
+                  })}
+                  <span>Soldier</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="elite">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("elite").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("elite").color,
+                  })}
+                  <span>Elite</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="champion1">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("champion1").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("champion1").color,
+                  })}
+                  <span>Champion (1)</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="champion2">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("champion2").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("champion2").color,
+                  })}
+                  <span>Champion (2)</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="champion3">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("champion3").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("champion3").color,
+                  })}
+                  <span>Champion (3)</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="champion4">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("champion4").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("champion4").color,
+                  })}
+                  <span>Champion (4)</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="champion5">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("champion5").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("champion5").color,
+                  })}
+                  <span>Champion (5)</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="champion6">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("champion6").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("champion6").color,
+                  })}
+                  <span>Champion (6)</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="companion">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("companion").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("companion").color,
+                  })}
+                  <span>Companion</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="groupvehicle">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {React.createElement(getRankIcon("groupvehicle").icon, {
+                    fontSize: "small",
+                    color: getRankIcon("groupvehicle").color,
+                  })}
+                  <span>Group Vehicle</span>
+                </Box>
+              </MenuItem>
             </Select>
           </FormControl>
 
@@ -339,11 +399,22 @@ const SearchbarFilter = ({
               }}
             >
               <MenuItem value="">All</MenuItem>
-              {Object.entries(speciesIconMap).map(([species, Icon]) => (
+              {Object.entries({
+                Beast: "Beast",
+                Construct: "Construct",
+                Demon: "Demon",
+                Elemental: "Elemental",
+                Humanoid: "Humanoid",
+                Undead: "Undead",
+                Plant: "Plant",
+                Monster: "Monster",
+              }).map(([species, label]) => (
                 <MenuItem key={species} value={species}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Icon fontSize="small" />
-                    <span>{species}</span>
+                    {React.createElement(getSpeciesIcon(species), {
+                      fontSize: "small",
+                    })}
+                    <span>{label}</span>
                   </Box>
                 </MenuItem>
               ))}
