@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   updateNpcCampaignAttitude,
   updateNpcCampaignFolder,
+  updateNpcFolder, // Import updateNpcFolder
 } from "../../../../utility/db";
 import {
   Box,
@@ -57,6 +58,11 @@ const NpcsTabMain = ({ campaignId }) => {
     useState(false);
   const [folderToDeleteConfirmation, setFolderToDeleteConfirmation] =
     useState(null);
+
+  // State for Rename Folder Dialog
+  const [isRenameFolderDialogOpen, setIsRenameFolderDialogOpen] = useState(false);
+  const [folderToRename, setFolderToRename] = useState(null);
+  const [renamedFolderName, setRenamedFolderName] = useState("");
 
   const loadNpcs = useCallback(async () => {
     setIsLoading(true);
@@ -222,15 +228,15 @@ const NpcsTabMain = ({ campaignId }) => {
   };
 
   const handleRenameFolder = (folderId) => {
-    // This will be implemented later, but we'll add a placeholder for now
-    console.log("Rename folder:", folderId);
-    // In a future implementation, this would open a dialog to rename the folder
-
-    // Mock implementation for now
-    showSnackbar(
-      "Folder rename functionality will be implemented soon",
-      "info"
-    );
+    const folder = npcFolders.find((f) => f.id === folderId);
+    if (folder) {
+      setFolderToRename(folder);
+      setRenamedFolderName(folder.name);
+      setIsRenameFolderDialogOpen(true);
+    } else {
+      console.error("Folder not found for renaming:", folderId);
+      showSnackbar("Could not find the folder to rename.", "error");
+    }
   };
 
   const handleDeleteFolder = (folderId) => {
@@ -273,6 +279,30 @@ const NpcsTabMain = ({ campaignId }) => {
   const handleCancelDelete = () => {
     setIsDeleteFolderDialogOpen(false);
     setFolderToDeleteConfirmation(null);
+  };
+
+  // Function to handle the actual folder renaming
+  const handleConfirmRenameFolder = async () => {
+    if (!folderToRename || !renamedFolderName.trim()) return;
+
+    try {
+      await updateNpcFolder({
+        ...folderToRename,
+        name: renamedFolderName.trim(),
+      });
+      showSnackbar("Folder renamed successfully", "success");
+      // Refresh folders list
+      const foldersList = await getNpcFoldersForCampaign(campaignId);
+      setNpcFolders(foldersList);
+      setIsRenameFolderDialogOpen(false);
+      setFolderToRename(null);
+      setRenamedFolderName("");
+    } catch (error) {
+      console.error("Error renaming folder:", error);
+      showSnackbar("Failed to rename folder", "error");
+      // Optionally keep the dialog open on error:
+      // setIsRenameFolderDialogOpen(true);
+    }
   };
 
   return (
@@ -431,6 +461,21 @@ const NpcsTabMain = ({ campaignId }) => {
           maxLength={50}
           folderName={newNpcFolderName}
           setFolderName={setNewNpcFolderName}
+        />
+
+        {/* Rename Folder Dialog */}
+        <FolderNameDialogComponent
+          open={isRenameFolderDialogOpen}
+          handleClose={() => {
+            setIsRenameFolderDialogOpen(false);
+            setFolderToRename(null);
+            setRenamedFolderName("");
+          }}
+          handleAction={handleConfirmRenameFolder}
+          mode="rename"
+          maxLength={50}
+          folderName={renamedFolderName}
+          setFolderName={setRenamedFolderName}
         />
 
         {/* Delete Confirmation Dialog */}
