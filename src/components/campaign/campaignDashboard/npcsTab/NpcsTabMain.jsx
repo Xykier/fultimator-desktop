@@ -34,7 +34,8 @@ import FeedbackSnackbar from "./FeedbackSnackbar";
 const NpcsTabMain = ({ campaignId }) => {
   const navigate = useNavigate();
   const [isLinkNpcDialogOpen, setIsLinkNpcDialogOpen] = useState(false);
-  const [npcSearchText, setNpcSearchText] = useState("");
+  const [linkNpcSearchText, setLinkNpcSearchText] = useState("");
+  const [filterSearchText, setFilterSearchText] = useState("");
   const [allNpcs, setAllNpcs] = useState([]);
   const [associatedNpcIds, setAssociatedNpcIds] = useState([]);
   const [campaignNpcs, setCampaignNpcs] = useState([]);
@@ -99,7 +100,7 @@ const NpcsTabMain = ({ campaignId }) => {
   const handleAddExistingNpc = () => setIsLinkNpcDialogOpen(true);
   const handleClose = () => {
     setIsLinkNpcDialogOpen(false);
-    setNpcSearchText("");
+    setLinkNpcSearchText("");
   };
 
   const handleToggleNpc = async (npcId) => {
@@ -179,12 +180,12 @@ const NpcsTabMain = ({ campaignId }) => {
 
   // Filter NPCs for the "Link NPC" dialog based on search text
   const filteredNpcsForDialog = allNpcs.filter((npc) =>
-    npc.name.toLowerCase().includes(npcSearchText.toLowerCase())
+    npc.name.toLowerCase().includes(linkNpcSearchText.toLowerCase())
   );
 
   // Apply search filter to campaign NPCs
   const searchedCampaignNpcs = campaignNpcs.filter((npc) =>
-    npc.name.toLowerCase().includes(npcSearchText.toLowerCase())
+    npc.name.toLowerCase().includes(filterSearchText.toLowerCase())
   );
 
   // Apply sorting to the searched campaign NPCs
@@ -195,7 +196,7 @@ const NpcsTabMain = ({ campaignId }) => {
     sortedCampaignNpcs,
     selectedNpcFolderId,
     npcFilterType,
-    npcSearchText,
+    filterSearchText,
     npcTag,
     npcRank,
     npcSpecies
@@ -320,8 +321,8 @@ const NpcsTabMain = ({ campaignId }) => {
         {campaignNpcs.length > 0 && (
           <Grid item xs={12}>
             <SearchbarFilter
-             searchText={npcSearchText}
-             setSearchText={setNpcSearchText}
+             searchText={filterSearchText}
+             setSearchText={setFilterSearchText}
              sortOrder={npcSortOrder}
              handleSortChange={handleSortChange}
              filterType={npcFilterType}
@@ -390,8 +391,8 @@ const NpcsTabMain = ({ campaignId }) => {
         <LinkNpcDialog
           open={isLinkNpcDialogOpen}
           handleClose={handleClose}
-          searchText={npcSearchText}
-          setSearchText={setNpcSearchText}
+          searchText={linkNpcSearchText}
+          setSearchText={setLinkNpcSearchText}
           filteredNpcs={filteredNpcsForDialog}
           associatedNpcIds={associatedNpcIds}
           handleToggleNpc={handleToggleNpc}

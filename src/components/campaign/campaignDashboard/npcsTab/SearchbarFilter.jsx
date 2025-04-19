@@ -32,6 +32,47 @@ import {
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import {
+  GiRaiseZombie,
+  GiWolfHead,
+  GiRobotGolem,
+  GiEvilBat,
+  GiFire,
+  GiSwordwoman,
+  GiGooeyDaemon,
+  GiRose,
+} from "react-icons/gi"; // Species icons
+
+const attitudeOptions = [
+  { value: "all", label: "All NPCs", icon: <PeopleIcon fontSize="small" /> },
+  {
+    value: "friendly",
+    label: "Friendly",
+    icon: <FriendlyIcon fontSize="small" />,
+  },
+  {
+    value: "neutral",
+    label: "Neutral",
+    icon: <NeutralIcon fontSize="small" />,
+  },
+  {
+    value: "hostile",
+    label: "Hostile",
+    icon: <HostileIcon fontSize="small" />,
+  },
+];
+
+// Map species names to icons
+const speciesIconMap = {
+  Beast: GiWolfHead,
+  Construct: GiRobotGolem,
+  Demon: GiEvilBat,
+  Elemental: GiFire,
+  Humanoid: GiSwordwoman,
+  Undead: GiRaiseZombie,
+  Plant: GiRose,
+  Monster: GiGooeyDaemon,
+};
 
 const SearchbarFilter = ({
   searchText,
@@ -53,7 +94,6 @@ const SearchbarFilter = ({
   const handleSortDirectionChange = () => {
     const newDirection = sortDirection === "asc" ? "desc" : "asc";
     setSortDirection(newDirection);
-    // Assuming you want to pass both sortOrder and sortDirection to parent component
     handleSortChange(sortOrder, newDirection);
   };
 
@@ -64,26 +104,6 @@ const SearchbarFilter = ({
   const handleVillainToggle = (event) => {
     handleFilterChange(null, event.target.checked ? "villains" : "all");
   };
-
-  // Map attitude values to icons for the select menu
-  const attitudeOptions = [
-    { value: "all", label: "All NPCs", icon: <PeopleIcon fontSize="small" /> },
-    {
-      value: "friendly",
-      label: "Friendly",
-      icon: <FriendlyIcon fontSize="small" />,
-    },
-    {
-      value: "neutral",
-      label: "Neutral",
-      icon: <NeutralIcon fontSize="small" />,
-    },
-    {
-      value: "hostile",
-      label: "Hostile",
-      icon: <HostileIcon fontSize="small" />,
-    },
-  ];
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
@@ -310,16 +330,23 @@ const SearchbarFilter = ({
               value={npcSpecies}
               label="Species"
               onChange={handleSpeciesChange}
+              renderValue={(selected) => {
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <span>{selected ? selected : "All"}</span>
+                  </Box>
+                );
+              }}
             >
               <MenuItem value="">All</MenuItem>
-              <MenuItem value="Beast">Beast</MenuItem>
-              <MenuItem value="Construct">Construct</MenuItem>
-              <MenuItem value="Demon">Demon</MenuItem>
-              <MenuItem value="Elemental">Elemental</MenuItem>
-              <MenuItem value="Humanoid">Humanoid</MenuItem>
-              <MenuItem value="Monster">Monster</MenuItem>
-              <MenuItem value="Plant">Plant</MenuItem>
-              <MenuItem value="Undead">Undead</MenuItem>
+              {Object.entries(speciesIconMap).map(([species, Icon]) => (
+                <MenuItem key={species} value={species}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Icon fontSize="small" />
+                    <span>{species}</span>
+                  </Box>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
