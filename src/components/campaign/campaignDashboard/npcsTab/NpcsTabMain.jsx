@@ -34,7 +34,6 @@ const NpcsTabMain = ({ campaignId }) => {
         npcFilterType,
         npcRank,
         npcSpecies,
-        npcTag,
         isNewFolderDialogOpen,
         newNpcFolderName,
         isDeleteFolderDialogOpen,
@@ -54,7 +53,6 @@ const NpcsTabMain = ({ campaignId }) => {
         handleFilterChange,
         handleRankChange,
         handleSpeciesChange,
-        handleTagChange,
         handleSortChange,
         handleSetAttitude,
         setFilterSearchText,
@@ -102,8 +100,6 @@ const NpcsTabMain = ({ campaignId }) => {
               npcSpecies={npcSpecies}
               handleSpeciesChange={handleSpeciesChange}
               sortDirection={npcSortDirection}
-              npcTag={npcTag}
-              handleTagChange={handleTagChange}
             />
           </Grid>
         )}

@@ -8,7 +8,6 @@ export const useNpcFilters = (campaignNpcs) => {
   const [npcFilterType, setNpcFilterType] = useState("all");
   const [npcRank, setNpcRank] = useState("");
   const [npcSpecies, setNpcSpecies] = useState("");
-  const [npcTag, setNpcTag] = useState("");
   const [selectedNpcFolderId, setSelectedNpcFolderId] = useState(null);
   const [showAllNpcs, setShowAllNpcs] = useState(false);
 
@@ -17,15 +16,19 @@ export const useNpcFilters = (campaignNpcs) => {
   };
 
   const handleRankChange = (event) => {
-    setNpcRank(event.target.value);
+    if (typeof event === "string" || event === null) {
+      setNpcRank(event);
+    } else {
+      setNpcRank(event.target.value);
+    }
   };
 
   const handleSpeciesChange = (event) => {
-    setNpcSpecies(event.target.value);
-  };
-
-  const handleTagChange = (event, newValue) => {
-    setNpcTag(newValue);
+    if (typeof event === "string" || event === null) {
+      setNpcSpecies(event);
+    } else {
+      setNpcSpecies(event.target.value);
+    }
   };
 
   const handleSortChange = (order, direction) => {
@@ -42,11 +45,7 @@ export const useNpcFilters = (campaignNpcs) => {
 
   // Apply sorting to the searched campaign NPCs
   const sortedCampaignNpcs = useMemo(() => {
-    return sortNpcs(
-      searchedCampaignNpcs,
-      npcSortOrder,
-      npcSortDirection
-    );
+    return sortNpcs(searchedCampaignNpcs, npcSortOrder, npcSortDirection);
   }, [searchedCampaignNpcs, npcSortOrder, npcSortDirection]);
 
   // Apply folder filters to the sorted campaign NPCs
@@ -54,17 +53,50 @@ export const useNpcFilters = (campaignNpcs) => {
     if (!campaignNpcs.length) return [];
 
     return sortedCampaignNpcs.filter((npc) => {
-      if (showAllNpcs) {
-        return true;
-      } else if (selectedNpcFolderId === null) {
-        // Show NPCs not in any folder if 'All NPCs' is not selected and no specific folder is selected
-        return !npc.folderId; // Check if folderId is null or undefined
-      } else {
-        // Show NPCs in the selected folder
-        return npc.folderId === selectedNpcFolderId;
+      // Filter by folder
+      if (!showAllNpcs && selectedNpcFolderId === null) {
+        // Show NPCs not in any folder if no specific folder is selected and not showing all folders
+        if (npc.folderId) {
+          return false;
+        }
+      } else if (!showAllNpcs && selectedNpcFolderId !== null) {
+        // Show NPCs in the selected folder when not showing all folders
+        if (npc.folderId !== selectedNpcFolderId) {
+          return false;
+        }
       }
+      // When showAllNpcs is true, we don't apply any folder filtering
+
+      // Apply other filters regardless of folder selection
+      if (npcFilterType === "villains") {
+        if (!npc.villain) {
+          return false;
+        }
+      } else if (npcFilterType !== "all") {
+        if (npc.attitude !== npcFilterType) {
+          return false;
+        }
+      }
+
+      if (npcRank && npc.rank !== npcRank) {
+        return false;
+      }
+
+      if (npcSpecies && npc.species !== npcSpecies) {
+        return false;
+      }
+
+      return true;
     });
-  }, [sortedCampaignNpcs, selectedNpcFolderId, showAllNpcs, campaignNpcs.length]);
+  }, [
+    sortedCampaignNpcs,
+    selectedNpcFolderId,
+    showAllNpcs,
+    campaignNpcs.length,
+    npcFilterType,
+    npcRank,
+    npcSpecies,
+  ]);
 
   return {
     // Filter states
@@ -74,7 +106,6 @@ export const useNpcFilters = (campaignNpcs) => {
     npcFilterType,
     npcRank,
     npcSpecies,
-    npcTag,
     selectedNpcFolderId,
     showAllNpcs,
     // Filter results
@@ -87,7 +118,6 @@ export const useNpcFilters = (campaignNpcs) => {
     handleFilterChange,
     handleRankChange,
     handleSpeciesChange,
-    handleTagChange,
-    handleSortChange
+    handleSortChange,
   };
 };

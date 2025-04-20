@@ -65,15 +65,14 @@ const SearchbarFilter = ({
   handleRankChange,
   npcSpecies,
   handleSpeciesChange,
+  sortDirection,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [expanded, setExpanded] = useState(false);
-  const [sortDirection, setSortDirection] = useState("asc");
 
   const handleSortDirectionChange = () => {
     const newDirection = sortDirection === "asc" ? "desc" : "asc";
-    setSortDirection(newDirection);
     handleSortChange(sortOrder, newDirection);
   };
 

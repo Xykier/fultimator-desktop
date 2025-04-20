@@ -30,7 +30,6 @@ export const useCampaignNpcs = (campaignId) => {
     npcFilterType,
     npcRank,
     npcSpecies,
-    npcTag,
     selectedNpcFolderId,
     showAllNpcs,
     displayedNpcs,
@@ -40,7 +39,6 @@ export const useCampaignNpcs = (campaignId) => {
     handleFilterChange,
     handleRankChange,
     handleSpeciesChange,
-    handleTagChange,
     handleSortChange
   } = useNpcFilters(campaignNpcs);
 
@@ -130,7 +128,6 @@ export const useCampaignNpcs = (campaignId) => {
     npcFilterType,
     npcRank,
     npcSpecies,
-    npcTag,
 
     // Event Handlers and Methods
     loadNpcs,
@@ -143,7 +140,6 @@ export const useCampaignNpcs = (campaignId) => {
     handleFilterChange,
     handleRankChange,
     handleSpeciesChange,
-    handleTagChange,
     handleSortChange,
     handleSetAttitude,
     setFilterSearchText,
