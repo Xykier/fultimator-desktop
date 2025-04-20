@@ -19,9 +19,22 @@ const NpcList = ({
   onDeleteFolder,
 }) => {
   // Find the selected folder object if a folder is selected
-  const selectedFolder = selectedFolderId
-    ? folders.find((folder) => folder.id === selectedFolderId)
-    : null;
+  const findFolder = (folders, selectedFolderId) => {
+    for (const folder of folders) {
+      if (folder.id === selectedFolderId) {
+        return folder;
+      }
+      if (folder.children && folder.children.length > 0) {
+        const found = findFolder(folder.children, selectedFolderId);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
+  };
+
+  const selectedFolder = selectedFolderId ? findFolder(folders, selectedFolderId) : null;
 
   return (
     <>

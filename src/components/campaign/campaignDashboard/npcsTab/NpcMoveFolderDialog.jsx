@@ -17,7 +17,29 @@ const NpcMoveFolderDialog = ({
   handleFolderChange,
   handleMoveToFolder,
 }) => {
-  // NPC Move to Folder Dialog
+  // Recursive function to render folders with proper indentation
+  const renderFolderOptions = (foldersList, depth = 0) => {
+    if (!foldersList || foldersList.length === 0) return null;
+
+    return foldersList.flatMap((folder) => {
+      const indentation = "\u00A0".repeat(depth * 4); // Non-breaking spaces for indentation
+      
+      // Create an array with current folder
+      const options = [
+        <MenuItem key={folder.id} value={folder.id}>
+          {indentation}{folder.name}
+        </MenuItem>
+      ];
+      
+      // Add children if they exist (recursive call)
+      if (folder.children && folder.children.length > 0) {
+        options.push(...renderFolderOptions(folder.children, depth + 1));
+      }
+      
+      return options;
+    });
+  };
+
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Move to Folder</DialogTitle>
@@ -33,12 +55,7 @@ const NpcMoveFolderDialog = ({
           <MenuItem value="">
             <em>None (Root)</em>
           </MenuItem>
-          {folders &&
-            folders.map((folder) => (
-              <MenuItem key={folder.id} value={folder.id}>
-                {folder.name}
-              </MenuItem>
-            ))}
+          {renderFolderOptions(folders)}
         </Select>
       </DialogContent>
       <DialogActions>

@@ -7,6 +7,8 @@ import {
   IconButton,
   Breadcrumbs,
   Link,
+  Button,
+  Box,
 } from "@mui/material";
 import {
   ExpandLess,
@@ -14,6 +16,7 @@ import {
   Folder,
   FolderOpen,
   Home,
+  People,
 } from "@mui/icons-material";
 
 const FolderExplorer = ({
@@ -21,12 +24,14 @@ const FolderExplorer = ({
   selectedFolderId,
   setSelectedFolderId,
   setFolders,
+  showAllNpcs,
+  setShowAllNpcs,
 }) => {
   const [openFolders, setOpenFolders] = useState({});
-  
+
   // Process folders to create a flat structure for easier operations
   const [flatFolders, setFlatFolders] = useState([]);
-  
+
   // Flatten the nested folder structure on component mount or when folders change
   useEffect(() => {
     const flattenedFolders = [];
@@ -53,7 +58,7 @@ const FolderExplorer = ({
     
     flattenFolders(folders);
     setFlatFolders(flattenedFolders);
-  }, [folders]);
+  }, [folders, setFlatFolders]);
 
   const getChildFolders = (folderId) => {
     return flatFolders.filter((folder) => folder.parentId === folderId);
@@ -61,6 +66,7 @@ const FolderExplorer = ({
 
   const handleFolderClick = (folderId) => {
     setSelectedFolderId(folderId);
+    setShowAllNpcs(false);
   };
 
   const handleToggle = (folderId) => {
@@ -96,31 +102,53 @@ const FolderExplorer = ({
     setSelectedFolderId(folderId);
   };
 
+  const goToRoot = () => {
+    setShowAllNpcs(false);
+    setSelectedFolderId(null);
+  };
+
+  const goToAllNPCs = () => {
+    setShowAllNpcs(true);
+    setSelectedFolderId(null);
+  };
+
   return (
     <div>
-      <Breadcrumbs aria-label="breadcrumb">
-        <Link
-          underline="hover"
-          color="inherit"
-          onClick={() => handleBreadcrumbClick(null)}
-          sx={{ display: "flex", alignItems: "center" }}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Button
+          variant={showAllNpcs ? "contained" : "outlined"}
+          startIcon={<People />}
+          onClick={goToAllNPCs}
+          sx={{ mr: 2 }}
         >
-          <Home sx={{ mr: 0.5 }} fontSize="inherit" />
           All NPCs
-        </Link>
-        {breadcrumbs.map((folder) => (
+        </Button>
+        
+        <Breadcrumbs aria-label="breadcrumb">
           <Link
-            key={folder.id}
             underline="hover"
             color="inherit"
-            onClick={() => handleBreadcrumbClick(folder.id)}
+            onClick={goToRoot}
             sx={{ display: "flex", alignItems: "center" }}
           >
-            <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
-            {folder.name}
+            <Home sx={{ mr: 0.5 }} fontSize="inherit" />
+            Home
           </Link>
-        ))}
-      </Breadcrumbs>
+          {breadcrumbs.map((folder) => (
+            <Link
+              key={folder.id}
+              underline="hover"
+              color="inherit"
+              onClick={() => handleBreadcrumbClick(folder.id)}
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
+              {folder.name}
+            </Link>
+          ))}
+        </Breadcrumbs>
+      </Box>
+      
       <List disablePadding>
         {getChildFolders(null).map((folder) => (
           <FolderItem

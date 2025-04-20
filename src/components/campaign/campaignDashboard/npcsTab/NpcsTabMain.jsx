@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   updateNpcCampaignAttitude,
   updateNpcCampaignFolder,
   updateNpcFolder, // Import updateNpcFolder
 } from "../../../../utility/db";
-import { sortNpcs, filterNpcs } from "../../../../utility/npcUtils";
-import {
-  Grid,
-  Paper,
-} from "@mui/material";
+import { sortNpcs } from "../../../../utility/npcUtils";
+import { Grid, Paper } from "@mui/material";
 import {
   getRelatedNpcs,
   getNpcs,
@@ -49,6 +46,7 @@ const NpcsTabMain = ({ campaignId }) => {
   const [npcTag, setNpcTag] = useState("");
   const [npcFolders, setNpcFolders] = useState([]); // State for NPC folders
   const [selectedNpcFolderId, setSelectedNpcFolderId] = useState(null); // State for selected folder
+  const [showAllNpcs, setShowAllNpcs] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -63,7 +61,8 @@ const NpcsTabMain = ({ campaignId }) => {
     useState(null);
 
   // State for Rename Folder Dialog
-  const [isRenameFolderDialogOpen, setIsRenameFolderDialogOpen] = useState(false);
+  const [isRenameFolderDialogOpen, setIsRenameFolderDialogOpen] =
+    useState(false);
   const [folderToRename, setFolderToRename] = useState(null);
   const [renamedFolderName, setRenamedFolderName] = useState("");
 
@@ -80,6 +79,7 @@ const NpcsTabMain = ({ campaignId }) => {
       // Load folders for the campaign
       try {
         const foldersList = await getNpcFoldersForCampaign(campaignId);
+        console.log("Folders list:", foldersList);
         setNpcFolders(foldersList);
       } catch (folderErr) {
         console.error("Error loading NPC folders:", folderErr);
@@ -189,18 +189,26 @@ const NpcsTabMain = ({ campaignId }) => {
   );
 
   // Apply sorting to the searched campaign NPCs
-  const sortedCampaignNpcs = sortNpcs(searchedCampaignNpcs, npcSortOrder, npcSortDirection);
+  const sortedCampaignNpcs = sortNpcs(
+    searchedCampaignNpcs,
+    npcSortOrder,
+    npcSortDirection
+  );
 
   // Apply folder, attitude/villain filters to the sorted campaign NPCs
-  const displayedNpcs = filterNpcs(
-    sortedCampaignNpcs,
-    selectedNpcFolderId,
-    npcFilterType,
-    filterSearchText,
-    npcTag,
-    npcRank,
-    npcSpecies
-  );
+  const displayedNpcs = useMemo(() => {
+    if (!campaignId) return [];
+
+    return sortedCampaignNpcs.filter((npc) => {
+      if (showAllNpcs) {
+        return true;
+      } else if (selectedNpcFolderId === null) {
+        return npc.folderId === null;
+      } else {
+        return npc.folderId === selectedNpcFolderId;
+      }
+    });
+  }, [sortedCampaignNpcs, selectedNpcFolderId, showAllNpcs, campaignId]);
 
   const handleCreateFolder = async () => {
     try {
@@ -233,7 +241,21 @@ const NpcsTabMain = ({ campaignId }) => {
   };
 
   const handleRenameFolder = (folderId) => {
-    const folder = npcFolders.find((f) => f.id === folderId);
+    const findFolder = (folders, folderId) => {
+      for (const folder of folders) {
+        if (folder.id === folderId) {
+          return folder;
+        }
+        if (folder.children && folder.children.length > 0) {
+          const found = findFolder(folder.children, folderId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+    const folder = findFolder(npcFolders, folderId);
     if (folder) {
       setFolderToRename(folder);
       setRenamedFolderName(folder.name);
@@ -245,30 +267,102 @@ const NpcsTabMain = ({ campaignId }) => {
   };
 
   const handleDeleteFolder = (folderId) => {
-    // This will use the existing delete folder functionality
-    // Just need to trigger the delete dialog
-    const folderToDelete = npcFolders.find((f) => f.id === folderId);
-    if (folderToDelete) {
-      setFolderToDeleteConfirmation(folderToDelete);
+    const collectFolderIdsToDelete = (folders, targetId, idsToDelete = []) => {
+      for (let folder of folders) {
+        if (folder.id === targetId) {
+          // Add this folder to delete list
+          idsToDelete.push(folder.id);
+          
+          // Add all children recursively
+          if (folder.children && folder.children.length > 0) {
+            folder.children.forEach(child => {
+              idsToDelete.push(child.id);
+              // Process nested children
+              if (child.children && child.children.length > 0) {
+                collectFolderIdsToDelete([child], child.id, idsToDelete);
+              }
+            });
+          }
+          return idsToDelete;
+        }
+        
+        // Check children if current folder is not a match
+        if (folder.children && folder.children.length > 0) {
+          collectFolderIdsToDelete(folder.children, targetId, idsToDelete);
+        }
+      }
+      return idsToDelete;
+    };
+  
+    const folderIdsToDelete = collectFolderIdsToDelete(npcFolders, folderId);
+    if (folderIdsToDelete.length > 0) {
+      setFolderToDeleteConfirmation(folderIdsToDelete);
       setIsDeleteFolderDialogOpen(true);
     }
   };
-
+  
   const handleConfirmDelete = async () => {
     if (!folderToDeleteConfirmation) return;
-
-    const folderIdToDelete = folderToDeleteConfirmation.id;
-    const originalFolders = [...npcFolders]; // Create a copy for reverting
-
-    // Optimistic update: Remove the folder from the UI immediately
-    setNpcFolders(npcFolders.filter((f) => f.id !== folderIdToDelete));
-
+  
+    const folderIdsToDelete = Array.isArray(folderToDeleteConfirmation)
+      ? folderToDeleteConfirmation
+      : [folderToDeleteConfirmation];
+  
+    const originalFolders = [...npcFolders]; // Backup for reverting
+    
+    // Find the parent of the folder being deleted (for selection purposes)
+    let parentId = null;
+    const findParent = (folders, targetId) => {
+      for (let folder of folders) {
+        if (folder.id === targetId) {
+          return folder.parentId;
+        }
+        if (folder.children && folder.children.length > 0) {
+          for (let child of folder.children) {
+            if (child.id === targetId) {
+              return folder.id; // Return parent's ID
+            }
+            // Check deeper levels
+            const deeperParent = findParent([child], targetId);
+            if (deeperParent !== null) return deeperParent;
+          }
+        }
+      }
+      return null;
+    };
+    
+    // If the selected folder is being deleted, find its parent
+    if (folderIdsToDelete.includes(selectedNpcFolderId)) {
+      parentId = findParent(npcFolders, selectedNpcFolderId);
+    }
+    
+    // Optimistic update - proper tree filtering
+    const filterDeletedFolders = (folders) => {
+      return folders.filter(folder => {
+        // Keep this folder if its ID is not in the delete list
+        if (folderIdsToDelete.includes(folder.id)) return false;
+        
+        // Process children if they exist
+        if (folder.children && folder.children.length > 0) {
+          folder.children = filterDeletedFolders(folder.children);
+        }
+        
+        return true;
+      });
+    };
+    
+    // Apply optimistic update
+    setNpcFolders(filterDeletedFolders([...npcFolders]));
+  
     try {
-      await deleteNpcFolder(folderIdToDelete, campaignId);
-
-      // If the deleted folder was selected, reset to "All NPCs" view
-      if (selectedNpcFolderId === folderIdToDelete) {
-        setSelectedNpcFolderId(null);
+      // Delete all folders on the server
+      for (const folderId of folderIdsToDelete) {
+        await deleteNpcFolder(folderId, campaignId);
+      }
+  
+      // Update selection if needed
+      if (folderIdsToDelete.includes(selectedNpcFolderId)) {
+        setSelectedNpcFolderId(parentId); // Set to parent or null
       }
     } catch (error) {
       console.error("Failed to delete folder:", error);
@@ -278,14 +372,22 @@ const NpcsTabMain = ({ campaignId }) => {
     } finally {
       setIsDeleteFolderDialogOpen(false);
       setFolderToDeleteConfirmation(null);
+      
+      // Refresh folders from server to ensure sync
+      try {
+        const foldersList = await getNpcFoldersForCampaign(campaignId);
+        setNpcFolders(foldersList);
+      } catch (refreshError) {
+        console.error("Failed to refresh folders:", refreshError);
+      }
     }
   };
-
+  
   const handleCancelDelete = () => {
     setIsDeleteFolderDialogOpen(false);
     setFolderToDeleteConfirmation(null);
   };
-
+  
   // Function to handle the actual folder renaming
   const handleConfirmRenameFolder = async () => {
     if (!folderToRename || !renamedFolderName.trim()) return;
@@ -327,19 +429,19 @@ const NpcsTabMain = ({ campaignId }) => {
         {campaignNpcs.length > 0 && (
           <Grid item xs={12}>
             <SearchbarFilter
-             searchText={filterSearchText}
-             setSearchText={setFilterSearchText}
-             sortOrder={npcSortOrder}
-             handleSortChange={handleSortChange}
-             filterType={npcFilterType}
-             handleFilterChange={handleFilterChange}
-             npcRank={npcRank}
-             handleRankChange={handleRankChange}
-             npcSpecies={npcSpecies}
-             handleSpeciesChange={handleSpeciesChange}
-             sortDirection={npcSortDirection}
-             npcTag={npcTag}
-             handleTagChange={handleTagChange}
+              searchText={filterSearchText}
+              setSearchText={setFilterSearchText}
+              sortOrder={npcSortOrder}
+              handleSortChange={handleSortChange}
+              filterType={npcFilterType}
+              handleFilterChange={handleFilterChange}
+              npcRank={npcRank}
+              handleRankChange={handleRankChange}
+              npcSpecies={npcSpecies}
+              handleSpeciesChange={handleSpeciesChange}
+              sortDirection={npcSortDirection}
+              npcTag={npcTag}
+              handleTagChange={handleTagChange}
             />
           </Grid>
         )}
@@ -351,6 +453,8 @@ const NpcsTabMain = ({ campaignId }) => {
             selectedFolderId={selectedNpcFolderId}
             setSelectedFolderId={setSelectedNpcFolderId}
             setFolders={setNpcFolders}
+            showAllNpcs={showAllNpcs}
+            setShowAllNpcs={setShowAllNpcs}
           />
         </Grid>
 
@@ -435,7 +539,11 @@ const NpcsTabMain = ({ campaignId }) => {
         <DeleteFolderDialogComponent
           open={isDeleteFolderDialogOpen}
           handleClose={handleCancelDelete}
-          folderToDelete={folderToDeleteConfirmation}
+          folderToDelete={
+            Array.isArray(folderToDeleteConfirmation)
+              ? { name: "selected folder and its children" }
+              : folderToDeleteConfirmation
+          }
           handleConfirmDelete={handleConfirmDelete}
         />
 

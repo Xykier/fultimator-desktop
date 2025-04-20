@@ -794,6 +794,9 @@ export const deleteNpcFolder = async (folderId, campaignId) => {
       // Only update if the NPC is also associated with the current campaign
       if (npcCampaign.campaignId === campaignId) {
         const updatedNpcCampaign = { ...npcCampaign, folderId: null };
+        if (updatedNpcCampaign.folderId === undefined) {
+          updatedNpcCampaign.folderId = null;
+        }
         await cursor.update(updatedNpcCampaign);
       }
       cursor = await cursor.continue();
@@ -815,7 +818,7 @@ export const updateNpcCampaignFolder = async (npcId, campaignId, folderId) => {
   const npcCampaign = await db.get(NPC_CAMPAIGN_STORE_NAME, [npcId, campaignId]);
 
   if (npcCampaign) {
-    const updatedNpcCampaign = { ...npcCampaign, folderId: folderId };
+    const updatedNpcCampaign = { ...npcCampaign, folderId: folderId === undefined ? null : folderId };
     await db.put(NPC_CAMPAIGN_STORE_NAME, updatedNpcCampaign);
   } else {
     console.error("NPC campaign data not found for npcId:", npcId, "and campaignId:", campaignId);
