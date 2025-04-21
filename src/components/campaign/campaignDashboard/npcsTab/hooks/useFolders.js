@@ -16,12 +16,12 @@ export const useFolders = (campaignId, npcFolders, setNpcFolders, loadNpcs, show
   const [folderToRename, setFolderToRename] = useState(null);
   const [renamedFolderName, setRenamedFolderName] = useState("");
 
-  const handleCreateFolder = async () => {
+  const handleCreateFolder = async (parentId) => {
     try {
       await addNpcFolder({
         campaignId: campaignId,
         name: newNpcFolderName,
-        parentId: null, // Use selected folder as parent if needed
+        parentId: parentId, // Use selected folder as parent if needed
       });
       // Refresh folders list
       const foldersList = await getNpcFoldersForCampaign(campaignId);

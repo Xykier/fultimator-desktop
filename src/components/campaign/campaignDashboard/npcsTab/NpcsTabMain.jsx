@@ -170,7 +170,7 @@ const NpcsTabMain = ({ campaignId }) => {
         <FolderNameDialogComponent
           open={isNewFolderDialogOpen}
           handleClose={() => setIsNewFolderDialogOpen(false)}
-          handleAction={handleCreateFolder}
+          handleAction={() => handleCreateFolder(selectedNpcFolderId)}
           parentId={selectedNpcFolderId}
           mode="create"
           maxLength={50}
