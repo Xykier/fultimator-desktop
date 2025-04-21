@@ -12,6 +12,7 @@ import NpcListLoading from "./NpcListLoading";
 import NpcListError from "./NpcListError";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 import useCampaignNpcs from "./hooks/useCampaignNpcs";
+import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
 const NpcsTabMain = ({ campaignId }) => {
   const {
@@ -19,21 +20,12 @@ const NpcsTabMain = ({ campaignId }) => {
         isLoading,
         loadError,
         campaignNpcs, // Base list for potential other uses
-        displayedNpcs, // Filtered and sorted list for display
         npcFolders,
-        selectedNpcFolderId,
-        showAllFolders,
         snackbar,
         expandedNpcId,
         isLinkNpcDialogOpen,
         linkNpcSearchText,
         filteredNpcsForDialog, // For the link dialog
-        filterSearchText, // For the main search bar
-        npcSortOrder,
-        npcSortDirection,
-        npcFilterType,
-        npcRank,
-        npcSpecies,
         isNewFolderDialogOpen,
         newNpcFolderName,
         isDeleteFolderDialogOpen,
@@ -50,14 +42,7 @@ const NpcsTabMain = ({ campaignId }) => {
         handleEditNpc,
         handleExpandNpc,
         handleSnackbarClose,
-        handleFilterChange,
-        handleRankChange,
-        handleSpeciesChange,
-        handleSortChange,
         handleSetAttitude,
-        setFilterSearchText,
-        setSelectedNpcFolderId,
-        setShowAllFolders,
         handleCreateFolder,
         setIsNewFolderDialogOpen,
         setNewNpcFolderName,
@@ -74,6 +59,9 @@ const NpcsTabMain = ({ campaignId }) => {
         setFolderToRename
         } = useCampaignNpcs(campaignId);
 
+        // Get state from the store
+        const selectedNpcFolderId = useNpcFiltersStore((state) => state.selectedNpcFolderId);
+
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
       <Grid container spacing={3}>
@@ -88,19 +76,7 @@ const NpcsTabMain = ({ campaignId }) => {
         {/* Search, sort, and filter controls */}
         {campaignNpcs.length > 0 && (
           <Grid item xs={12}>
-            <SearchbarFilter
-              searchText={filterSearchText}
-              setSearchText={setFilterSearchText}
-              sortOrder={npcSortOrder}
-              handleSortChange={handleSortChange}
-              filterType={npcFilterType}
-              handleFilterChange={handleFilterChange}
-              npcRank={npcRank}
-              handleRankChange={handleRankChange}
-              npcSpecies={npcSpecies}
-              handleSpeciesChange={handleSpeciesChange}
-              sortDirection={npcSortDirection}
-            />
+            <SearchbarFilter />
           </Grid>
         )}
 
@@ -108,11 +84,7 @@ const NpcsTabMain = ({ campaignId }) => {
         <Grid item xs={12}>
           <FolderExplorer
             folders={npcFolders}
-            selectedFolderId={selectedNpcFolderId}
-            setSelectedFolderId={setSelectedNpcFolderId}
             setFolders={setNpcFolders}
-            showAllFolders={showAllFolders}
-            setShowAllFolders={setShowAllFolders}
           />
         </Grid>
 
@@ -140,16 +112,14 @@ const NpcsTabMain = ({ campaignId }) => {
         {/* Display NPCs or Empty State for the current filter */}
         {!isLoading && !loadError && campaignNpcs.length > 0 && (
           <NpcList
-            displayedNpcs={displayedNpcs}
+            campaignNpcs={campaignNpcs}
             expandedNpcId={expandedNpcId}
             handleExpandNpc={handleExpandNpc}
             handleEditNpc={handleEditNpc}
             handleToggleNpc={handleToggleNpc}
             handleSetAttitude={handleSetAttitude}
-            filterType={npcFilterType}
             folders={npcFolders}
             handleMoveNpcToFolder={handleMoveNpcToFolder}
-            selectedFolderId={selectedNpcFolderId}
             onRenameFolder={handleRenameFolder}
             onDeleteFolder={handleDeleteFolder}
           />

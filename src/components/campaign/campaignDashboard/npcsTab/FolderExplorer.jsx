@@ -18,15 +18,19 @@ import {
   Home,
   People,
 } from "@mui/icons-material";
+import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
 const FolderExplorer = ({
   folders,
-  selectedFolderId,
-  setSelectedFolderId,
   setFolders,
-  showAllFolders,
-  setShowAllFolders,
 }) => {
+
+  // Get state from the store
+  const selectedFolderId = useNpcFiltersStore((state) => state.selectedNpcFolderId);
+  const setSelectedFolderId = useNpcFiltersStore((state) => state.setSelectedNpcFolderId);
+  const showAllFolders = useNpcFiltersStore((state) => state.showAllFolders);
+  const setShowAllFolders = useNpcFiltersStore((state) => state.setShowAllFolders);
+
   const [openFolders, setOpenFolders] = useState({});
 
   // Process folders to create a flat structure for easier operations

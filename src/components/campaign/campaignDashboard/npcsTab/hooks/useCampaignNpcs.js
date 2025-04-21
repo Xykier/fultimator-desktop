@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useNpcData } from "./useNpcData";
-import { useNpcFilters } from "./useNpcFilters";
 import { useFolders } from "./useFolders";
 import { useNpcDialogs } from "./useNpcDialogs";
 import { useNpcActions } from "./useNpcActions";
@@ -21,26 +20,6 @@ export const useCampaignNpcs = (campaignId) => {
     showSnackbar,
     handleSnackbarClose
   } = useNpcData(campaignId);
-
-  // Filtering and sorting
-  const {
-    filterSearchText,
-    npcSortOrder,
-    npcSortDirection,
-    npcFilterType,
-    npcRank,
-    npcSpecies,
-    selectedNpcFolderId,
-    showAllFolders,
-    displayedNpcs,
-    setFilterSearchText,
-    setSelectedNpcFolderId,
-    setShowAllFolders,
-    handleFilterChange,
-    handleRankChange,
-    handleSpeciesChange,
-    handleSortChange
-  } = useNpcFilters(campaignNpcs);
 
   // Folder management
   const {
@@ -98,14 +77,11 @@ export const useCampaignNpcs = (campaignId) => {
 
     // NPC Lists and Display Data
     campaignNpcs,
-    displayedNpcs,
     allNpcs,
     associatedNpcIds,
 
     // Folder Management State
     npcFolders,
-    selectedNpcFolderId,
-    showAllFolders,
     isNewFolderDialogOpen,
     newNpcFolderName,
     isDeleteFolderDialogOpen,
@@ -122,12 +98,6 @@ export const useCampaignNpcs = (campaignId) => {
     // Search and Filter States
     linkNpcSearchText,
     filteredNpcsForDialog,
-    filterSearchText,
-    npcSortOrder,
-    npcSortDirection,
-    npcFilterType,
-    npcRank,
-    npcSpecies,
 
     // Event Handlers and Methods
     loadNpcs,
@@ -137,14 +107,7 @@ export const useCampaignNpcs = (campaignId) => {
     handleEditNpc,
     handleExpandNpc,
     handleSnackbarClose,
-    handleFilterChange,
-    handleRankChange,
-    handleSpeciesChange,
-    handleSortChange,
     handleSetAttitude,
-    setFilterSearchText,
-    setSelectedNpcFolderId,
-    setShowAllFolders,
     handleCreateFolder,
     setIsNewFolderDialogOpen,
     setNewNpcFolderName,

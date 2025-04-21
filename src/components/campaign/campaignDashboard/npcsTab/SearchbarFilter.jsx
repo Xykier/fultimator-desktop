@@ -34,9 +34,10 @@ import {
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 import { getSpeciesIcon, getRankIcon } from "../../../../libs/npcIcons";
+import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
 const attitudeOptions = [
-  { value: "all", label: "All NPCs", icon: <PeopleIcon fontSize="small" /> },
+  { value: "all", label: "All Attitudes", icon: <PeopleIcon fontSize="small" /> },
   {
     value: "friendly",
     label: "Friendly",
@@ -54,34 +55,75 @@ const attitudeOptions = [
   },
 ];
 
-const SearchbarFilter = ({
-  searchText,
-  setSearchText,
-  sortOrder,
-  handleSortChange,
-  filterType,
-  handleFilterChange,
-  npcRank,
-  handleRankChange,
-  npcSpecies,
-  handleSpeciesChange,
-  sortDirection,
-}) => {
+const SearchbarFilter = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [expanded, setExpanded] = useState(false);
+  
+  // Extract state from the store with individual selectors to prevent unnecessary re-renders
+  const filterSearchText = useNpcFiltersStore((state) => state.filterSearchText);
+  const npcSortOrder = useNpcFiltersStore((state) => state.npcSortOrder);
+  const npcSortDirection = useNpcFiltersStore((state) => state.npcSortDirection);
+  const npcAttitudeFilter = useNpcFiltersStore((state) => state.npcAttitudeFilter);
+  const showVillainsOnly = useNpcFiltersStore((state) => state.showVillainsOnly);
+  const npcRank = useNpcFiltersStore((state) => state.npcRank);
+  const npcSpecies = useNpcFiltersStore((state) => state.npcSpecies);
+  
+  // Extract actions from the store
+  const setFilterSearchText = useNpcFiltersStore((state) => state.setFilterSearchText);
+  const setNpcSortOrder = useNpcFiltersStore((state) => state.setNpcSortOrder);
+  const setNpcSortDirection = useNpcFiltersStore((state) => state.setNpcSortDirection);
+  const setNpcAttitudeFilter = useNpcFiltersStore((state) => state.setNpcAttitudeFilter);
+  const setShowVillainsOnly = useNpcFiltersStore((state) => state.setShowVillainsOnly);
+  const setNpcRank = useNpcFiltersStore((state) => state.setNpcRank);
+  const setNpcSpecies = useNpcFiltersStore((state) => state.setNpcSpecies);
+
+  const handleSortChange = (order, direction) => {
+    setNpcSortOrder(order);
+    if (direction) setNpcSortDirection(direction);
+  };
 
   const handleSortDirectionChange = () => {
-    const newDirection = sortDirection === "asc" ? "desc" : "asc";
-    handleSortChange(sortOrder, newDirection);
+    const newDirection = npcSortDirection === "asc" ? "desc" : "asc";
+    setNpcSortDirection(newDirection);
+  };
+
+  const handleAttitudeChange = (event) => {
+    setNpcAttitudeFilter(event.target.value);
+  };
+
+  const handleVillainToggle = (event) => {
+    setShowVillainsOnly(event.target.checked);
+  };
+
+  const handleRankChange = (event) => {
+    if (typeof event === "string" || event === null) {
+      setNpcRank(event);
+    } else {
+      setNpcRank(event.target.value);
+    }
+  };
+
+  const handleSpeciesChange = (event) => {
+    if (typeof event === "string" || event === null) {
+      setNpcSpecies(event);
+    } else {
+      setNpcSpecies(event.target.value);
+    }
   };
 
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
 
-  const handleVillainToggle = (event) => {
-    handleFilterChange(null, event.target.checked ? "villains" : "all");
+  const clearAllFilters = () => {
+    setFilterSearchText("");
+    setNpcSortOrder("name");
+    setNpcSortDirection("asc");
+    setNpcAttitudeFilter("all");
+    setShowVillainsOnly(false);
+    setNpcRank("");
+    setNpcSpecies("");
   };
 
   return (
@@ -101,8 +143,8 @@ const SearchbarFilter = ({
           label="Search campaign NPCs..."
           placeholder="Name"
           size="small"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          value={filterSearchText}
+          onChange={(e) => setFilterSearchText(e.target.value)}
           sx={{ flexGrow: 1 }}
           InputProps={{
             startAdornment: (
@@ -110,10 +152,10 @@ const SearchbarFilter = ({
                 <SearchIcon color="action" />
               </InputAdornment>
             ),
-            endAdornment: searchText ? (
+            endAdornment: filterSearchText ? (
               <IconButton
                 aria-label="clear"
-                onClick={() => setSearchText("")}
+                onClick={() => setFilterSearchText("")}
                 edge="end"
                 size="small"
               >
@@ -133,13 +175,7 @@ const SearchbarFilter = ({
         </Button>
         <Tooltip title="Clear all filters">
           <Button
-            onClick={() => {
-              setSearchText("");
-              handleSortChange("name", "asc");
-              handleFilterChange(null, "all");
-              handleRankChange("");
-              handleSpeciesChange("");
-            }}
+            onClick={clearAllFilters}
             sx={{ minWidth: "auto", whiteSpace: "nowrap" }}
             size="small"
           >
@@ -179,11 +215,9 @@ const SearchbarFilter = ({
               <InputLabel id="sort-order-label">Sort By</InputLabel>
               <Select
                 labelId="sort-order-label"
-                value={sortOrder}
+                value={npcSortOrder}
                 label="Sort By"
-                onChange={(e) =>
-                  handleSortChange(e.target.value, sortDirection)
-                }
+                onChange={(e) => handleSortChange(e.target.value)}
                 startAdornment={
                   <InputAdornment position="start">
                     <SortIcon fontSize="small" color="action" />
@@ -208,7 +242,7 @@ const SearchbarFilter = ({
                 p: 1,
               }}
             >
-              {sortDirection === "asc" ? (
+              {npcSortDirection === "asc" ? (
                 <ArrowUpwardIcon fontSize="small" />
               ) : (
                 <ArrowDownwardIcon fontSize="small" />
@@ -225,9 +259,9 @@ const SearchbarFilter = ({
             <Select
               labelId="attitude-label"
               id="attitude"
-              value={filterType === "villains" ? "all" : filterType}
+              value={npcAttitudeFilter}
               label="Attitude"
-              onChange={(e) => handleFilterChange(null, e.target.value)}
+              onChange={handleAttitudeChange}
               renderValue={(selected) => {
                 const option = attitudeOptions.find(
                   (opt) => opt.value === selected
@@ -251,11 +285,11 @@ const SearchbarFilter = ({
             </Select>
           </FormControl>
 
-          {/* Villains as a toggle switch */}
+          {/* Villains as a toggle switch - now separated from attitude */}
           <FormControlLabel
             control={
               <Switch
-                checked={filterType === "villains"}
+                checked={showVillainsOnly}
                 onChange={handleVillainToggle}
                 color="warning"
                 size="small"
@@ -265,7 +299,7 @@ const SearchbarFilter = ({
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 <VillainIcon
                   fontSize="small"
-                  color={filterType === "villains" ? "warning" : "action"}
+                  color={showVillainsOnly ? "warning" : "action"}
                 />
                 <span>Villains only</span>
               </Box>

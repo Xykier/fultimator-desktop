@@ -46,7 +46,8 @@
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "semver": "^7.7.1",
-    "stream-browserify": "^3.0.0"
+    "stream-browserify": "^3.0.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
@@ -70,6 +71,6 @@
   "author": "Fultimator <fultimator@gmail.com>",
   "buildcounter": {
     "version": "1.0.2",
-    "count": 30
+    "count": 31
   }
 }

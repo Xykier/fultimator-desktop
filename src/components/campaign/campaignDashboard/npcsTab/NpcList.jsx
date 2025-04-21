@@ -3,21 +3,30 @@ import { Box, Grid, Typography } from "@mui/material";
 
 import NpcCard from "./NpcCard";
 import NpcsFolderHeader from "./NpcsFolderHeader";
+import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
 const NpcList = ({
-  displayedNpcs,
+  campaignNpcs,
   expandedNpcId,
   handleExpandNpc,
   handleEditNpc,
   handleToggleNpc,
   handleSetAttitude,
-  filterType,
   folders,
-  handleMoveNpcToFolder,
-  selectedFolderId,
+  handleMoveNpcToFolder,  
   onRenameFolder,
   onDeleteFolder,
 }) => {
+  // Use the Zustand store instead of the hook-based state
+  const {
+    npcFilterType,
+    selectedNpcFolderId,
+    getDisplayedNpcs
+  } = useNpcFiltersStore();
+
+  // Get displayed NPCs using the store's method
+  const displayedNpcs = getDisplayedNpcs(campaignNpcs);
+
   // Find the selected folder object if a folder is selected
   const findFolder = (folders, selectedFolderId) => {
     for (const folder of folders) {
@@ -34,7 +43,7 @@ const NpcList = ({
     return null;
   };
 
-  const selectedFolder = selectedFolderId ? findFolder(folders, selectedFolderId) : null;
+  const selectedFolder = selectedNpcFolderId ? findFolder(folders, selectedNpcFolderId) : null;
 
   return (
     <>
@@ -79,13 +88,13 @@ const NpcList = ({
             <Typography variant="body1" color="text.secondary">
               {selectedFolder
                 ? `No NPCs in folder "${selectedFolder.name}"`
-                : filterType === "all"
+                : npcFilterType === "all"
                 ? "No NPCs match the current search."
-                : filterType === "friendly"
+                : npcFilterType === "friendly"
                 ? "No friendly NPCs found."
-                : filterType === "neutral"
+                : npcFilterType === "neutral"
                 ? "No neutral NPCs found."
-                : filterType === "hostile"
+                : npcFilterType === "hostile"
                 ? "No hostile NPCs found."
                 : "No villains found."}
             </Typography>
