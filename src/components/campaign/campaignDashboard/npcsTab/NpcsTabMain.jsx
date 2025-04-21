@@ -22,7 +22,7 @@ const NpcsTabMain = ({ campaignId }) => {
         displayedNpcs, // Filtered and sorted list for display
         npcFolders,
         selectedNpcFolderId,
-        showAllNpcs,
+        showAllFolders,
         snackbar,
         expandedNpcId,
         isLinkNpcDialogOpen,
@@ -57,7 +57,7 @@ const NpcsTabMain = ({ campaignId }) => {
         handleSetAttitude,
         setFilterSearchText,
         setSelectedNpcFolderId,
-        setShowAllNpcs,
+        setShowAllFolders,
         handleCreateFolder,
         setIsNewFolderDialogOpen,
         setNewNpcFolderName,
@@ -111,8 +111,8 @@ const NpcsTabMain = ({ campaignId }) => {
             selectedFolderId={selectedNpcFolderId}
             setSelectedFolderId={setSelectedNpcFolderId}
             setFolders={setNpcFolders}
-            showAllNpcs={showAllNpcs}
-            setShowAllNpcs={setShowAllNpcs}
+            showAllFolders={showAllFolders}
+            setShowAllFolders={setShowAllFolders}
           />
         </Grid>
 

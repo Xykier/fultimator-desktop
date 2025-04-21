@@ -24,8 +24,8 @@ const FolderExplorer = ({
   selectedFolderId,
   setSelectedFolderId,
   setFolders,
-  showAllNpcs,
-  setShowAllNpcs,
+  showAllFolders,
+  setShowAllFolders,
 }) => {
   const [openFolders, setOpenFolders] = useState({});
 
@@ -66,7 +66,7 @@ const FolderExplorer = ({
 
   const handleFolderClick = (folderId) => {
     setSelectedFolderId(folderId);
-    setShowAllNpcs(false);
+    setShowAllFolders(false);
   };
 
   const handleToggle = (folderId) => {
@@ -103,12 +103,12 @@ const FolderExplorer = ({
   };
 
   const goToRoot = () => {
-    setShowAllNpcs(false);
+    setShowAllFolders(false);
     setSelectedFolderId(null);
   };
 
-  const goToAllNPCs = () => {
-    setShowAllNpcs(true);
+  const goToAllFolders = () => {
+    setShowAllFolders(true);
     setSelectedFolderId(null);
   };
 
@@ -116,12 +116,12 @@ const FolderExplorer = ({
     <div>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Button
-          variant={showAllNpcs ? "contained" : "outlined"}
+          variant={showAllFolders ? "contained" : "outlined"}
           startIcon={<People />}
-          onClick={goToAllNPCs}
+          onClick={goToAllFolders}
           sx={{ mr: 2 }}
         >
-          All NPCs
+          All Folders
         </Button>
         
         <Breadcrumbs aria-label="breadcrumb">
