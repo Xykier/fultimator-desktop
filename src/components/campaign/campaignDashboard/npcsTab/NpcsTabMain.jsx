@@ -12,31 +12,23 @@ import NpcListLoading from "./NpcListLoading";
 import NpcListError from "./NpcListError";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 import useCampaignNpcs from "./hooks/useCampaignNpcs";
+import { useNpcStore } from "./stores/npcDataStore";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
 const NpcsTabMain = ({ campaignId }) => {
   const {
     // State & Derived Values
-    isLoading,
-    loadError,
-    campaignNpcs, // Base list for potential other uses
-    snackbar,
     expandedNpcId,
     isLinkNpcDialogOpen,
     linkNpcSearchText,
     filteredNpcsForDialog, // For the link dialog
-    associatedNpcIds, // Useful for checking if an NPC is linked
-    showSnackbar,
 
     // Handlers & Setters
-    loadNpcs,
     handleAddExistingNpc,
     handleCloseLinkDialog: handleClose, // Rename for clarity
-    handleToggleNpc,
     handleEditNpc,
     handleExpandNpc,
-    handleSnackbarClose,
     handleSetAttitude,
     setLinkNpcSearchText,
   } = useCampaignNpcs(campaignId);
@@ -45,7 +37,19 @@ const NpcsTabMain = ({ campaignId }) => {
   const { selectedNpcFolderId } = useNpcFiltersStore();
 
   const {
-    setCampaignId,
+    initialize: initializeNpcs,
+    campaignNpcs,
+    isLoading,
+    loadError,
+    snackbar,
+    showSnackbar,
+    handleSnackbarClose,
+    associatedNpcIds,
+    toggleNpc: handleToggleNpc,
+  } = useNpcStore();
+
+  const {
+    setCampaignId: setFoldersCampaignId,
     fetchFolders,
     newNpcFolderName,
     setNewNpcFolderName,
@@ -68,11 +72,12 @@ const NpcsTabMain = ({ campaignId }) => {
   } = useNpcFoldersStore();
 
   useEffect(() => {
-    setCampaignId(campaignId);
-    setLoadNpcs(loadNpcs);
+    initializeNpcs(campaignId);
+    setFoldersCampaignId(campaignId);
+    setLoadNpcs(() => initializeNpcs(campaignId));
     setShowSnackbar(showSnackbar);
     fetchFolders();
-  }, [campaignId, setCampaignId, fetchFolders, loadNpcs, setLoadNpcs, showSnackbar, setShowSnackbar]);
+  }, [campaignId, setFoldersCampaignId, fetchFolders, setLoadNpcs, showSnackbar, setShowSnackbar, initializeNpcs]);
 
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
@@ -104,7 +109,7 @@ const NpcsTabMain = ({ campaignId }) => {
         {/* Error state */}
         {loadError && (
           <Grid item xs={12}>
-            <NpcListError loadError={loadError} loadNpcs={loadNpcs} />
+            <NpcListError />
           </Grid>
         )}
 

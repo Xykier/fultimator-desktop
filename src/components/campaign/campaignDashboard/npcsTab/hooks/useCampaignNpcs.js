@@ -1,24 +1,10 @@
 import { useMemo } from "react";
-import { useNpcData } from "./useNpcData";
 import { useNpcDialogs } from "./useNpcDialogs";
 import { useNpcActions } from "./useNpcActions";
+import { useNpcStore } from "../stores/npcDataStore";
 
 export const useCampaignNpcs = (campaignId) => {
-  // Core data and state management
-  const {
-    allNpcs,
-    associatedNpcIds,
-    campaignNpcs,
-    npcFolders,
-    setNpcFolders,
-    isLoading,
-    loadError,
-    loadNpcs,
-    handleToggleNpc,
-    snackbar,
-    showSnackbar,
-    handleSnackbarClose
-  } = useNpcData(campaignId);
+  const { allNpcs, loadNpcs, showSnackbar } = useNpcStore();
 
   // Dialog state management
   const {
@@ -28,14 +14,15 @@ export const useCampaignNpcs = (campaignId) => {
     handleAddExistingNpc,
     handleCloseLinkDialog,
     handleExpandNpc,
-    setLinkNpcSearchText
+    setLinkNpcSearchText,
   } = useNpcDialogs();
 
   // NPC action handlers
-  const {
-    handleEditNpc,
-    handleSetAttitude
-  } = useNpcActions(campaignId, loadNpcs, showSnackbar);
+  const { handleEditNpc, handleSetAttitude } = useNpcActions(
+    campaignId,
+    loadNpcs,
+    showSnackbar
+  );
 
   // Filtered NPCs for the "Link NPC" dialog
   const filteredNpcsForDialog = useMemo(() => {
@@ -46,20 +33,10 @@ export const useCampaignNpcs = (campaignId) => {
 
   // Return everything that the original hook returned
   return {
-    // Loading and Error States
-    isLoading,
-    loadError,
-
     // NPC Lists and Display Data
-    campaignNpcs,
     allNpcs,
-    associatedNpcIds,
-
-    // Folder Management State
-    npcFolders,
 
     // UI State
-    snackbar,
     expandedNpcId,
     isLinkNpcDialogOpen,
 
@@ -71,12 +48,9 @@ export const useCampaignNpcs = (campaignId) => {
     loadNpcs,
     handleAddExistingNpc,
     handleCloseLinkDialog,
-    handleToggleNpc,
     handleEditNpc,
     handleExpandNpc,
-    handleSnackbarClose,
     handleSetAttitude,
-    setNpcFolders,
     setLinkNpcSearchText,
   };
 };
