@@ -45,7 +45,6 @@ export const useNpcData = (campaignId) => {
       // Load folders for the campaign
       try {
         const foldersList = await getNpcFoldersForCampaign(campaignId);
-        console.log("Folders list:", foldersList);
         setNpcFolders(foldersList);
       } catch (folderErr) {
         console.error("Error loading NPC folders:", folderErr);

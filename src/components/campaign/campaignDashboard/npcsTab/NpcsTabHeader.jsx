@@ -1,8 +1,11 @@
 import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { CreateNewFolder, Link as LinkIcon } from "@mui/icons-material";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
-const NpcsTabHeader = ({ handleAddExistingNpc, setIsNewFolderDialogOpen }) => {
+const NpcsTabHeader = ({ handleAddExistingNpc }) => {
+  const { setIsNewFolderDialogOpen } = useNpcFoldersStore();
+
   return (
     <Box
       sx={{

@@ -19,17 +19,17 @@ import {
   People,
 } from "@mui/icons-material";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
-const FolderExplorer = ({
-  folders,
-  setFolders,
-}) => {
+const FolderExplorer = () => {
 
   // Get state from the store
   const selectedFolderId = useNpcFiltersStore((state) => state.selectedNpcFolderId);
   const setSelectedFolderId = useNpcFiltersStore((state) => state.setSelectedNpcFolderId);
   const showAllFolders = useNpcFiltersStore((state) => state.showAllFolders);
   const setShowAllFolders = useNpcFiltersStore((state) => state.setShowAllFolders);
+  const folders = useNpcFoldersStore((state) => state.npcFolders);
+  const setFolders = useNpcFoldersStore((state) => state.setNpcFolders);
 
   const [openFolders, setOpenFolders] = useState({});
 

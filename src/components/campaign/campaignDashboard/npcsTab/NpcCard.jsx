@@ -32,10 +32,10 @@ import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NpcDetailDialog from "./NpcDetailDialog";
 import NpcMoveFolderDialog from "./NpcMoveFolderDialog";
 import { getSpeciesIcon, getRankIcon } from "../../../../libs/npcIcons";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
 // Standardized icon size constant
 const ICON_SIZE = 16; // Set all icons to be 16px
-
 
 const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
@@ -116,8 +116,9 @@ const NpcCard = ({
   onNotes,
   onSetAttitude,
   folders,
-  onMoveToFolder,
 }) => {
+  const {  moveNpcToFolder } = useNpcFoldersStore();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [attitude, setAttitude] = useState(npc.attitude || "neutral");
@@ -146,12 +147,14 @@ const NpcCard = ({
 
   const handleMoveFolderClose = () => {
     setMoveFolderDialogOpen(false);
+    setSelectedFolder("");
   };
 
   const handleMoveToFolder = () => {
-    if (onMoveToFolder) {
-      onMoveToFolder(npc.id, selectedFolder);
-    }
+    console.log("Moving NPC to folder:", selectedFolder);
+    console.log("NPC ID:", npc.id);
+
+    moveNpcToFolder(npc.id, selectedFolder);
     handleMoveFolderClose();
   };
 
@@ -195,19 +198,17 @@ const NpcCard = ({
             sx={{ objectFit: "contain", paddingTop: "5px" }}
           />
           <CompactCardContent>
-            <Tooltip title={npc.name}>
-              <Typography
-                variant="body2"
-                noWrap
-                sx={{
-                  fontWeight: "bold",
-                  width: "100%",
-                  color: theme.palette.text.primary,
-                }}
-              >
-                {npc.name}
-              </Typography>
-            </Tooltip>
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                fontWeight: "bold",
+                width: "100%",
+                color: theme.palette.text.primary,
+              }}
+            >
+              {npc.name}
+            </Typography>
 
             <IconContainer>
               {/* Prominent Level Badge */}

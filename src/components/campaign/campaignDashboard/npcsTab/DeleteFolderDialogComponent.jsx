@@ -24,7 +24,7 @@ const DeleteFolderDialogComponent = ({
       <DialogTitle id="delete-folder-dialog-title">Delete Folder</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Deleting the folder "{folderToDelete?.name}" will unlink all NPCs
+          Deleting the folder {folderToDelete} will unlink all NPCs
           inside from this campaign. The NPCs will remain in your database but
           will no longer be associated with this folder. Are you sure you want
           to continue?

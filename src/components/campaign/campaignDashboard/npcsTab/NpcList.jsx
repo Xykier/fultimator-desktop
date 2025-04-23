@@ -4,6 +4,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import NpcCard from "./NpcCard";
 import NpcsFolderHeader from "./NpcsFolderHeader";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
 const NpcList = ({
   campaignNpcs,
@@ -12,23 +13,24 @@ const NpcList = ({
   handleEditNpc,
   handleToggleNpc,
   handleSetAttitude,
-  folders,
-  handleMoveNpcToFolder,  
-  onRenameFolder,
-  onDeleteFolder,
 }) => {
   // Use the Zustand store instead of the hook-based state
-  const {
-    npcFilterType,
-    selectedNpcFolderId,
-    getDisplayedNpcs
-  } = useNpcFiltersStore();
+  const { npcFilterType, selectedNpcFolderId, getDisplayedNpcs } =
+    useNpcFiltersStore();
+
+  const { npcFolders, prepareRenameFolder, prepareDeleteFolder } =
+    useNpcFoldersStore();
 
   // Get displayed NPCs using the store's method
   const displayedNpcs = getDisplayedNpcs(campaignNpcs);
 
   // Find the selected folder object if a folder is selected
   const findFolder = (folders, selectedFolderId) => {
+    if (!folders || !Array.isArray(folders)) {
+      console.error("Invalid folders data:", folders);
+      return null;
+    }
+    
     for (const folder of folders) {
       if (folder.id === selectedFolderId) {
         return folder;
@@ -43,7 +45,9 @@ const NpcList = ({
     return null;
   };
 
-  const selectedFolder = selectedNpcFolderId ? findFolder(folders, selectedNpcFolderId) : null;
+  const selectedFolder = selectedNpcFolderId
+    ? findFolder(npcFolders, selectedNpcFolderId)
+    : null;
 
   return (
     <>
@@ -52,8 +56,8 @@ const NpcList = ({
         <Grid item xs={12}>
           <NpcsFolderHeader
             selectedFolder={selectedFolder}
-            onRenameFolder={onRenameFolder}
-            onDeleteFolder={onDeleteFolder}
+            onRenameFolder={() => prepareRenameFolder(selectedFolder.id)}
+            onDeleteFolder={() => prepareDeleteFolder(selectedFolder.id)}
           />
         </Grid>
       )}
@@ -68,8 +72,7 @@ const NpcList = ({
             onEdit={handleEditNpc}
             onUnlink={handleToggleNpc}
             onSetAttitude={handleSetAttitude}
-            folders={folders}
-            onMoveToFolder={handleMoveNpcToFolder}
+            folders={npcFolders}
           />
         ))
       ) : (

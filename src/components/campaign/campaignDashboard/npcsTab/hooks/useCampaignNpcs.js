@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useNpcData } from "./useNpcData";
-import { useFolders } from "./useFolders";
 import { useNpcDialogs } from "./useNpcDialogs";
 import { useNpcActions } from "./useNpcActions";
 
@@ -20,30 +19,6 @@ export const useCampaignNpcs = (campaignId) => {
     showSnackbar,
     handleSnackbarClose
   } = useNpcData(campaignId);
-
-  // Folder management
-  const {
-    isNewFolderDialogOpen,
-    newNpcFolderName,
-    isDeleteFolderDialogOpen,
-    folderToDeleteConfirmation,
-    isRenameFolderDialogOpen,
-    folderToRename,
-    renamedFolderName,
-    handleCreateFolder,
-    handleMoveNpcToFolder,
-    handleRenameFolder,
-    handleDeleteFolder,
-    handleConfirmDelete,
-    handleCancelDelete,
-    handleConfirmRenameFolder,
-    setIsNewFolderDialogOpen,
-    setNewNpcFolderName,
-    setIsDeleteFolderDialogOpen,
-    setIsRenameFolderDialogOpen,
-    setRenamedFolderName,
-    setFolderToRename
-  } = useFolders(campaignId, npcFolders, setNpcFolders, loadNpcs, showSnackbar);
 
   // Dialog state management
   const {
@@ -82,13 +57,6 @@ export const useCampaignNpcs = (campaignId) => {
 
     // Folder Management State
     npcFolders,
-    isNewFolderDialogOpen,
-    newNpcFolderName,
-    isDeleteFolderDialogOpen,
-    isRenameFolderDialogOpen,
-    renamedFolderName,
-    folderToDeleteConfirmation,
-    folderToRename,
 
     // UI State
     snackbar,
@@ -108,21 +76,8 @@ export const useCampaignNpcs = (campaignId) => {
     handleExpandNpc,
     handleSnackbarClose,
     handleSetAttitude,
-    handleCreateFolder,
-    setIsNewFolderDialogOpen,
-    setNewNpcFolderName,
     setNpcFolders,
-    handleMoveNpcToFolder,
-    handleRenameFolder,
-    setIsRenameFolderDialogOpen,
-    setRenamedFolderName,
-    handleDeleteFolder,
-    setIsDeleteFolderDialogOpen,
-    handleConfirmDelete,
-    handleCancelDelete,
-    handleConfirmRenameFolder,
     setLinkNpcSearchText,
-    setFolderToRename,
   };
 };
 

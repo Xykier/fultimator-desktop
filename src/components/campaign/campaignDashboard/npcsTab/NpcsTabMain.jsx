@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Grid, Paper } from "@mui/material";
 import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
@@ -13,64 +13,73 @@ import NpcListError from "./NpcListError";
 import FeedbackSnackbar from "./FeedbackSnackbar";
 import useCampaignNpcs from "./hooks/useCampaignNpcs";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
 const NpcsTabMain = ({ campaignId }) => {
   const {
-        // State & Derived Values
-        isLoading,
-        loadError,
-        campaignNpcs, // Base list for potential other uses
-        npcFolders,
-        snackbar,
-        expandedNpcId,
-        isLinkNpcDialogOpen,
-        linkNpcSearchText,
-        filteredNpcsForDialog, // For the link dialog
-        isNewFolderDialogOpen,
-        newNpcFolderName,
-        isDeleteFolderDialogOpen,
-        isRenameFolderDialogOpen,
-        renamedFolderName,
-        associatedNpcIds, // Useful for checking if an NPC is linked
-        folderToDeleteConfirmation,
-    
-        // Handlers & Setters
-        loadNpcs,
-        handleAddExistingNpc,
-        handleCloseLinkDialog: handleClose, // Rename for clarity
-        handleToggleNpc,
-        handleEditNpc,
-        handleExpandNpc,
-        handleSnackbarClose,
-        handleSetAttitude,
-        handleCreateFolder,
-        setIsNewFolderDialogOpen,
-        setNewNpcFolderName,
-        setNpcFolders,
-        handleMoveNpcToFolder,
-        handleRenameFolder, // Initiates rename dialog
-        setIsRenameFolderDialogOpen,
-        setRenamedFolderName,
-        handleDeleteFolder, // Initiates delete dialog
-        handleConfirmDelete,
-        handleCancelDelete,
-        handleConfirmRenameFolder,
-        setLinkNpcSearchText,
-        setFolderToRename
-        } = useCampaignNpcs(campaignId);
+    // State & Derived Values
+    isLoading,
+    loadError,
+    campaignNpcs, // Base list for potential other uses
+    snackbar,
+    expandedNpcId,
+    isLinkNpcDialogOpen,
+    linkNpcSearchText,
+    filteredNpcsForDialog, // For the link dialog
+    associatedNpcIds, // Useful for checking if an NPC is linked
+    showSnackbar,
 
-        // Get state from the store
-        const selectedNpcFolderId = useNpcFiltersStore((state) => state.selectedNpcFolderId);
+    // Handlers & Setters
+    loadNpcs,
+    handleAddExistingNpc,
+    handleCloseLinkDialog: handleClose, // Rename for clarity
+    handleToggleNpc,
+    handleEditNpc,
+    handleExpandNpc,
+    handleSnackbarClose,
+    handleSetAttitude,
+    setLinkNpcSearchText,
+  } = useCampaignNpcs(campaignId);
+
+  // Get state from the store
+  const { selectedNpcFolderId } = useNpcFiltersStore();
+
+  const {
+    setCampaignId,
+    fetchFolders,
+    newNpcFolderName,
+    setNewNpcFolderName,
+    isNewFolderDialogOpen,
+    setIsNewFolderDialogOpen,
+    createFolder,
+    isRenameFolderDialogOpen,
+    setIsRenameFolderDialogOpen,
+    setFolderToRename,
+    renamedFolderName,
+    setRenamedFolderName,
+    confirmRenameFolder,
+    isDeleteFolderDialogOpen,
+    confirmDeleteFolder,
+    cancelDeleteFolder,
+    folderToDeleteConfirmation,
+    getFolderName,
+    setLoadNpcs,
+    setShowSnackbar,
+  } = useNpcFoldersStore();
+
+  useEffect(() => {
+    setCampaignId(campaignId);
+    setLoadNpcs(loadNpcs);
+    setShowSnackbar(showSnackbar);
+    fetchFolders();
+  }, [campaignId, setCampaignId, fetchFolders, loadNpcs, setLoadNpcs, showSnackbar, setShowSnackbar]);
 
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
       <Grid container spacing={3}>
         {/* Header */}
         <Grid item xs={12}>
-          <NpcsTabHeader
-            handleAddExistingNpc={handleAddExistingNpc}
-            setIsNewFolderDialogOpen={() => setIsNewFolderDialogOpen(true)}
-          />
+          <NpcsTabHeader handleAddExistingNpc={handleAddExistingNpc} />
         </Grid>
 
         {/* Search, sort, and filter controls */}
@@ -82,10 +91,7 @@ const NpcsTabMain = ({ campaignId }) => {
 
         {/* Display NPC Folders */}
         <Grid item xs={12}>
-          <FolderExplorer
-            folders={npcFolders}
-            setFolders={setNpcFolders}
-          />
+          <FolderExplorer />
         </Grid>
 
         {/* Loading state */}
@@ -118,10 +124,6 @@ const NpcsTabMain = ({ campaignId }) => {
             handleEditNpc={handleEditNpc}
             handleToggleNpc={handleToggleNpc}
             handleSetAttitude={handleSetAttitude}
-            folders={npcFolders}
-            handleMoveNpcToFolder={handleMoveNpcToFolder}
-            onRenameFolder={handleRenameFolder}
-            onDeleteFolder={handleDeleteFolder}
           />
         )}
 
@@ -140,7 +142,7 @@ const NpcsTabMain = ({ campaignId }) => {
         <FolderNameDialogComponent
           open={isNewFolderDialogOpen}
           handleClose={() => setIsNewFolderDialogOpen(false)}
-          handleAction={() => handleCreateFolder(selectedNpcFolderId)}
+          handleAction={() => createFolder(selectedNpcFolderId)}
           parentId={selectedNpcFolderId}
           mode="create"
           maxLength={50}
@@ -156,7 +158,7 @@ const NpcsTabMain = ({ campaignId }) => {
             setFolderToRename(null);
             setRenamedFolderName("");
           }}
-          handleAction={handleConfirmRenameFolder}
+          handleAction={() => confirmRenameFolder()}
           mode="rename"
           maxLength={50}
           folderName={renamedFolderName}
@@ -166,13 +168,16 @@ const NpcsTabMain = ({ campaignId }) => {
         {/* Delete Confirmation Dialog */}
         <DeleteFolderDialogComponent
           open={isDeleteFolderDialogOpen}
-          handleClose={handleCancelDelete}
+          handleClose={cancelDeleteFolder}
           folderToDelete={
             Array.isArray(folderToDeleteConfirmation)
-              ? { name: "selected folder and its children" }
-              : folderToDeleteConfirmation
+              ? '"' +
+                getFolderName(selectedNpcFolderId) +
+                '"' +
+                " and its children"
+              : getFolderName(folderToDeleteConfirmation)
           }
-          handleConfirmDelete={handleConfirmDelete}
+          handleConfirmDelete={() => confirmDeleteFolder()}
         />
 
         {/* Feedback snackbar */}
