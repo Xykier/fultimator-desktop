@@ -150,11 +150,8 @@ const NpcCard = ({
     setSelectedFolder("");
   };
 
-  const handleMoveToFolder = () => {
-    console.log("Moving NPC to folder:", selectedFolder);
-    console.log("NPC ID:", npc.id);
-
-    moveNpcToFolder(npc.id, selectedFolder);
+  const handleMoveToFolder = (folderId) => {
+    moveNpcToFolder(npc.id, folderId);
     handleMoveFolderClose();
   };
 
@@ -412,6 +409,7 @@ const NpcCard = ({
         folders={folders}
         handleFolderChange={handleFolderChange}
         handleMoveToFolder={handleMoveToFolder}
+        currentFolderId={npc.folderId}
       />
 
       {/* NPC Details Dialog */}
