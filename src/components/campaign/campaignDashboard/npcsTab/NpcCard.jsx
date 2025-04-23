@@ -3,7 +3,6 @@ import {
   Card,
   CardActions,
   CardMedia,
-  Grid,
   Box,
   IconButton,
   Tooltip,
@@ -117,7 +116,7 @@ const NpcCard = ({
   onSetAttitude,
   folders,
 }) => {
-  const {  moveNpcToFolder } = useNpcFoldersStore();
+  const { moveNpcToFolder } = useNpcFoldersStore();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -182,224 +181,222 @@ const NpcCard = ({
 
   return (
     <React.Fragment>
-      <Grid item xs={6} sm={4} md={3} lg={2}>
-        <StyledCard
-          elevation={2}
-          onDoubleClick={!isMobile ? handleDetailsOpen : undefined}
-        >
-          <CardMedia
-            component="img"
-            height="80"
-            image={npc.imgurl || "/logo192.png"}
-            alt={npc.name}
-            sx={{ objectFit: "contain", paddingTop: "5px" }}
-          />
-          <CompactCardContent>
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{
-                fontWeight: "bold",
-                width: "100%",
-                color: theme.palette.text.primary,
-              }}
-            >
-              {npc.name}
-            </Typography>
-
-            <IconContainer>
-              {/* Prominent Level Badge */}
-              <Tooltip title={`Level: ${npc.lvl}`}>
-                <LevelBadge>
-                  <Typography
-                    variant="body2"
-                    color={theme.palette.primary.contrastText}
-                    sx={{ lineHeight: 1 }}
-                  >
-                    {npc.lvl}
-                  </Typography>
-                </LevelBadge>
-              </Tooltip>
-
-              {/* Rank Badge */}
-              <Tooltip title={rankName}>
-                <StyledIcon sx={{ color: rankColor }}>
-                  <RankIcon />
-                </StyledIcon>
-              </Tooltip>
-
-              {/* Species Icon */}
-              {SpeciesIcon && (
-                <Tooltip title={npc.species}>
-                  <StyledIcon>
-                    <SpeciesIcon />
-                  </StyledIcon>
-                </Tooltip>
-              )}
-
-              {/* Villain Badge */}
-              {npc.villain && (
-                <Tooltip title={`Villain: ${npc.villain}`}>
-                  <StyledIcon sx={{ color: theme.palette.error.main }}>
-                    <ReportProblemIcon />
-                  </StyledIcon>
-                </Tooltip>
-              )}
-            </IconContainer>
-          </CompactCardContent>
-
-          <CardActions
+      <StyledCard
+        elevation={2}
+        onDoubleClick={!isMobile ? handleDetailsOpen : undefined}
+      >
+        <CardMedia
+          component="img"
+          height="80"
+          image={npc.imgurl || "/logo192.png"}
+          alt={npc.name}
+          sx={{ objectFit: "contain", paddingTop: "5px" }}
+        />
+        <CompactCardContent>
+          <Typography
+            variant="body2"
+            noWrap
             sx={{
-              justifyContent: "space-between",
-              padding: theme.spacing(0.5),
+              fontWeight: "bold",
+              width: "100%",
+              color: theme.palette.text.primary,
             }}
           >
-            <Box sx={{ display: "flex", gap: 0.5 }}>
-              <Tooltip title="Edit NPC">
-                <StyledIconButton
-                  onClick={() => onEdit && onEdit(npc.id)}
-                  size="small"
+            {npc.name}
+          </Typography>
+
+          <IconContainer>
+            {/* Prominent Level Badge */}
+            <Tooltip title={`Level: ${npc.lvl}`}>
+              <LevelBadge>
+                <Typography
+                  variant="body2"
+                  color={theme.palette.primary.contrastText}
+                  sx={{ lineHeight: 1 }}
                 >
-                  <EditIcon />
-                </StyledIconButton>
-              </Tooltip>
+                  {npc.lvl}
+                </Typography>
+              </LevelBadge>
+            </Tooltip>
 
-              <Tooltip title="Notes">
-                <StyledIconButton
-                  onClick={() => onNotes && onNotes(npc.id)}
-                  size="small"
-                >
-                  <StickyNote2Icon />
-                </StyledIconButton>
-              </Tooltip>
+            {/* Rank Badge */}
+            <Tooltip title={rankName}>
+              <StyledIcon sx={{ color: rankColor }}>
+                <RankIcon />
+              </StyledIcon>
+            </Tooltip>
 
-              <Tooltip title="View Details">
-                <StyledIconButton onClick={handleDetailsOpen} size="small">
-                  <SearchIcon />
-                </StyledIconButton>
+            {/* Species Icon */}
+            {SpeciesIcon && (
+              <Tooltip title={npc.species}>
+                <StyledIcon>
+                  <SpeciesIcon />
+                </StyledIcon>
               </Tooltip>
-            </Box>
+            )}
 
-            <Tooltip title="More options">
+            {/* Villain Badge */}
+            {npc.villain && (
+              <Tooltip title={`Villain: ${npc.villain}`}>
+                <StyledIcon sx={{ color: theme.palette.error.main }}>
+                  <ReportProblemIcon />
+                </StyledIcon>
+              </Tooltip>
+            )}
+          </IconContainer>
+        </CompactCardContent>
+
+        <CardActions
+          sx={{
+            justifyContent: "space-between",
+            padding: theme.spacing(0.5),
+          }}
+        >
+          <Box sx={{ display: "flex", gap: 0.5 }}>
+            <Tooltip title="Edit NPC">
               <StyledIconButton
-                aria-label="more options"
-                id={`npc-menu-button-${npc.id}`}
-                aria-controls={menuOpen ? `npc-menu-${npc.id}` : undefined}
-                aria-expanded={menuOpen ? "true" : undefined}
-                aria-haspopup="true"
-                onClick={handleMenuClick}
+                onClick={() => onEdit && onEdit(npc.id)}
                 size="small"
               >
-                <MoreVertIcon />
+                <EditIcon />
               </StyledIconButton>
             </Tooltip>
 
-            <Menu
-              id={`npc-menu-${npc.id}`}
-              MenuListProps={{
-                "aria-labelledby": `npc-menu-button-${npc.id}`,
-                dense: true,
-              }}
-              anchorEl={anchorEl}
-              open={menuOpen}
-              onClose={handleMenuClose}
-              PaperProps={{
-                elevation: 3,
+            <Tooltip title="Notes">
+              <StyledIconButton
+                onClick={() => onNotes && onNotes(npc.id)}
+                size="small"
+              >
+                <StickyNote2Icon />
+              </StyledIconButton>
+            </Tooltip>
+
+            <Tooltip title="View Details">
+              <StyledIconButton onClick={handleDetailsOpen} size="small">
+                <SearchIcon />
+              </StyledIconButton>
+            </Tooltip>
+          </Box>
+
+          <Tooltip title="More options">
+            <StyledIconButton
+              aria-label="more options"
+              id={`npc-menu-button-${npc.id}`}
+              aria-controls={menuOpen ? `npc-menu-${npc.id}` : undefined}
+              aria-expanded={menuOpen ? "true" : undefined}
+              aria-haspopup="true"
+              onClick={handleMenuClick}
+              size="small"
+            >
+              <MoreVertIcon />
+            </StyledIconButton>
+          </Tooltip>
+
+          <Menu
+            id={`npc-menu-${npc.id}`}
+            MenuListProps={{
+              "aria-labelledby": `npc-menu-button-${npc.id}`,
+              dense: true,
+            }}
+            anchorEl={anchorEl}
+            open={menuOpen}
+            onClose={handleMenuClose}
+            PaperProps={{
+              elevation: 3,
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                onEdit && onEdit(npc.id);
+                handleMenuClose();
               }}
             >
-              <MenuItem
-                onClick={() => {
-                  onEdit && onEdit(npc.id);
-                  handleMenuClose();
-                }}
+              <ListItemIcon>
+                <EditIcon sx={{ fontSize: ICON_SIZE }} />
+              </ListItemIcon>
+              <ListItemText>Edit NPC</ListItemText>
+            </MenuItem>
+
+            <MenuItem
+              onClick={() => {
+                onUnlink && onUnlink(npc.id);
+                handleMenuClose();
+              }}
+            >
+              <ListItemIcon>
+                <LinkOff
+                  sx={{
+                    fontSize: ICON_SIZE,
+                    color: theme.palette.error.main,
+                  }}
+                />
+              </ListItemIcon>
+              <ListItemText>Unlink from Campaign</ListItemText>
+            </MenuItem>
+
+            <MenuItem onClick={handleMoveFolderOpen}>
+              <ListItemIcon>
+                <FolderIcon sx={{ fontSize: ICON_SIZE }} />
+              </ListItemIcon>
+              <ListItemText>Move to Folder</ListItemText>
+            </MenuItem>
+
+            <Divider sx={{ my: 1 }} />
+
+            <Box sx={{ display: "flex", justifyContent: "center", p: 1 }}>
+              <ToggleButtonGroup
+                value={attitude}
+                exclusive
+                onChange={handleAttitudeChange}
+                aria-label="NPC attitude"
+                size="small"
               >
-                <ListItemIcon>
-                  <EditIcon sx={{ fontSize: ICON_SIZE }} />
-                </ListItemIcon>
-                <ListItemText>Edit NPC</ListItemText>
-              </MenuItem>
+                <ToggleButton value="friendly" aria-label="friendly attitude">
+                  <Tooltip title="Friendly">
+                    <SentimentSatisfiedAltIcon
+                      sx={{
+                        fontSize: ICON_SIZE,
+                        color:
+                          attitude === "friendly"
+                            ? theme.palette.success.main
+                            : theme.palette.action.active,
+                      }}
+                    />
+                  </Tooltip>
+                </ToggleButton>
 
-              <MenuItem
-                onClick={() => {
-                  onUnlink && onUnlink(npc.id);
-                  handleMenuClose();
-                }}
-              >
-                <ListItemIcon>
-                  <LinkOff
-                    sx={{
-                      fontSize: ICON_SIZE,
-                      color: theme.palette.error.main,
-                    }}
-                  />
-                </ListItemIcon>
-                <ListItemText>Unlink from Campaign</ListItemText>
-              </MenuItem>
+                <ToggleButton value="neutral" aria-label="neutral attitude">
+                  <Tooltip title="Neutral">
+                    <SentimentNeutralIcon
+                      sx={{
+                        fontSize: ICON_SIZE,
+                        color:
+                          attitude === "neutral"
+                            ? theme.palette.primary.main
+                            : theme.palette.action.active,
+                      }}
+                    />
+                  </Tooltip>
+                </ToggleButton>
 
-              <MenuItem onClick={handleMoveFolderOpen}>
-                <ListItemIcon>
-                  <FolderIcon sx={{ fontSize: ICON_SIZE }} />
-                </ListItemIcon>
-                <ListItemText>Move to Folder</ListItemText>
-              </MenuItem>
-
-              <Divider sx={{ my: 1 }} />
-
-              <Box sx={{ display: "flex", justifyContent: "center", p: 1 }}>
-                <ToggleButtonGroup
-                  value={attitude}
-                  exclusive
-                  onChange={handleAttitudeChange}
-                  aria-label="NPC attitude"
-                  size="small"
-                >
-                  <ToggleButton value="friendly" aria-label="friendly attitude">
-                    <Tooltip title="Friendly">
-                      <SentimentSatisfiedAltIcon
-                        sx={{
-                          fontSize: ICON_SIZE,
-                          color:
-                            attitude === "friendly"
-                              ? theme.palette.success.main
-                              : theme.palette.action.active,
-                        }}
-                      />
-                    </Tooltip>
-                  </ToggleButton>
-
-                  <ToggleButton value="neutral" aria-label="neutral attitude">
-                    <Tooltip title="Neutral">
-                      <SentimentNeutralIcon
-                        sx={{
-                          fontSize: ICON_SIZE,
-                          color:
-                            attitude === "neutral"
-                              ? theme.palette.primary.main
-                              : theme.palette.action.active,
-                        }}
-                      />
-                    </Tooltip>
-                  </ToggleButton>
-
-                  <ToggleButton value="hostile" aria-label="hostile attitude">
-                    <Tooltip title="Hostile">
-                      <SentimentVeryDissatisfiedIcon
-                        sx={{
-                          fontSize: ICON_SIZE,
-                          color:
-                            attitude === "hostile"
-                              ? theme.palette.error.main
-                              : theme.palette.action.active,
-                        }}
-                      />
-                    </Tooltip>
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
-            </Menu>
-          </CardActions>
-        </StyledCard>
-      </Grid>
+                <ToggleButton value="hostile" aria-label="hostile attitude">
+                  <Tooltip title="Hostile">
+                    <SentimentVeryDissatisfiedIcon
+                      sx={{
+                        fontSize: ICON_SIZE,
+                        color:
+                          attitude === "hostile"
+                            ? theme.palette.error.main
+                            : theme.palette.action.active,
+                      }}
+                    />
+                  </Tooltip>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+          </Menu>
+        </CardActions>
+      </StyledCard>
 
       {/* Move Folder Dialog */}
       <NpcMoveFolderDialog

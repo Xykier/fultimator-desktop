@@ -127,7 +127,7 @@ const SearchbarFilter = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 0 }}>
       {/* Always visible search row with expand/collapse button */}
       <Box
         sx={{

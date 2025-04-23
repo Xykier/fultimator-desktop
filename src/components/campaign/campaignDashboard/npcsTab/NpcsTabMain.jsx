@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { Grid, Paper } from "@mui/material";
 import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
-import NpcList from "./NpcList";
 import FolderNameDialogComponent from "./FolderNameDialogComponent";
 import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
 import FolderExplorer from "./FolderExplorer";
@@ -15,6 +14,7 @@ import useCampaignNpcs from "./hooks/useCampaignNpcs";
 import { useNpcStore } from "./stores/npcDataStore";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
+import NpcExplorer from "./NpcExplorer";
 
 const NpcsTabMain = ({ campaignId }) => {
   const {
@@ -81,7 +81,7 @@ const NpcsTabMain = ({ campaignId }) => {
 
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
-      <Grid container spacing={3}>
+      <Grid container spacing={1}>
         {/* Header */}
         <Grid item xs={12}>
           <NpcsTabHeader handleAddExistingNpc={handleAddExistingNpc} />
@@ -122,7 +122,8 @@ const NpcsTabMain = ({ campaignId }) => {
 
         {/* Display NPCs or Empty State for the current filter */}
         {!isLoading && !loadError && campaignNpcs.length > 0 && (
-          <NpcList
+          <Grid item xs={12}>
+          <NpcExplorer
             campaignNpcs={campaignNpcs}
             expandedNpcId={expandedNpcId}
             handleExpandNpc={handleExpandNpc}
@@ -130,6 +131,7 @@ const NpcsTabMain = ({ campaignId }) => {
             handleToggleNpc={handleToggleNpc}
             handleSetAttitude={handleSetAttitude}
           />
+          </Grid>
         )}
 
         {/* Link NPC Dialog */}

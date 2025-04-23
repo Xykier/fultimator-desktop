@@ -1,7 +1,8 @@
-import React from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Grid, Typography, Stack } from "@mui/material";
 
 import NpcCard from "./NpcCard";
+import NpcListItem from "./NpcListItem"; // We'll create this component
 import NpcsFolderHeader from "./NpcsFolderHeader";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
@@ -18,8 +19,10 @@ const NpcList = ({
   const { npcFilterType, selectedNpcFolderId, getDisplayedNpcs } =
     useNpcFiltersStore();
 
-  const { npcFolders, prepareRenameFolder, prepareDeleteFolder } =
+  const { npcFolders, prepareRenameFolder, prepareDeleteFolder, setIsNewFolderDialogOpen } =
     useNpcFoldersStore();
+
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
 
   // Get displayed NPCs using the store's method
   const displayedNpcs = getDisplayedNpcs(campaignNpcs);
@@ -49,62 +52,91 @@ const NpcList = ({
     ? findFolder(npcFolders, selectedNpcFolderId)
     : null;
 
-  return (
-    <>
-      {/* Folder Header - only shown when a folder is selected */}
-      {selectedFolder && (
-        <Grid item xs={12}>
-          <NpcsFolderHeader
-            selectedFolder={selectedFolder}
-            onRenameFolder={() => prepareRenameFolder(selectedFolder.id)}
-            onDeleteFolder={() => prepareDeleteFolder(selectedFolder.id)}
-          />
-        </Grid>
-      )}
+  const handleCreateFolder = (parentId) => {
+    setIsNewFolderDialogOpen(true);
+    // You might need to set the parent folder ID in your store
+    console.log("handleCreateFolder", parentId);
+  };
 
-      {displayedNpcs.length > 0 ? (
-        displayedNpcs.map((npc) => (
-          <NpcCard
-            key={npc.id}
-            npc={npc}
-            expandedNpcId={expandedNpcId}
-            handleExpandNpc={handleExpandNpc}
-            onEdit={handleEditNpc}
-            onUnlink={handleToggleNpc}
-            onSetAttitude={handleSetAttitude}
-            folders={npcFolders}
-          />
-        ))
-      ) : (
-        // Empty state specific to the selected filter
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              py: 6,
-              textAlign: "center",
-              border: "1px dashed",
-              borderColor: "divider",
-              borderRadius: 1,
-              mt: 2,
-            }}
-          >
-            <Typography variant="body1" color="text.secondary">
-              {selectedFolder
-                ? `No NPCs in folder "${selectedFolder.name}"`
-                : npcFilterType === "all"
-                ? "No NPCs match the current search."
-                : npcFilterType === "friendly"
-                ? "No friendly NPCs found."
-                : npcFilterType === "neutral"
-                ? "No neutral NPCs found."
-                : npcFilterType === "hostile"
-                ? "No hostile NPCs found."
-                : "No villains found."}
-            </Typography>
+  return (
+        <Box sx={{ display: "flex", height: "100%", width: "100%" }}>       
+          {/* Main Content */}
+          <Box sx={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            {/* Folder Header with breadcrumbs and actions */}
+            <NpcsFolderHeader
+              selectedFolder={selectedFolder}
+              onRenameFolder={prepareRenameFolder}
+              onDeleteFolder={prepareDeleteFolder}
+              onCreateFolder={handleCreateFolder}
+              viewMode={viewMode}
+              onChangeViewMode={setViewMode}
+            />
+
+            {/* NPCs Content */}
+            <Box sx={{ flex: 1, overflowY: "auto" }}>
+              {displayedNpcs.length > 0 ? (
+                  viewMode === "grid" ? (
+                    <Grid container spacing={2}>
+                      {displayedNpcs.map((npc) => (
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={npc.id}>
+                          <NpcCard
+                            npc={npc}
+                            expandedNpcId={expandedNpcId}
+                            handleExpandNpc={handleExpandNpc}
+                            onEdit={handleEditNpc}
+                            onUnlink={handleToggleNpc}
+                            onSetAttitude={handleSetAttitude}
+                            folders={npcFolders}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Stack spacing={1}>
+                      {displayedNpcs.map((npc) => (
+                        <NpcListItem
+                          key={npc.id}
+                          npc={npc}
+                          expandedNpcId={expandedNpcId}
+                          handleExpandNpc={handleExpandNpc}
+                          onEdit={handleEditNpc}
+                          onUnlink={handleToggleNpc}
+                          onSetAttitude={handleSetAttitude}
+                          folders={npcFolders}
+                        />
+                      ))}
+                    </Stack>
+                  )
+              ) : (
+                // Empty state specific to the selected filter
+                <Box
+                  sx={{
+                    py: 6,
+                    textAlign: "center",
+                    border: "1px dashed",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    mt: 2,
+                  }}
+                >
+                  <Typography variant="body1" color="text.secondary">
+                    {selectedFolder
+                      ? `No NPCs in folder "${selectedFolder.name}"`
+                      : npcFilterType === "all"
+                      ? "No NPCs match the current search."
+                      : npcFilterType === "friendly"
+                      ? "No friendly NPCs found."
+                      : npcFilterType === "neutral"
+                      ? "No neutral NPCs found."
+                      : npcFilterType === "hostile"
+                      ? "No hostile NPCs found."
+                      : "No villains found."}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
           </Box>
-        </Grid>
-      )}
-    </>
+        </Box>
   );
 };
 

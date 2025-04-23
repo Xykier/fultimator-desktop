@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  List,
-  ListItem,
-  ListItemText,
-  Collapse,
-  IconButton,
   Breadcrumbs,
   Link,
   Button,
   Box,
 } from "@mui/material";
 import {
-  ExpandLess,
-  ExpandMore,
   Folder,
-  FolderOpen,
   Home,
   People,
 } from "@mui/icons-material";
@@ -29,9 +21,6 @@ const FolderExplorer = () => {
   const showAllFolders = useNpcFiltersStore((state) => state.showAllFolders);
   const setShowAllFolders = useNpcFiltersStore((state) => state.setShowAllFolders);
   const folders = useNpcFoldersStore((state) => state.npcFolders);
-  const setFolders = useNpcFoldersStore((state) => state.setNpcFolders);
-
-  const [openFolders, setOpenFolders] = useState({});
 
   // Process folders to create a flat structure for easier operations
   const [flatFolders, setFlatFolders] = useState([]);
@@ -63,27 +52,6 @@ const FolderExplorer = () => {
     flattenFolders(folders);
     setFlatFolders(flattenedFolders);
   }, [folders, setFlatFolders]);
-
-  const getChildFolders = (folderId) => {
-    return flatFolders.filter((folder) => folder.parentId === folderId);
-  };
-
-  const handleFolderClick = (folderId) => {
-    setSelectedFolderId(folderId);
-    setShowAllFolders(false);
-  };
-
-  const handleToggle = (folderId) => {
-    setOpenFolders((prevOpenFolders) => {
-      const newOpenFolders = { ...prevOpenFolders };
-      if (newOpenFolders[folderId]) {
-        delete newOpenFolders[folderId];
-      } else {
-        newOpenFolders[folderId] = true;
-      }
-      return newOpenFolders;
-    });
-  };
 
   const buildBreadcrumbs = () => {
     const breadcrumbs = [];
@@ -152,86 +120,7 @@ const FolderExplorer = () => {
           ))}
         </Breadcrumbs>
       </Box>
-      
-      <List disablePadding>
-        {getChildFolders(null).map((folder) => (
-          <FolderItem
-            key={folder.id}
-            folder={folder}
-            openFolders={openFolders}
-            handleToggle={handleToggle}
-            handleFolderClick={handleFolderClick}
-            selectedFolderId={selectedFolderId}
-            setSelectedFolderId={setSelectedFolderId}
-            setFolders={setFolders}
-            getChildFolders={getChildFolders}
-          />
-        ))}
-      </List>
     </div>
-  );
-};
-
-const FolderItem = ({
-  folder,
-  openFolders,
-  handleToggle,
-  handleFolderClick,
-  selectedFolderId,
-  setSelectedFolderId,
-  setFolders,
-  getChildFolders
-}) => {
-  const isSelected = folder.id === selectedFolderId;
-  const isOpen = !!openFolders[folder.id];
-  const hasChildren = getChildFolders(folder.id).length > 0;
-
-  return (
-    <>
-      <ListItem
-        button
-        onClick={() => {
-          handleFolderClick(folder.id);
-          handleToggle(folder.id);
-        }}
-        sx={{ pl: 4, backgroundColor: isSelected ? "action.selected" : null }}
-      >
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent ListItem onClick from firing
-            handleToggle(folder.id);
-          }}
-          aria-label="expand"
-        >
-          {hasChildren ? (
-            isOpen ? (
-              <ExpandLess />
-            ) : (
-              <ExpandMore />
-            )
-          ) : null}
-        </IconButton>
-        {isSelected ? <FolderOpen /> : <Folder />}
-        <ListItemText primary={folder.name} />
-      </ListItem>
-      <Collapse in={isOpen} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
-          {getChildFolders(folder.id).map((childFolder) => (
-            <FolderItem
-              key={childFolder.id}
-              folder={childFolder}
-              openFolders={openFolders}
-              handleToggle={handleToggle}
-              handleFolderClick={handleFolderClick}
-              selectedFolderId={selectedFolderId}
-              setSelectedFolderId={setSelectedFolderId}
-              setFolders={setFolders}
-              getChildFolders={getChildFolders}
-            />
-          ))}
-        </List>
-      </Collapse>
-    </>
   );
 };
 
