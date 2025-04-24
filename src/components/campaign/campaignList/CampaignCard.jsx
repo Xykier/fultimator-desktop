@@ -2,7 +2,6 @@ import React from "react";
 import {
   Box,
   Card,
-  CardActionArea,
   CardContent,
   CardMedia,
   Chip,
@@ -91,13 +90,14 @@ const CampaignCard = ({ campaign, onMenuOpen, onClick }) => {
         position: "relative",
       }}
     >
-      <CardActionArea
+      <Box
         onClick={() => onClick(id)}
         sx={{
           height: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "stretch",
+          cursor: "pointer",
         }}
       >
         <Box sx={{ position: "relative", height: imageHeight }}>
@@ -275,7 +275,7 @@ const CampaignCard = ({ campaign, onMenuOpen, onClick }) => {
             )}
           </Box>
         </CardContent>
-      </CardActionArea>
+      </Box>
     </Card>
   );
 };

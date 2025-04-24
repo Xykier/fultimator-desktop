@@ -124,7 +124,7 @@ const NpcsTabMain = ({ campaignId }) => {
 
         {/* Display NPCs or Empty State for the current filter */}
         {!isLoading && !loadError && campaignNpcs.length > 0 && (
-          <Grid item xs={12}>
+          <>
             <NpcExplorer
               campaignNpcs={campaignNpcs}
               expandedNpcId={expandedNpcId}
@@ -133,7 +133,7 @@ const NpcsTabMain = ({ campaignId }) => {
               handleToggleNpc={handleToggleNpc}
               handleSetAttitude={handleSetAttitude}
             />
-          </Grid>
+          </>
         )}
 
         {/* Link NPC Dialog */}

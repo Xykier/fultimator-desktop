@@ -133,7 +133,7 @@ const NpcFolderSidebar = () => {
       elevation={0}
       variant="outlined"
       sx={{
-        height: "90%",
+        height: "100%",
         width: 240,
         overflowY: "auto",
         borderRadius: 1,
