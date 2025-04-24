@@ -51,7 +51,7 @@ const CampaignDashboard = () => {
   const secondary = theme.palette.secondary.main;
 
   // State management
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState('overview');
   const [campaign, setCampaign] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -122,7 +122,7 @@ const CampaignDashboard = () => {
 
   // Tab change handler
   const handleTabChange = (event, newValue) => {
-    navigate(`/campaign/${campaignId}/${newValue}`);
+    navigate(`/campaign/${campaignId}/${newValue}`, { replace: true });
   };
 
   // Navigate back to campaign list
@@ -367,18 +367,21 @@ const CampaignDashboard = () => {
 
         {/* Tab Content */}
         <Routes>
-          <Route index path="/overview" element={
-            <OverviewTab
-              campaign={campaign}
-              upcomingSession={upcomingSession}
-              pastSessions={pastSessions}
-              pcs={pcs}
-              npcs={npcs}
-              notes={notes}
-              locations={locations}
-              campaignId={campaignId}
-            />
-          } />
+          { ['/', '/overview'].map((path) =>
+            <Route path={path} element={
+              <OverviewTab
+                campaign={campaign}
+                upcomingSession={upcomingSession}
+                pastSessions={pastSessions}
+                pcs={pcs}
+                npcs={npcs}
+                notes={notes}
+                locations={locations}
+                campaignId={campaignId}
+              />
+            } />
+          )}
+
           <Route path="/sessions" element={
             <SessionsTab sessions={sessions} campaignId={campaignId} />
           } />
