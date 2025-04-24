@@ -18,7 +18,6 @@ import NpcExplorer from "./NpcExplorer";
 const NpcsTabMain = ({ campaignId }) => {
   const {
     // State & Derived Values
-    expandedNpcId,
     isLinkNpcDialogOpen,
     linkNpcSearchText,
     filteredNpcsForDialog, // For the link dialog
@@ -26,9 +25,6 @@ const NpcsTabMain = ({ campaignId }) => {
     // Handlers & Setters
     handleAddExistingNpc,
     handleCloseLinkDialog: handleClose, // Rename for clarity
-    handleEditNpc,
-    handleExpandNpc,
-    handleSetAttitude,
     setLinkNpcSearchText,
   } = useCampaignNpcs(campaignId);
 
@@ -127,11 +123,7 @@ const NpcsTabMain = ({ campaignId }) => {
           <>
             <NpcExplorer
               campaignNpcs={campaignNpcs}
-              expandedNpcId={expandedNpcId}
-              handleExpandNpc={handleExpandNpc}
-              handleEditNpc={handleEditNpc}
               handleToggleNpc={handleToggleNpc}
-              handleSetAttitude={handleSetAttitude}
             />
           </>
         )}

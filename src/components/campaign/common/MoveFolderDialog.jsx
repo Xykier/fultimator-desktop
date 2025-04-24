@@ -33,7 +33,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FolderSpecialIcon from "@mui/icons-material/FolderSpecial";
 
-const NpcMoveFolderDialog = ({
+const MoveFolderDialog = ({
   open,
   onClose,
   selectedFolder,
@@ -505,4 +505,4 @@ const NpcMoveFolderDialog = ({
   );
 };
 
-export default NpcMoveFolderDialog;
+export default MoveFolderDialog;

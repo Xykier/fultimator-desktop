@@ -24,9 +24,8 @@ import {
   People as PeopleIcon,
   CheckBoxOutlined as SelectionIcon,
 } from "@mui/icons-material";
-import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
-const NpcsFolderHeader = ({
+const FolderHeader = ({
   selectedFolder,
   onRenameFolder,
   onDeleteFolder,
@@ -34,8 +33,8 @@ const NpcsFolderHeader = ({
   viewMode = "grid",
   onChangeViewMode,
   onSelectAll,
+  showAllFolders,
 }) => {
-  const { showAllFolders } = useNpcFiltersStore();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -176,4 +175,4 @@ const NpcsFolderHeader = ({
   );
 };
 
-export default NpcsFolderHeader;
+export default FolderHeader;

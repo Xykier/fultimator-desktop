@@ -19,17 +19,14 @@ import {
   ChevronRight,
   Home as HomeIcon,
 } from "@mui/icons-material";
-import { useNpcFiltersStore } from "./stores/npcFiltersStore";
-import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
-const NpcFolderSidebar = () => {
-  const {
-    selectedNpcFolderId,
-    setSelectedNpcFolderId,
-    showAllFolders,
-    setShowAllFolders,
-  } = useNpcFiltersStore();
-  const { npcFolders } = useNpcFoldersStore();
+const FolderSidebar = ({
+  folders,
+  selectedFolderId,
+  setSelectedFolderId,
+  showAllFolders,
+  setShowAllFolders,
+}) => {
   const [expandedFolders, setExpandedFolders] = useState({});
 
   const toggleFolderExpand = (folderId, e) => {
@@ -41,7 +38,7 @@ const NpcFolderSidebar = () => {
   };
 
   const handleSelectFolder = (folderId) => {
-    setSelectedNpcFolderId(folderId === selectedNpcFolderId ? null : folderId);
+    setSelectedFolderId(folderId === selectedFolderId ? null : folderId);
     if (showAllFolders) {
       setShowAllFolders(false);
     }
@@ -52,7 +49,7 @@ const NpcFolderSidebar = () => {
 
     return folders.map((folder) => {
       const isExpanded = expandedFolders[folder.id];
-      const isSelected = folder.id === selectedNpcFolderId;
+      const isSelected = folder.id === selectedFolderId;
       const hasChildren = folder.children && folder.children.length > 0;
 
       return (
@@ -153,10 +150,10 @@ const NpcFolderSidebar = () => {
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => {
-              setSelectedNpcFolderId(null);
+              setSelectedFolderId(null);
               setShowAllFolders(false);
             }}
-            selected={selectedNpcFolderId === null && showAllFolders === false}
+            selected={selectedFolderId === null && showAllFolders === false}
             sx={{
               borderRadius: 1,
               m: 0.5,
@@ -168,14 +165,14 @@ const NpcFolderSidebar = () => {
             <ListItemIcon sx={{ minWidth: 36 }}>
               <HomeIcon
                 fontSize="small"
-                color={selectedNpcFolderId === null ? "primary" : "action"}
+                color={selectedFolderId === null ? "primary" : "action"}
               />
             </ListItemIcon>
             <ListItemText
               primary={
                 <Typography
                   variant="body2"
-                  fontWeight={selectedNpcFolderId === null ? 600 : 400}
+                  fontWeight={selectedFolderId === null ? 600 : 400}
                 >
                   Root
                 </Typography>
@@ -183,10 +180,10 @@ const NpcFolderSidebar = () => {
             />
           </ListItemButton>
         </ListItem>
-        {renderFolders(npcFolders)}
+        {renderFolders(folders)}
       </List>
     </Paper>
   );
 };
 
-export default NpcFolderSidebar;
+export default FolderSidebar;
