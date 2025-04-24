@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Box, Grid, Typography, Stack } from "@mui/material";
+import { 
+  Box, 
+  Grid, 
+  Typography, 
+  Stack, 
+  Toolbar, 
+  Button, 
+  Fade,
+  Tooltip,
+  IconButton
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FolderIcon from "@mui/icons-material/Folder";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckIcon from "@mui/icons-material/Check";
 
 import NpcCard from "./NpcCard";
 import NpcListItem from "./NpcListItem";
 import NpcsFolderHeader from "./NpcsFolderHeader";
+import NpcMoveFolderDialog from "./NpcMoveFolderDialog";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
+import { useNpcStore } from "./stores/npcDataStore";
 
 const NpcList = ({
   campaignNpcs,
@@ -15,11 +31,12 @@ const NpcList = ({
   handleToggleNpc,
   handleSetAttitude,
 }) => {
-  // Use the Zustand store instead of the hook-based state
+  const {unlinkMultipleNpcs} = useNpcStore();
+  
   const { npcFilterType, selectedNpcFolderId, getDisplayedNpcs } =
     useNpcFiltersStore();
 
-  const { npcFolders, prepareRenameFolder, prepareDeleteFolder, setIsNewFolderDialogOpen } =
+  const { npcFolders, prepareRenameFolder, prepareDeleteFolder, setIsNewFolderDialogOpen, moveNpcToFolder } =
     useNpcFoldersStore();
 
   // Initialize viewMode from localStorage or default to "grid"
@@ -28,10 +45,37 @@ const NpcList = ({
     return savedViewMode || "grid"; // Default to 'grid' if no saved preference
   });
 
+  // Add selection state
+  const [selectedNpcs, setSelectedNpcs] = useState([]);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [moveFolderDialogOpen, setMoveFolderDialogOpen] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState("");
+  
+  // Track previous folder ID to detect changes
+  const [prevFolderId, setPrevFolderId] = useState(selectedNpcFolderId);
+
   // Update localStorage whenever viewMode changes
   useEffect(() => {
     localStorage.setItem("npcListViewMode", viewMode);
   }, [viewMode]);
+
+  // Clear selection when folder changes
+  useEffect(() => {
+    if (prevFolderId !== selectedNpcFolderId) {
+      setSelectedNpcs([]);
+      setSelectionMode(false);
+      setPrevFolderId(selectedNpcFolderId);
+    }
+  }, [selectedNpcFolderId, prevFolderId]);
+
+  // Automatically enable selection mode when there are selected NPCs
+  useEffect(() => {
+    if (selectedNpcs.length > 0 && !selectionMode) {
+      setSelectionMode(true);
+    } else if (selectedNpcs.length === 0 && selectionMode) {
+      setSelectionMode(false);
+    }
+  }, [selectedNpcs, selectionMode]);
 
   // Get displayed NPCs using the store's method
   const displayedNpcs = getDisplayedNpcs(campaignNpcs);
@@ -57,14 +101,65 @@ const NpcList = ({
     return null;
   };
 
-  const selectedFolder = selectedNpcFolderId
+  const currentFolder = selectedNpcFolderId
     ? findFolder(npcFolders, selectedNpcFolderId)
     : null;
+
+  // Selection handlers
+  const handleSelectNpc = (npcId, isSelected) => {
+    if (isSelected) {
+      setSelectedNpcs((prev) => [...prev, npcId]);
+    } else {
+      setSelectedNpcs((prev) => prev.filter((id) => id !== npcId));
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedNpcs.length === displayedNpcs.length) {
+      // Deselect all if all are selected
+      setSelectedNpcs([]);
+    } else {
+      // Select all displayed NPCs
+      setSelectedNpcs(displayedNpcs.map((npc) => npc.id));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedNpcs([]);
+    setSelectionMode(false);
+  };
 
   const handleCreateFolder = (parentId) => {
     setIsNewFolderDialogOpen(true);
     // You might need to set the parent folder ID in your store
     console.log("handleCreateFolder", parentId);
+  };
+
+  // Batch actions for selected NPCs
+  const handleBatchUnlink = () => {
+    unlinkMultipleNpcs(selectedNpcs);
+    setSelectedNpcs([]);
+  };
+
+  const handleMoveFolderOpen = () => {
+    setMoveFolderDialogOpen(true);
+  };
+
+  const handleMoveFolderClose = () => {
+    setMoveFolderDialogOpen(false);
+    setSelectedFolder("");
+  };
+
+  const handleMoveToFolder = (folderId) => {
+    selectedNpcs.forEach((npcId) => {
+      moveNpcToFolder(npcId, folderId);
+    });
+    handleMoveFolderClose();
+    setSelectedNpcs([]);
+  };
+
+  const handleFolderChange = (event) => {
+    setSelectedFolder(event.target.value);
   };
 
   return (
@@ -73,13 +168,75 @@ const NpcList = ({
       <Box sx={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {/* Folder Header with breadcrumbs and actions */}
         <NpcsFolderHeader
-          selectedFolder={selectedFolder}
+          selectedFolder={currentFolder}
           onRenameFolder={prepareRenameFolder}
           onDeleteFolder={prepareDeleteFolder}
           onCreateFolder={handleCreateFolder}
           viewMode={viewMode}
           onChangeViewMode={setViewMode}
+          onSelectAll={handleSelectAll}
         />
+
+        {/* Selection Toolbar */}
+        <Fade in={selectionMode}>
+          <Toolbar
+            variant="dense"
+            sx={{
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              borderRadius: 1,
+              mb: 2,
+              display: selectionMode ? "flex" : "none",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="subtitle2" sx={{ mr: 1 }}>
+                {selectedNpcs.length} selected
+              </Typography>
+              
+              <Tooltip title={selectedNpcs.length === displayedNpcs.length ? "Deselect All" : "Select All"}>
+                <IconButton 
+                  size="small" 
+                  onClick={handleSelectAll} 
+                  color="inherit"
+                >
+                  <CheckIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                size="small"
+                startIcon={<FolderIcon />}
+                variant="outlined"
+                color="inherit"
+                onClick={handleMoveFolderOpen}
+              >
+                Move To Folder
+              </Button>
+              
+              <Button
+                size="small"
+                startIcon={<DeleteIcon />}
+                variant="outlined"
+                color="inherit"
+                onClick={handleBatchUnlink}
+              >
+                Unlink Selected
+              </Button>
+              
+              <IconButton 
+                size="small" 
+                onClick={handleClearSelection} 
+                color="inherit"
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </Fade>
 
         {/* NPCs Content */}
         <Box sx={{ flex: 1, overflowY: "auto" }}>
@@ -96,6 +253,9 @@ const NpcList = ({
                         onUnlink={handleToggleNpc}
                         onSetAttitude={handleSetAttitude}
                         folders={npcFolders}
+                        onSelect={handleSelectNpc}
+                        isSelected={selectedNpcs.includes(npc.id)}
+                        selectionMode={selectionMode}
                       />
                     </Grid>
                   ))}
@@ -112,6 +272,9 @@ const NpcList = ({
                       onUnlink={handleToggleNpc}
                       onSetAttitude={handleSetAttitude}
                       folders={npcFolders}
+                      onSelect={handleSelectNpc}
+                      isSelected={selectedNpcs.includes(npc.id)}
+                      selectionMode={selectionMode}
                     />
                   ))}
                 </Stack>
@@ -129,8 +292,8 @@ const NpcList = ({
               }}
             >
               <Typography variant="body1" color="text.secondary">
-                {selectedFolder
-                  ? `No NPCs in folder "${selectedFolder.name}"`
+                {currentFolder
+                  ? `No NPCs in folder "${currentFolder.name}"`
                   : npcFilterType === "all"
                   ? "No NPCs match the current search."
                   : npcFilterType === "friendly"
@@ -145,6 +308,18 @@ const NpcList = ({
           )}
         </Box>
       </Box>
+
+      {/* Move Folder Dialog */}
+      <NpcMoveFolderDialog
+        open={moveFolderDialogOpen}
+        onClose={handleMoveFolderClose}
+        selectedFolder={selectedFolder}
+        folders={npcFolders}
+        handleFolderChange={handleFolderChange}
+        handleMoveToFolder={handleMoveToFolder}
+        currentFolderId={currentFolder?.id}
+        title={`Move ${selectedNpcs.length} NPCs to folder`}
+      />
     </Box>
   );
 };

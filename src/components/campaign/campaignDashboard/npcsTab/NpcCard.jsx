@@ -16,6 +16,8 @@ import {
   ToggleButton,
   useMediaQuery,
   useTheme,
+  Checkbox,
+  Fade,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -36,17 +38,28 @@ import { useNpcFoldersStore } from "./stores/npcFolderStore";
 // Standardized icon size constant
 const ICON_SIZE = 16; // Set all icons to be 16px
 
-const StyledCard = styled(Card)(({ theme }) => ({
+const StyledCard = styled(Card)(({ theme, selected }) => ({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
   height: "100%",
   minHeight: 200,
   transition: "transform 0.2s, box-shadow 0.2s",
+  position: "relative",
+  border: selected ? `2px solid ${theme.palette.primary.main}` : "none",
   "&:hover": {
     transform: "translateY(-4px)",
     boxShadow: theme.shadows[4],
   },
+}));
+
+const SelectionCheckbox = styled(Box)(() => ({
+  position: "absolute",
+  top: 8,
+  left: 8,
+  zIndex: 2,
+  backgroundColor: "rgba(255, 255, 255, 0.7)",
+  borderRadius: "50%",
 }));
 
 const CompactCardContent = styled(Box)(({ theme }) => ({
@@ -100,6 +113,17 @@ const StyledIconButton = styled(IconButton)(() => ({
   },
 }));
 
+const CardOverlay = styled(Box)(() => ({
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0, 0, 0, 0.04)",
+  zIndex: 1,
+  pointerEvents: "none",
+}));
+
 const getRankName = (rank) => {
   if (rank && rank.startsWith("champion")) {
     const level = rank.charAt(rank.length - 1);
@@ -115,6 +139,9 @@ const NpcCard = ({
   onNotes,
   onSetAttitude,
   folders,
+  onSelect,
+  isSelected = false,
+  selectionMode = false,
 }) => {
   const { moveNpcToFolder } = useNpcFoldersStore();
 
@@ -126,9 +153,11 @@ const NpcCard = ({
   const [moveFolderDialogOpen, setMoveFolderDialogOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
+    event.stopPropagation();
   };
 
   const handleMenuClose = () => {
@@ -163,12 +192,28 @@ const NpcCard = ({
     }
   };
 
-  const handleDetailsOpen = () => {
+  const handleDetailsOpen = (e) => {
+    e.stopPropagation();
     setDetailsDialogOpen(true);
   };
 
   const handleDetailsClose = () => {
     setDetailsDialogOpen(false);
+  };
+
+  const handleCardClick = (e) => {
+    if (selectionMode && onSelect) {
+      onSelect(npc.id, !isSelected);
+    } else if (!isMobile) {
+      handleDetailsOpen(e);
+    }
+  };
+
+  const handleCheckboxChange = (e) => {
+    e.stopPropagation();
+    if (onSelect) {
+      onSelect(npc.id, !isSelected);
+    }
   };
 
   const SpeciesIcon = getSpeciesIcon(npc.species);
@@ -183,8 +228,27 @@ const NpcCard = ({
     <React.Fragment>
       <StyledCard
         elevation={2}
-        onDoubleClick={!isMobile ? handleDetailsOpen : undefined}
+        onClick={handleCardClick}
+        selected={isSelected}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
+        {/* Selection checkbox - always visible when in selection mode or visible on hover */}
+        <Fade in={selectionMode || isHovered || isSelected}>
+          <SelectionCheckbox>
+            <Checkbox
+              checked={isSelected}
+              onChange={handleCheckboxChange}
+              onClick={(e) => e.stopPropagation()}
+              color="primary"
+              size="small"
+            />
+          </SelectionCheckbox>
+        </Fade>
+
+        {/* Show a subtle overlay when selected */}
+        {isSelected && <CardOverlay />}
+
         <CardMedia
           component="img"
           height="80"
@@ -255,7 +319,10 @@ const NpcCard = ({
           <Box sx={{ display: "flex", gap: 0.5 }}>
             <Tooltip title="Edit NPC">
               <StyledIconButton
-                onClick={() => onEdit && onEdit(npc.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit && onEdit(npc.id);
+                }}
                 size="small"
               >
                 <EditIcon />
@@ -264,7 +331,10 @@ const NpcCard = ({
 
             <Tooltip title="Notes">
               <StyledIconButton
-                onClick={() => onNotes && onNotes(npc.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNotes && onNotes(npc.id);
+                }}
                 size="small"
               >
                 <StickyNote2Icon />
@@ -304,6 +374,7 @@ const NpcCard = ({
             PaperProps={{
               elevation: 3,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <MenuItem
               onClick={() => {

@@ -22,6 +22,7 @@ import {
   ViewList as ViewListIcon,
   Add as AddIcon,
   People as PeopleIcon,
+  CheckBoxOutlined as SelectionIcon,
 } from "@mui/icons-material";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
@@ -32,6 +33,7 @@ const NpcsFolderHeader = ({
   onCreateFolder,
   viewMode = "grid",
   onChangeViewMode,
+  onSelectAll,
 }) => {
   const { showAllFolders } = useNpcFiltersStore();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -103,6 +105,16 @@ const NpcsFolderHeader = ({
           >
             New Folder
           </Button>
+
+          <Tooltip title="Select All">
+            <IconButton
+              size="small"
+              onClick={onSelectAll}
+              sx={{ mr: 1 }}
+            >
+              <SelectionIcon />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title={viewMode === "grid" ? "List view" : "Grid view"}>
             <IconButton

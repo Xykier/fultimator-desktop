@@ -136,6 +136,40 @@ export const useNpcStore = create((set, get) => ({
     }
   },
 
+  unlinkMultipleNpcs: async (npcIds = []) => {
+    const {
+      campaignId,
+      associatedNpcIds,
+      campaignNpcs,
+      showSnackbar,
+    } = get();
+  
+    if (!npcIds.length) return;
+  
+    try {
+      // Use Promise.all to remove all NPCs in parallel
+      await Promise.all(
+        npcIds.map((npcId) =>
+          disassociateNpcFromCampaign(npcId, campaignId)
+        )
+      );
+  
+      // Filter out the removed NPCs from state
+      const updatedNpcIds = associatedNpcIds.filter(id => !npcIds.includes(id));
+      const updatedCampaignNpcs = campaignNpcs.filter(npc => !npcIds.includes(npc.id));
+  
+      set({
+        associatedNpcIds: updatedNpcIds,
+        campaignNpcs: updatedCampaignNpcs,
+      });
+  
+      showSnackbar(`${npcIds.length} NPC(s) removed from campaign`, "info");
+    } catch (error) {
+      console.error("Error unlinking multiple NPCs:", error);
+      showSnackbar("Failed to remove NPCs from campaign", "error");
+    }
+  },
+
   // Initialize - can be called in useEffect when component mounts
   initialize: async (campaignId) => {
     set({ campaignId });

@@ -1,71 +1,113 @@
 import React, { useState } from "react";
 import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemAvatar,
+  Avatar,
   IconButton,
+  Typography,
+  Tooltip,
+  Box,
   Menu,
   MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Avatar,
-  Chip,
-  ToggleButtonGroup,
-  Tooltip,
   Divider,
+  ToggleButtonGroup,
   ToggleButton,
-  useTheme,
-  useMediaQuery,
+  Checkbox,
+  Fade,
 } from "@mui/material";
-import {
-  MoreVert as MoreVertIcon,
-  Edit as EditIcon,
-  Search as SearchIcon,
-  StickyNote2 as StickyNote2Icon,
-  ReportProblem as ReportProblemIcon,
-} from "@mui/icons-material";
-import { LinkOff } from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditIcon from "@mui/icons-material/Edit";
+import FolderIcon from "@mui/icons-material/Folder";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import FolderIcon from "@mui/icons-material/Folder";
-import { useNpcFoldersStore } from "./stores/npcFolderStore";
+import { LinkOff } from "@mui/icons-material";
+import SearchIcon from "@mui/icons-material/Search";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NpcDetailDialog from "./NpcDetailDialog";
 import NpcMoveFolderDialog from "./NpcMoveFolderDialog";
 import { getSpeciesIcon, getRankIcon } from "../../../../libs/npcIcons";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
 // Standardized icon size constant
-const ICON_SIZE = 16; // Set all icons to be 16px
+const ICON_SIZE = 16;
+
+const StyledListItem = styled(ListItem)(({ theme, selected }) => ({
+  padding: theme.spacing(1),
+  borderRadius: theme.shape.borderRadius,
+  marginBottom: theme.spacing(1),
+  transition: "background-color 0.2s",
+  border: selected ? `1px solid ${theme.palette.primary.main}` : `1px solid ${theme.palette.divider}`,
+  backgroundColor: selected ? theme.palette.action.selected : theme.palette.background.paper,
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
+
+const LevelBadge = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  borderRadius: "12px",
+  padding: theme.spacing(0, 1),
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 4,
+  height: 20,
+  minWidth: 24,
+  fontSize: "0.75rem",
+}));
+
+const IconContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+}));
+
+const SelectionCheckbox = styled(Box)(() => ({
+  display: "flex",
+  alignItems: "center",
+}));
+
+const getRankName = (rank) => {
+  if (rank && rank.startsWith("champion")) {
+    const level = rank.charAt(rank.length - 1);
+    return `Champion ${level}`;
+  }
+  return rank ? rank.charAt(0).toUpperCase() + rank.slice(1) : "";
+};
 
 const NpcListItem = ({
   npc,
-  handleExpandNpc,
   onEdit,
   onUnlink,
-  onSetAttitude,
   onNotes,
+  onSetAttitude,
   folders,
+  onSelect,
+  isSelected = false,
+  selectionMode = false,
 }) => {
-  const { moveNpcToFolder } = useNpcFoldersStore();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const { moveNpcToFolder } = useNpcFoldersStore();
   const [attitude, setAttitude] = useState(npc.attitude || "neutral");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const menuOpen = Boolean(anchorEl);
   const [moveFolderDialogOpen, setMoveFolderDialogOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-
-  // Menu state
-  const menuOpen = Boolean(menuAnchorEl);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
     event.stopPropagation();
-    setMenuAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-    setMenuAnchorEl(null);
+    setAnchorEl(null);
   };
 
   const handleMoveFolderOpen = () => {
@@ -77,14 +119,15 @@ const NpcListItem = ({
     setSelectedFolder(event.target.value);
   };
 
-  const handleMoveFolderClose = () => {
-    setMoveFolderDialogOpen(false);
-    setSelectedFolder("");
-  };
-
+  
   const handleMoveToFolder = (folderId) => {
     moveNpcToFolder(npc.id, folderId);
     handleMoveFolderClose();
+  };
+
+  const handleMoveFolderClose = () => {
+    setMoveFolderDialogOpen(false);
+    setSelectedFolder("");
   };
 
   const handleAttitudeChange = (event, newAttitude) => {
@@ -96,8 +139,8 @@ const NpcListItem = ({
     }
   };
 
-  const handleDetailsOpen = (event) => {
-    event.stopPropagation();
+  const handleDetailsOpen = (e) => {
+    e.stopPropagation();
     setDetailsDialogOpen(true);
   };
 
@@ -105,218 +148,147 @@ const NpcListItem = ({
     setDetailsDialogOpen(false);
   };
 
-  const attitudeColors = {
-    friendly: "success",
-    neutral: "info",
-    hostile: "error",
-  };
-
-  const getVillainLabel = () => {
-    switch (npc.villain) {
-      case "minor":
-        return "Minor Villain";
-      case "major":
-        return "Major Villain";
-      case "superior":
-        return "Superior Villain";
-      default:
-        return null;
+  const handleCheckboxChange = (e) => {
+    e.stopPropagation();
+    if (onSelect) {
+      onSelect(npc.id, !isSelected);
     }
   };
 
-  const villainLabel = getVillainLabel();
+  const handleListItemClick = () => {
+    if (selectionMode && onSelect) {
+      onSelect(npc.id, !isSelected);
+    } else {
+      handleDetailsOpen({ stopPropagation: () => {} });
+    }
+  };
 
-  // Get species icon
   const SpeciesIcon = getSpeciesIcon(npc.species);
-
+  
   // Get rank icon and color
   const rankInfo = getRankIcon(npc.rank || "soldier");
   const RankIcon = rankInfo.icon;
   const rankColor = rankInfo.color;
-  const rankName = npc.rank ? 
-    (npc.rank.startsWith("champion") ? 
-      `Champion ${npc.rank.charAt(npc.rank.length - 1)}` : 
-      npc.rank.charAt(0).toUpperCase() + npc.rank.slice(1)) : 
-    "";
-
-  const handleEditClick = (event) => {
-    event.stopPropagation();
-    onEdit && onEdit(npc.id);
-  };
-
-  const handleNotesClick = (event) => {
-    event.stopPropagation();
-    onNotes && onNotes(npc.id);
-  };
+  const rankName = getRankName(npc.rank || "soldier");
 
   return (
-    <Card
-      variant="outlined"
-      sx={{
-        display: "flex",
-        cursor: "pointer",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        "&:hover": {
-          transform: "translateY(-2px)",
-          boxShadow: theme.shadows[3],
-        },
-      }}
-      onClick={() => handleExpandNpc(npc.id)}
-      onDoubleClick={!isMobile ? handleDetailsOpen : undefined}
-    >
-      <Box sx={{ display: "flex", width: "100%", alignItems: "center" }}>
-        <Avatar
-          sx={{
-            bgcolor: "#fff",
-            border: "1px solid #ccc",
-            width: 48,
-            height: 48,
-            ml: 2,
-          }}
-          src={npc.imgurl || "/logo192.png"}
-          alt={npc.name}
-        />
-
-        <CardContent sx={{ flex: 1, "&:last-child": { pb: 2 } }}>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
-            <Typography
-              variant="subtitle1"
-              component="div"
-              sx={{ fontWeight: 500 }}
-            >
-              {npc.name}
-            </Typography>
-
-            <Box sx={{ display: "flex", ml: "auto", gap: 1, flexWrap: "wrap" }}>
-              {/* Level Badge */}
-              <Chip
+    <React.Fragment>
+      <StyledListItem
+        selected={isSelected}
+        onClick={handleListItemClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+          {/* Selection checkbox - visible when in selection mode or on hover */}
+          <Fade in={selectionMode || isHovered || isSelected}>
+            <SelectionCheckbox>
+              <Checkbox
+                checked={isSelected}
+                onChange={handleCheckboxChange}
+                onClick={(e) => e.stopPropagation()}
                 size="small"
-                label={`Lvl ${npc.lvl}`}
-                color="primary"
-                variant="filled"
-                sx={{ 
-                  minWidth: '50px', 
-                  height: '20px',
-                  '& .MuiChip-label': {
-                    padding: '0 8px',
-                  }
-                }}
               />
+            </SelectionCheckbox>
+          </Fade>
 
-              {/* Attitude Chip */}
-              {npc.attitude && (
-                <Chip
-                  size="small"
-                  label={
-                    npc.attitude.charAt(0).toUpperCase() + npc.attitude.slice(1)
-                  }
-                  color={attitudeColors[npc.attitude] || "default"}
-                  variant="outlined"
-                  sx={{ height: '20px' }}
-                />
-              )}
+          {/* Avatar */}
+          <ListItemAvatar>
+            <Avatar
+              alt={npc.name}
+              src={npc.imgurl || "/logo192.png"}
+              variant="rounded"
+              sx={{ width: 40, height: 40 }}
+            />
+          </ListItemAvatar>
 
-              {/* Villain Chip */}
-              {villainLabel && (
-                <Chip
-                  size="small"
-                  label={villainLabel}
-                  color="warning"
-                  variant="outlined"
-                  icon={<ReportProblemIcon sx={{ fontSize: ICON_SIZE }} />}
-                  sx={{ height: '20px' }}
-                />
-              )}
-            </Box>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            {/* Species with inline icon */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-              {SpeciesIcon && (
-                <Tooltip title={npc.species}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mr: 0.5 }}>
-                    <SpeciesIcon sx={{ fontSize: ICON_SIZE }} />
+          {/* NPC Info */}
+          <ListItemText
+            primary={
+              <Typography variant="subtitle1" fontWeight="medium">
+                {npc.name}
+              </Typography>
+            }
+            secondary={
+              <IconContainer>
+                <LevelBadge>{npc.lvl}</LevelBadge>
+                
+                <Tooltip title={rankName}>
+                  <Box sx={{ color: rankColor }}>
+                    <RankIcon sx={{ fontSize: ICON_SIZE }} />
                   </Box>
                 </Tooltip>
-              )}
-              <Typography variant="body2" color="text.secondary">
-                {npc.species}
-              </Typography>
-            </Box>
-            
-            {/* Bullet separator if both species and rank exist */}
-            {npc.species && rankName && (
-              <Typography variant="body2" color="text.secondary" sx={{ mx: 0.5 }}>
-                •
-              </Typography>
-            )}
-            
-            {/* Rank with inline icon */}
-            {rankName && (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {RankIcon && (
-                  <Tooltip title={rankName}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 0.5 }}>
-                      <RankIcon sx={{ fontSize: ICON_SIZE, color: rankColor }} />
+                
+                {SpeciesIcon && (
+                  <Tooltip title={npc.species}>
+                    <Box>
+                      <SpeciesIcon sx={{ fontSize: ICON_SIZE }} />
                     </Box>
                   </Tooltip>
                 )}
-                <Typography variant="body2" color="text.secondary">
-                  {rankName}
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        </CardContent>
+                
+                {npc.villain && (
+                  <Tooltip title={`Villain: ${npc.villain}`}>
+                    <ReportProblemIcon 
+                      sx={{ 
+                        fontSize: ICON_SIZE, 
+                        color: (theme) => theme.palette.error.main 
+                      }} 
+                    />
+                  </Tooltip>
+                )}
+              </IconContainer>
+            }
+          />
 
-        <Box sx={{ display: "flex", alignItems: "center", pr: 1, gap: 0.5 }}>
-          <Tooltip title="Edit NPC">
-            <IconButton
-              size="small"
-              onClick={handleEditClick}
-              sx={{ padding: 0.5 }}
-            >
-              <EditIcon sx={{ fontSize: ICON_SIZE }} />
-            </IconButton>
-          </Tooltip>
-          
-          <Tooltip title="Notes">
-            <IconButton
-              size="small"
-              onClick={handleNotesClick}
-              sx={{ padding: 0.5 }}
-            >
-              <StickyNote2Icon sx={{ fontSize: ICON_SIZE }} />
-            </IconButton>
-          </Tooltip>
-          
-          <Tooltip title="View Details">
-            <IconButton
-              size="small"
-              onClick={handleDetailsOpen}
-              sx={{ padding: 0.5 }}
-            >
-              <SearchIcon sx={{ fontSize: ICON_SIZE }} />
-            </IconButton>
-          </Tooltip>
-          
-          <Tooltip title="More options">
-            <IconButton
-              aria-label="npc options"
-              size="small"
-              onClick={handleMenuClick}
-              id={`npc-menu-button-${npc.id}`}
-              aria-controls={menuOpen ? `npc-menu-${npc.id}` : undefined}
-              aria-expanded={menuOpen ? "true" : undefined}
-              aria-haspopup="true"
-              sx={{ padding: 0.5 }}
-            >
-              <MoreVertIcon sx={{ fontSize: ICON_SIZE }} />
-            </IconButton>
-          </Tooltip>
+          {/* Action buttons */}
+          <Box sx={{ display: "flex", gap: 0.5, ml: "auto" }}>
+            <Tooltip title="Edit NPC">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit && onEdit(npc.id);
+                }}
+                size="small"
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Notes">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNotes && onNotes(npc.id);
+                }}
+                size="small"
+              >
+                <StickyNote2Icon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="View Details">
+              <IconButton onClick={handleDetailsOpen} size="small">
+                <SearchIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="More options">
+              <IconButton
+                aria-label="more options"
+                id={`npc-menu-button-${npc.id}`}
+                aria-controls={menuOpen ? `npc-menu-${npc.id}` : undefined}
+                aria-expanded={menuOpen ? "true" : undefined}
+                aria-haspopup="true"
+                onClick={handleMenuClick}
+                size="small"
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
-      </Box>
+      </StyledListItem>
 
       <Menu
         id={`npc-menu-${npc.id}`}
@@ -324,10 +296,9 @@ const NpcListItem = ({
           "aria-labelledby": `npc-menu-button-${npc.id}`,
           dense: true,
         }}
-        anchorEl={menuAnchorEl}
+        anchorEl={anchorEl}
         open={menuOpen}
         onClose={handleMenuClose}
-        onClick={(e) => e.stopPropagation()}
         PaperProps={{
           elevation: 3,
         }}
@@ -339,7 +310,7 @@ const NpcListItem = ({
           }}
         >
           <ListItemIcon>
-            <EditIcon sx={{ fontSize: ICON_SIZE }} />
+            <EditIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Edit NPC</ListItemText>
         </MenuItem>
@@ -351,19 +322,14 @@ const NpcListItem = ({
           }}
         >
           <ListItemIcon>
-            <LinkOff
-              sx={{
-                fontSize: ICON_SIZE,
-                color: theme.palette.error.main,
-              }}
-            />
+            <LinkOff fontSize="small" color="error" />
           </ListItemIcon>
           <ListItemText>Unlink from Campaign</ListItemText>
         </MenuItem>
 
         <MenuItem onClick={handleMoveFolderOpen}>
           <ListItemIcon>
-            <FolderIcon sx={{ fontSize: ICON_SIZE }} />
+            <FolderIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Move to Folder</ListItemText>
         </MenuItem>
@@ -383,10 +349,9 @@ const NpcListItem = ({
                 <SentimentSatisfiedAltIcon
                   sx={{
                     fontSize: ICON_SIZE,
-                    color:
-                      attitude === "friendly"
-                        ? theme.palette.success.main
-                        : theme.palette.action.active,
+                    color: attitude === "friendly" 
+                      ? (theme) => theme.palette.success.main
+                      : (theme) => theme.palette.action.active,
                   }}
                 />
               </Tooltip>
@@ -397,10 +362,9 @@ const NpcListItem = ({
                 <SentimentNeutralIcon
                   sx={{
                     fontSize: ICON_SIZE,
-                    color:
-                      attitude === "neutral"
-                        ? theme.palette.primary.main
-                        : theme.palette.action.active,
+                    color: attitude === "neutral"
+                      ? (theme) => theme.palette.primary.main
+                      : (theme) => theme.palette.action.active,
                   }}
                 />
               </Tooltip>
@@ -411,10 +375,9 @@ const NpcListItem = ({
                 <SentimentVeryDissatisfiedIcon
                   sx={{
                     fontSize: ICON_SIZE,
-                    color:
-                      attitude === "hostile"
-                        ? theme.palette.error.main
-                        : theme.palette.action.active,
+                    color: attitude === "hostile"
+                      ? (theme) => theme.palette.error.main
+                      : (theme) => theme.palette.action.active,
                   }}
                 />
               </Tooltip>
@@ -440,7 +403,7 @@ const NpcListItem = ({
         onClose={handleDetailsClose}
         npc={npc}
       />
-    </Card>
+    </React.Fragment>
   );
 };
 
