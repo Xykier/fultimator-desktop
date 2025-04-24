@@ -21,6 +21,7 @@ import {
   getRelatedPcs,
   getRelatedNpcs,
   updateCampaignLastPlayed,
+  updateCampaign, // Add updateCampaign import
 } from "../../utility/db";
 import Layout from "../../components/Layout";
 import LoadingPage from "../../components/common/LoadingPage";
@@ -36,6 +37,9 @@ import TabsNavigation from "../../components/campaign/campaignDashboard/TabsNavi
 import { WorldIcon } from "../../components/icons";
 import { ArrowDropDown as ArrowDropDownIcon } from "@mui/icons-material";
 import { ArrowDropUp as ArrowDropUpIcon } from "@mui/icons-material";
+import CampaignDialog from "../../components/campaign/campaignList/CampaignDialog"; // Import CampaignDialog
+
+const DEFAULT_CAMPAIGN_IMAGE = "/images/default-campaign.jpg"; // Add default image constant
 
 // Component for the campaign dashboard
 const CampaignDashboard = () => {
@@ -56,6 +60,10 @@ const CampaignDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showDescription, setShowDescription] = useState(false);
+  // Add edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
+  const [actionInProgress, setActionInProgress] = useState(false);
 
   // Fetch campaign data
   useEffect(() => {
@@ -112,9 +120,69 @@ const CampaignDashboard = () => {
     navigate("/campaigns");
   };
 
-  // Navigate to campaign edit
+  // Navigate to campaign edit - UPDATE THIS
   const handleEditCampaign = () => {
-    navigate(`/campaign/${campaignId}/edit`);
+    // Set the campaign to be edited and open the dialog
+    const campaignToEdit = { ...campaign };
+    // Clear the imageUrl if it's the default image
+    if (campaignToEdit.imageUrl === '/images/default-campaign.jpg') {
+      campaignToEdit.imageUrl = '';
+    }
+    setEditingCampaign(campaignToEdit);
+    setEditDialogOpen(true);
+  };
+
+  // Add new handlers for the edit dialog
+  const handleEditDialogClose = () => {
+    if (!actionInProgress) {
+      setEditDialogOpen(false);
+      setEditingCampaign(null); // Clear the editing campaign data
+    }
+  };
+
+  const handleEditInputChange = (event) => {
+    const { name, value } = event.target;
+    setEditingCampaign((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleEditImageUpdate = (newImageUrl) => {
+    setEditingCampaign((prev) => ({
+      ...prev,
+      imageUrl: newImageUrl || DEFAULT_CAMPAIGN_IMAGE, // Use default if empty
+    }));
+  };
+
+  const handleEditTagInput = (event) => {
+    const { value } = event.target;
+    // Convert comma-separated string to array, trimming whitespace
+    const tagsArray = value.split(",").map((tag) => tag.trim()).filter(tag => tag);
+    setEditingCampaign((prev) => ({
+      ...prev,
+      tags: tagsArray,
+    }));
+  };
+
+  const handleUpdateCampaign = async () => {
+    if (!editingCampaign || !campaign?.id) return;
+
+    setActionInProgress(true);
+    try {
+      const campaignToUpdate = { ...editingCampaign };
+      // Set default image if no image URL is provided
+      if (!campaignToUpdate.imageUrl) {
+        campaignToUpdate.imageUrl = '/images/default-campaign.jpg';
+      }
+      await updateCampaign(campaignToUpdate);
+      setCampaign(campaignToUpdate);
+      handleEditDialogClose();
+    } catch (err) {
+      console.error("Error updating campaign:", err);
+    } finally {
+      setActionInProgress(false);
+    }
   };
 
   // Helper functions
@@ -325,11 +393,26 @@ const CampaignDashboard = () => {
           <MapTab locations={locations} campaignId={campaignId} />
         </TabPanel>
       </Container>
+
+      {/* Render CampaignDialog for editing */}
+      {editingCampaign && ( // Conditionally render based on editingCampaign
+        <CampaignDialog
+          open={editDialogOpen}
+          onClose={handleEditDialogClose}
+          onUpdate={handleUpdateCampaign}
+          campaign={editingCampaign}
+          onInputChange={handleEditInputChange}
+          onImageUpdate={handleEditImageUpdate}
+          onTagInput={handleEditTagInput}
+          isEditMode={true}
+          actionInProgress={actionInProgress}
+        />
+      )}
     </Layout>
   );
 };
 
-// TabPanel component
+// TabPanel component (keep existing)
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
 

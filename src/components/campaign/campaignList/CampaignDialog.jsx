@@ -19,6 +19,8 @@ const CampaignDialog = ({
   open,
   onClose,
   onCreate,
+  onUpdate, // Added prop for update action
+  isEditMode = false, // Added prop to determine mode, defaults to false
   campaign,
   onInputChange,
   onImageUpdate,
@@ -67,7 +69,7 @@ const CampaignDialog = ({
     >
       <DialogTitle sx={{ pb: 1 }}>
         <Typography variant="h3" component="div" fontWeight="bold">
-          Create New Campaign
+          {isEditMode ? 'Edit Campaign' : 'Create New Campaign'}
         </Typography>
       </DialogTitle>
 
@@ -163,13 +165,15 @@ const CampaignDialog = ({
           Cancel
         </Button>
         <Button
-          onClick={onCreate}
+          onClick={isEditMode ? onUpdate : onCreate} // Conditional onClick handler
           variant="contained"
           color="primary"
           disabled={!campaign.name || actionInProgress}
           sx={{ minWidth: 100 }}
         >
-          {actionInProgress ? 'Creating...' : 'Create Campaign'}
+          {actionInProgress
+            ? (isEditMode ? 'Saving...' : 'Creating...') // Conditional loading text
+            : (isEditMode ? 'Save Changes' : 'Create Campaign')} {/* Conditional button text */}
         </Button>
       </DialogActions>
     </Dialog>

@@ -25,7 +25,12 @@ import {
   Delete as DeleteIcon,
   Info as InfoIcon,
 } from "@mui/icons-material";
-import { addCampaign, getCampaigns, deleteCampaign } from "../../utility/db";
+import {
+  addCampaign,
+  getCampaigns,
+  deleteCampaign,
+  updateCampaign
+} from "../../utility/db";
 import LoadingPage from "../../components/common/LoadingPage";
 import Layout from "../../components/Layout";
 import CampaignCard from "../../components/campaign/campaignList/CampaignCard";
@@ -52,6 +57,8 @@ const CampaignList = () => {
   const [actionInProgress, setActionInProgress] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingCampaign, setEditingCampaign] = useState(null);
 
   // New campaign form state
   const [newCampaign, setNewCampaign] = useState({
@@ -206,6 +213,45 @@ const CampaignList = () => {
 
   const handleCampaignClick = (campaignId) => {
     navigate(`/campaign/${campaignId}`);
+  };
+
+  const handleEditCampaign = (campaign) => {
+    const campaignToEdit = { ...campaign };
+    if (campaignToEdit.imageUrl === '/images/default-campaign.jpg') {
+      campaignToEdit.imageUrl = '';
+    }
+    setEditingCampaign(campaignToEdit);
+    setEditDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const handleUpdateCampaign = async () => {
+    if (!editingCampaign) return;
+
+    try {
+      setActionInProgress(true);
+      const campaignToUpdate = { ...editingCampaign };
+      if (!campaignToUpdate.imageUrl) {
+        campaignToUpdate.imageUrl = DEFAULT_CAMPAIGN_IMAGE;
+      }
+      await updateCampaign(campaignToUpdate);
+      setCampaigns(prev => 
+        prev.map(c => c.id === campaignToUpdate.id ? campaignToUpdate : c)
+      );
+      setEditDialogOpen(false);
+      setEditingCampaign(null);
+    } catch (error) {
+      console.error("Failed to update campaign:", error);
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  const handleEditDialogClose = () => {
+    if (!actionInProgress) {
+      setEditDialogOpen(false);
+      setEditingCampaign(null);
+    }
   };
 
   // Get all unique tags from campaigns
@@ -434,10 +480,7 @@ const CampaignList = () => {
         >
           <MenuItem
             onClick={() => {
-              handleMenuClose();
-              if (selectedCampaign) {
-                navigate(`/campaign/${selectedCampaign.id}/edit`);
-              }
+              handleEditCampaign(selectedCampaign);
             }}
             sx={{ gap: 1 }}
           >
@@ -511,6 +554,28 @@ const CampaignList = () => {
           onTagInput={handleTagInput}
           actionInProgress={actionInProgress}
         />
+
+        {/* Edit Campaign Dialog */}
+        {editingCampaign && (
+          <CampaignDialog
+            open={editDialogOpen}
+            onClose={handleEditDialogClose}
+            onUpdate={handleUpdateCampaign}
+            campaign={editingCampaign}
+            onInputChange={(e) => setEditingCampaign(prev => ({ ...prev, [e.target.name]: e.target.value }))}
+            onImageUpdate={(newImageUrl) => setEditingCampaign(prev => ({ ...prev, imageUrl: newImageUrl }))}
+            onTagInput={(e) => {
+              const tagsString = e.target.value;
+              const tagArray = tagsString
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter((tag) => tag !== "");
+              setEditingCampaign(prev => ({ ...prev, tags: tagArray }));
+            }}
+            isEditMode={true}
+            actionInProgress={actionInProgress}
+          />
+        )}
       </Container>
     </Layout>
   );
