@@ -368,7 +368,7 @@ const CampaignDashboard = () => {
         {/* Tab Content */}
         <Routes>
           { ['/', '/overview'].map((path) =>
-            <Route path={path} element={
+            <Route key={path} path={path} element={
               <OverviewTab
                 campaign={campaign}
                 upcomingSession={upcomingSession}
@@ -392,7 +392,7 @@ const CampaignDashboard = () => {
             <NpcsTab npcs={npcs} campaignId={campaignId} />} />
           <Route path="/notes" element={<NotesTab notes={notes} campaignId={campaignId} />
           } />
-          <Route path="/locations" element={
+          <Route path="/locations/*" element={
             <LocationsTab locations={locations} campaignId={campaignId} />
           } />
           <Route path="/map" element={
