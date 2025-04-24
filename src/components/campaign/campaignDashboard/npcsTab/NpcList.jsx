@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Grid, Typography, Stack } from "@mui/material";
 
 import NpcCard from "./NpcCard";
-import NpcListItem from "./NpcListItem"; // We'll create this component
+import NpcListItem from "./NpcListItem";
 import NpcsFolderHeader from "./NpcsFolderHeader";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
@@ -22,7 +22,16 @@ const NpcList = ({
   const { npcFolders, prepareRenameFolder, prepareDeleteFolder, setIsNewFolderDialogOpen } =
     useNpcFoldersStore();
 
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+  // Initialize viewMode from localStorage or default to "grid"
+  const [viewMode, setViewMode] = useState(() => {
+    const savedViewMode = localStorage.getItem("npcListViewMode");
+    return savedViewMode || "grid"; // Default to 'grid' if no saved preference
+  });
+
+  // Update localStorage whenever viewMode changes
+  useEffect(() => {
+    localStorage.setItem("npcListViewMode", viewMode);
+  }, [viewMode]);
 
   // Get displayed NPCs using the store's method
   const displayedNpcs = getDisplayedNpcs(campaignNpcs);
@@ -59,84 +68,84 @@ const NpcList = ({
   };
 
   return (
-        <Box sx={{ display: "flex", height: "100%", width: "100%" }}>       
-          {/* Main Content */}
-          <Box sx={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            {/* Folder Header with breadcrumbs and actions */}
-            <NpcsFolderHeader
-              selectedFolder={selectedFolder}
-              onRenameFolder={prepareRenameFolder}
-              onDeleteFolder={prepareDeleteFolder}
-              onCreateFolder={handleCreateFolder}
-              viewMode={viewMode}
-              onChangeViewMode={setViewMode}
-            />
+    <Box sx={{ display: "flex", height: "100%", width: "100%" }}>       
+      {/* Main Content */}
+      <Box sx={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* Folder Header with breadcrumbs and actions */}
+        <NpcsFolderHeader
+          selectedFolder={selectedFolder}
+          onRenameFolder={prepareRenameFolder}
+          onDeleteFolder={prepareDeleteFolder}
+          onCreateFolder={handleCreateFolder}
+          viewMode={viewMode}
+          onChangeViewMode={setViewMode}
+        />
 
-            {/* NPCs Content */}
-            <Box sx={{ flex: 1, overflowY: "auto" }}>
-              {displayedNpcs.length > 0 ? (
-                  viewMode === "grid" ? (
-                    <Grid container spacing={2}>
-                      {displayedNpcs.map((npc) => (
-                        <Grid item xs={12} sm={6} md={4} lg={3} key={npc.id}>
-                          <NpcCard
-                            npc={npc}
-                            expandedNpcId={expandedNpcId}
-                            handleExpandNpc={handleExpandNpc}
-                            onEdit={handleEditNpc}
-                            onUnlink={handleToggleNpc}
-                            onSetAttitude={handleSetAttitude}
-                            folders={npcFolders}
-                          />
-                        </Grid>
-                      ))}
+        {/* NPCs Content */}
+        <Box sx={{ flex: 1, overflowY: "auto" }}>
+          {displayedNpcs.length > 0 ? (
+              viewMode === "grid" ? (
+                <Grid container spacing={2}>
+                  {displayedNpcs.map((npc) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={npc.id}>
+                      <NpcCard
+                        npc={npc}
+                        expandedNpcId={expandedNpcId}
+                        handleExpandNpc={handleExpandNpc}
+                        onEdit={handleEditNpc}
+                        onUnlink={handleToggleNpc}
+                        onSetAttitude={handleSetAttitude}
+                        folders={npcFolders}
+                      />
                     </Grid>
-                  ) : (
-                    <Stack spacing={1}>
-                      {displayedNpcs.map((npc) => (
-                        <NpcListItem
-                          key={npc.id}
-                          npc={npc}
-                          expandedNpcId={expandedNpcId}
-                          handleExpandNpc={handleExpandNpc}
-                          onEdit={handleEditNpc}
-                          onUnlink={handleToggleNpc}
-                          onSetAttitude={handleSetAttitude}
-                          folders={npcFolders}
-                        />
-                      ))}
-                    </Stack>
-                  )
+                  ))}
+                </Grid>
               ) : (
-                // Empty state specific to the selected filter
-                <Box
-                  sx={{
-                    py: 6,
-                    textAlign: "center",
-                    border: "1px dashed",
-                    borderColor: "divider",
-                    borderRadius: 1,
-                    mt: 2,
-                  }}
-                >
-                  <Typography variant="body1" color="text.secondary">
-                    {selectedFolder
-                      ? `No NPCs in folder "${selectedFolder.name}"`
-                      : npcFilterType === "all"
-                      ? "No NPCs match the current search."
-                      : npcFilterType === "friendly"
-                      ? "No friendly NPCs found."
-                      : npcFilterType === "neutral"
-                      ? "No neutral NPCs found."
-                      : npcFilterType === "hostile"
-                      ? "No hostile NPCs found."
-                      : "No villains found."}
-                  </Typography>
-                </Box>
-              )}
+                <Stack spacing={1}>
+                  {displayedNpcs.map((npc) => (
+                    <NpcListItem
+                      key={npc.id}
+                      npc={npc}
+                      expandedNpcId={expandedNpcId}
+                      handleExpandNpc={handleExpandNpc}
+                      onEdit={handleEditNpc}
+                      onUnlink={handleToggleNpc}
+                      onSetAttitude={handleSetAttitude}
+                      folders={npcFolders}
+                    />
+                  ))}
+                </Stack>
+              )
+          ) : (
+            // Empty state specific to the selected filter
+            <Box
+              sx={{
+                py: 6,
+                textAlign: "center",
+                border: "1px dashed",
+                borderColor: "divider",
+                borderRadius: 1,
+                mt: 2,
+              }}
+            >
+              <Typography variant="body1" color="text.secondary">
+                {selectedFolder
+                  ? `No NPCs in folder "${selectedFolder.name}"`
+                  : npcFilterType === "all"
+                  ? "No NPCs match the current search."
+                  : npcFilterType === "friendly"
+                  ? "No friendly NPCs found."
+                  : npcFilterType === "neutral"
+                  ? "No neutral NPCs found."
+                  : npcFilterType === "hostile"
+                  ? "No hostile NPCs found."
+                  : "No villains found."}
+              </Typography>
             </Box>
-          </Box>
+          )}
         </Box>
+      </Box>
+    </Box>
   );
 };
 

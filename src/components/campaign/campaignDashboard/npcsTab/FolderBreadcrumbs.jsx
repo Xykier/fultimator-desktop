@@ -13,7 +13,7 @@ import {
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
-const FolderExplorer = () => {
+const FolderBreadcrumbs = () => {
 
   // Get state from the store
   const selectedFolderId = useNpcFiltersStore((state) => state.selectedNpcFolderId);
@@ -96,7 +96,7 @@ const FolderExplorer = () => {
           All Folders
         </Button>
         
-        <Breadcrumbs aria-label="breadcrumb">
+        {!showAllFolders && <Breadcrumbs aria-label="breadcrumb">
           <Link
             underline="hover"
             color="inherit"
@@ -104,7 +104,7 @@ const FolderExplorer = () => {
             sx={{ display: "flex", alignItems: "center" }}
           >
             <Home sx={{ mr: 0.5 }} fontSize="inherit" />
-            Home
+            Root
           </Link>
           {breadcrumbs.map((folder) => (
             <Link
@@ -118,10 +118,10 @@ const FolderExplorer = () => {
               {folder.name}
             </Link>
           ))}
-        </Breadcrumbs>
+        </Breadcrumbs>}
       </Box>
     </div>
   );
 };
 
-export default FolderExplorer;
+export default FolderBreadcrumbs;

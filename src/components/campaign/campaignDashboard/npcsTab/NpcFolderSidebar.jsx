@@ -8,7 +8,6 @@ import {
   ListItemText,
   Collapse,
   IconButton,
-  Tooltip,
   Typography,
   Divider,
   Paper,
@@ -19,13 +18,17 @@ import {
   ExpandMore,
   ChevronRight,
   Home as HomeIcon,
-  Add as AddIcon
 } from "@mui/icons-material";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
-const NpcFolderSidebar = ({ onCreateFolder }) => {
-  const { selectedNpcFolderId, setSelectedNpcFolderId } = useNpcFiltersStore();
+const NpcFolderSidebar = () => {
+  const {
+    selectedNpcFolderId,
+    setSelectedNpcFolderId,
+    showAllFolders,
+    setShowAllFolders,
+  } = useNpcFiltersStore();
   const { npcFolders } = useNpcFoldersStore();
   const [expandedFolders, setExpandedFolders] = useState({});
 
@@ -39,10 +42,9 @@ const NpcFolderSidebar = ({ onCreateFolder }) => {
 
   const handleSelectFolder = (folderId) => {
     setSelectedNpcFolderId(folderId === selectedNpcFolderId ? null : folderId);
-  };
-
-  const handleCreateNewFolder = (parentId = null) => {
-    onCreateFolder(parentId);
+    if (showAllFolders) {
+      setShowAllFolders(false);
+    }
   };
 
   const renderFolders = (folders, depth = 0) => {
@@ -112,18 +114,6 @@ const NpcFolderSidebar = ({ onCreateFolder }) => {
                   </Typography>
                 }
               />
-              <Tooltip title="Create folder">
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCreateNewFolder(folder.id);
-                  }}
-                  sx={{ opacity: 0.6, "&:hover": { opacity: 1 } }}
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
             </ListItemButton>
           </ListItem>
           {hasChildren && (
@@ -143,28 +133,30 @@ const NpcFolderSidebar = ({ onCreateFolder }) => {
       elevation={0}
       variant="outlined"
       sx={{
-        height: "100%",
+        height: "90%",
         width: 240,
         overflowY: "auto",
         borderRadius: 1,
       }}
     >
       <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
-        <Typography variant="subtitle2" fontWeight={600} sx={{ ml: 1, flex: 1 }}>
+        <Typography
+          variant="subtitle2"
+          fontWeight={600}
+          sx={{ ml: 1, flex: 1 }}
+        >
           Folders
         </Typography>
-        <Tooltip title="Create root folder">
-          <IconButton size="small" onClick={() => handleCreateNewFolder()}>
-            <AddIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
       </Box>
       <Divider />
       <List dense disablePadding>
         <ListItem disablePadding>
           <ListItemButton
-            onClick={() => setSelectedNpcFolderId(null)}
-            selected={selectedNpcFolderId === null}
+            onClick={() => {
+              setSelectedNpcFolderId(null);
+              setShowAllFolders(false);
+            }}
+            selected={selectedNpcFolderId === null && showAllFolders === false}
             sx={{
               borderRadius: 1,
               m: 0.5,

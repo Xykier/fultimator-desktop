@@ -4,7 +4,6 @@ import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
 import FolderNameDialogComponent from "./FolderNameDialogComponent";
 import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
-import FolderExplorer from "./FolderExplorer";
 import LinkNpcDialog from "./LinkNpcDialog";
 import EmptyNpcsList from "./EmptyNpcsList";
 import NpcListLoading from "./NpcListLoading";
@@ -77,7 +76,15 @@ const NpcsTabMain = ({ campaignId }) => {
     setLoadNpcs(() => initializeNpcs(campaignId));
     setShowSnackbar(showSnackbar);
     fetchFolders();
-  }, [campaignId, setFoldersCampaignId, fetchFolders, setLoadNpcs, showSnackbar, setShowSnackbar, initializeNpcs]);
+  }, [
+    campaignId,
+    setFoldersCampaignId,
+    fetchFolders,
+    setLoadNpcs,
+    showSnackbar,
+    setShowSnackbar,
+    initializeNpcs,
+  ]);
 
   return (
     <Paper elevation={3} sx={{ p: 3 }}>
@@ -93,11 +100,6 @@ const NpcsTabMain = ({ campaignId }) => {
             <SearchbarFilter />
           </Grid>
         )}
-
-        {/* Display NPC Folders */}
-        <Grid item xs={12}>
-          <FolderExplorer />
-        </Grid>
 
         {/* Loading state */}
         {isLoading && (
@@ -123,14 +125,14 @@ const NpcsTabMain = ({ campaignId }) => {
         {/* Display NPCs or Empty State for the current filter */}
         {!isLoading && !loadError && campaignNpcs.length > 0 && (
           <Grid item xs={12}>
-          <NpcExplorer
-            campaignNpcs={campaignNpcs}
-            expandedNpcId={expandedNpcId}
-            handleExpandNpc={handleExpandNpc}
-            handleEditNpc={handleEditNpc}
-            handleToggleNpc={handleToggleNpc}
-            handleSetAttitude={handleSetAttitude}
-          />
+            <NpcExplorer
+              campaignNpcs={campaignNpcs}
+              expandedNpcId={expandedNpcId}
+              handleExpandNpc={handleExpandNpc}
+              handleEditNpc={handleEditNpc}
+              handleToggleNpc={handleToggleNpc}
+              handleSetAttitude={handleSetAttitude}
+            />
           </Grid>
         )}
 

@@ -21,7 +21,9 @@ import {
   GridView as GridViewIcon,
   ViewList as ViewListIcon,
   Add as AddIcon,
+  People as PeopleIcon,
 } from "@mui/icons-material";
+import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 
 const NpcsFolderHeader = ({
   selectedFolder,
@@ -31,6 +33,7 @@ const NpcsFolderHeader = ({
   viewMode = "grid",
   onChangeViewMode,
 }) => {
+  const { showAllFolders } = useNpcFiltersStore();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -70,17 +73,23 @@ const NpcsFolderHeader = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          mb: selectedFolder ? 1 : 0,
+          mb: 0,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
           {selectedFolder ? (
             <FolderOpenIcon color="primary" sx={{ mr: 1.5 }} />
+          ) : showAllFolders ? (
+            <PeopleIcon color="primary" sx={{ mr: 1.5 }} />
           ) : (
             <HomeIcon color="primary" sx={{ mr: 1.5 }} />
           )}
-          <Typography variant="h6" component="h2" sx={{ fontWeight: 500 }}>
-            {selectedFolder ? selectedFolder.name : "All NPCs"}
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 500 }}>
+            {selectedFolder
+              ? selectedFolder.name
+              : showAllFolders
+              ? "All Folders"
+              : "Root"}
           </Typography>
         </Box>
 

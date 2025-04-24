@@ -1,11 +1,8 @@
 import React from "react";
 import { Box, Button, Typography } from "@mui/material";
-import { CreateNewFolder, Link as LinkIcon } from "@mui/icons-material";
-import { useNpcFoldersStore } from "./stores/npcFolderStore";
+import { Link as LinkIcon } from "@mui/icons-material";
 
 const NpcsTabHeader = ({ handleAddExistingNpc }) => {
-  const { setIsNewFolderDialogOpen } = useNpcFoldersStore();
-
   return (
     <Box
       sx={{
@@ -25,14 +22,6 @@ const NpcsTabHeader = ({ handleAddExistingNpc }) => {
           sx={{ mr: 1 }}
         >
           Link NPC
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setIsNewFolderDialogOpen(true)}
-          startIcon={<CreateNewFolder />}
-        >
-          Create Folder
         </Button>
       </Box>
     </Box>
