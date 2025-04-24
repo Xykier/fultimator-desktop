@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import {useParams, useNavigate, Routes, Route, useLocation} from 'react-router-dom';
 import {
   Box,
   Button,
@@ -45,6 +45,7 @@ const DEFAULT_CAMPAIGN_IMAGE = "/images/default-campaign.jpg"; // Add default im
 const CampaignDashboard = () => {
   const { campaignId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const primary = theme.palette.primary.main;
   const secondary = theme.palette.secondary.main;
@@ -110,9 +111,18 @@ const CampaignDashboard = () => {
     loadCampaignData();
   }, [campaignId]);
 
+  useEffect(() => {
+    const tabs = ['overview', 'sessions', 'characters', 'npcs', 'notes', 'locations', 'map'];
+    tabs.forEach((tab) => {
+      if (location.pathname.includes(tab)) {
+        setActiveTab(tab);
+      }
+    })
+  }, [location])
+
   // Tab change handler
   const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
+    navigate(`/campaign/${campaignId}/${newValue}`);
   };
 
   // Navigate back to campaign list
@@ -356,42 +366,36 @@ const CampaignDashboard = () => {
         <TabsNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Tab Content */}
-        <TabPanel value={activeTab} index={0}>
-          <OverviewTab
-            campaign={campaign}
-            upcomingSession={upcomingSession}
-            pastSessions={pastSessions}
-            pcs={pcs}
-            npcs={npcs}
-            notes={notes}
-            locations={locations}
-            campaignId={campaignId}
-          />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={1}>
-          <SessionsTab sessions={sessions} campaignId={campaignId} />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={2}>
-          <CharactersTab pcs={pcs} campaignId={campaignId} />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={3}>
-          <NpcsTab npcs={npcs} campaignId={campaignId} />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={4}>
-          <NotesTab notes={notes} campaignId={campaignId} />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={5}>
-          <LocationsTab locations={locations} campaignId={campaignId} />
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={6}>
-          <MapTab locations={locations} campaignId={campaignId} />
-        </TabPanel>
+        <Routes>
+          <Route index path="/overview" element={
+            <OverviewTab
+              campaign={campaign}
+              upcomingSession={upcomingSession}
+              pastSessions={pastSessions}
+              pcs={pcs}
+              npcs={npcs}
+              notes={notes}
+              locations={locations}
+              campaignId={campaignId}
+            />
+          } />
+          <Route path="/sessions" element={
+            <SessionsTab sessions={sessions} campaignId={campaignId} />
+          } />
+          <Route path="/characters" element={
+            <CharactersTab pcs={pcs} campaignId={campaignId} />
+          } />
+          <Route path="/npcs" element={
+            <NpcsTab npcs={npcs} campaignId={campaignId} />} />
+          <Route path="/notes" element={<NotesTab notes={notes} campaignId={campaignId} />
+          } />
+          <Route path="/locations" element={
+            <LocationsTab locations={locations} campaignId={campaignId} />
+          } />
+          <Route path="/map" element={
+            <MapTab locations={locations} campaignId={campaignId} />
+          } />
+        </Routes>
       </Container>
 
       {/* Render CampaignDialog for editing */}
@@ -409,23 +413,6 @@ const CampaignDashboard = () => {
         />
       )}
     </Layout>
-  );
-};
-
-// TabPanel component (keep existing)
-const TabPanel = (props) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`tabpanel-${index}`}
-      aria-labelledby={`tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box>{children}</Box>}
-    </div>
   );
 };
 

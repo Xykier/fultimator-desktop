@@ -143,7 +143,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/campaign/:campaignId"
+                path="/campaign/:campaignId/*"
                 element={
                   <Suspense fallback={<LoadingPage />}>
                     <CampaignDashboard />
