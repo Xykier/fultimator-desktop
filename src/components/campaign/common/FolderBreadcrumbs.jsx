@@ -10,17 +10,14 @@ import {
   Home,
   People,
 } from "@mui/icons-material";
-import { useNpcFiltersStore } from "./stores/npcFiltersStore";
-import { useNpcFoldersStore } from "./stores/npcFolderStore";
 
-const FolderBreadcrumbs = () => {
-
-  // Get state from the store
-  const selectedFolderId = useNpcFiltersStore((state) => state.selectedNpcFolderId);
-  const setSelectedFolderId = useNpcFiltersStore((state) => state.setSelectedNpcFolderId);
-  const showAllFolders = useNpcFiltersStore((state) => state.showAllFolders);
-  const setShowAllFolders = useNpcFiltersStore((state) => state.setShowAllFolders);
-  const folders = useNpcFoldersStore((state) => state.npcFolders);
+const FolderBreadcrumbs = ({
+  folders,
+  selectedFolderId,
+  setSelectedFolderId,
+  showAllFolders,
+  setShowAllFolders,
+}) => {
 
   // Process folders to create a flat structure for easier operations
   const [flatFolders, setFlatFolders] = useState([]);

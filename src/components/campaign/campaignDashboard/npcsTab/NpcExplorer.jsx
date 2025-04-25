@@ -1,108 +1,119 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Drawer,
-  useMediaQuery,
-  Fab,
-  Zoom,
-  useTheme,
-  Grid,
-} from "@mui/material";
-import FolderIcon from "@mui/icons-material/Folder";
-import FolderBreadcrumbs from "./FolderBreadcrumbs";
-import NpcList from "./NpcList";
-import NpcFolderSidebar from "./NpcFolderSidebar";
+import React, { useState, useEffect } from "react";
+import { Box, Typography } from "@mui/material";
+import NpcCard from "./NpcCard";
+import NpcListItem from "./NpcListItem";
+import { useNpcFiltersStore } from "./stores/npcFiltersStore";
+import { useNpcFoldersStore } from "./stores/npcFolderStore";
+import { useNpcStore } from "./stores/npcDataStore";
+import Explorer from "../../common/Explorer";
 
-const NpcExplorer = ({
-  campaignNpcs,
-  expandedNpcId,
-  handleExpandNpc,
-  handleEditNpc,
-  handleToggleNpc,
-  handleSetAttitude,
-}) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [drawerOpen, setDrawerOpen] = useState(false);
+const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
+  const { unlinkMultipleNpcs } = useNpcStore();
+  const {
+    npcFilterType,
+    selectedNpcFolderId,
+    getDisplayedNpcs,
+    setSelectedNpcFolderId,
+    showAllFolders,
+    setShowAllFolders,
+  } = useNpcFiltersStore();
+  const {
+    npcFolders,
+    prepareRenameFolder,
+    prepareDeleteFolder,
+    setIsNewFolderDialogOpen,
+    moveNpcToFolder,
+  } = useNpcFoldersStore();
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+  // Initialize viewMode from localStorage or default to "grid"
+  const [viewMode, setViewMode] = useState(() => {
+    const savedViewMode = localStorage.getItem("npcListViewMode");
+    return savedViewMode || "grid"; // Default to 'grid' if no saved preference
+  });
 
-  const handleCreateFolder = (parentId) => {
-    // Your create folder logic
-    console.log("Creating folder with parent:", parentId);
-    setDrawerOpen(false); // Close drawer on mobile after action
-  };
+  // Add selection state
+  const [selectedNpcs, setSelectedNpcs] = useState([]);
+  const [selectionMode, setSelectionMode] = useState(false);
+
+  // Track previous folder ID to detect changes
+  const [prevFolderId, setPrevFolderId] = useState(selectedNpcFolderId);
+
+  // Update localStorage whenever viewMode changes
+  useEffect(() => {
+    localStorage.setItem("npcListViewMode", viewMode);
+  }, [viewMode]);
+
+  // Clear selection when folder changes
+  useEffect(() => {
+    if (prevFolderId !== selectedNpcFolderId) {
+      setSelectedNpcs([]);
+      setSelectionMode(false);
+      setPrevFolderId(selectedNpcFolderId);
+    }
+  }, [selectedNpcFolderId, prevFolderId]);
+
+  // Automatically enable selection mode when there are selected NPCs
+  useEffect(() => {
+    if (selectedNpcs.length > 0 && !selectionMode) {
+      setSelectionMode(true);
+    } else if (selectedNpcs.length === 0 && selectionMode) {
+      setSelectionMode(false);
+    }
+  }, [selectedNpcs, selectionMode]);
+
+  // Get displayed NPCs using the store's method
+  const displayedNpcs = getDisplayedNpcs(campaignNpcs);
 
   return (
-    <>
-      <Grid item xs={12}>
-        <FolderBreadcrumbs />
-      </Grid>
+    <Explorer
+      folders={npcFolders}
+      selectedFolderId={selectedNpcFolderId}
+      setSelectedFolderId={setSelectedNpcFolderId}
+      showAllFolders={showAllFolders}
+      setShowAllFolders={setShowAllFolders}
+      viewMode={viewMode}
+      setViewMode={setViewMode}
+      items={displayedNpcs}
+      setIsNewFolderDialogOpen={setIsNewFolderDialogOpen}
+      moveItemToFolder={moveNpcToFolder}
+      unlinkMultipleItems={unlinkMultipleNpcs}
+      prepareRenameFolder={prepareRenameFolder}
+      prepareDeleteFolder={prepareDeleteFolder}
+      handleUnlinkItem={handleToggleNpc}
+      filterType={npcFilterType}
+      ItemCardComponent={NpcCard}
+      ItemListComponent={NpcListItem}
+      EmptyListComponent={EmptyNpcsList}
+    />
+  );
+};
 
-      <Grid item xs={12}>
-        <Box
-          sx={{
-            display: "flex",
-            height: "100%",
-            position: "relative",
-            width: "100%",
-            marginBottom: 1,
-          }}
-        >
-          {/* Folder sidebar - permanent on desktop, drawer on mobile */}
-          {isMobile ? (
-            <>
-              <Drawer
-                variant="temporary"
-                open={drawerOpen}
-                onClose={toggleDrawer}
-                ModalProps={{ keepMounted: true }}
-                sx={{
-                  "& .MuiDrawer-paper": { width: 280, boxSizing: "border-box" },
-                }}
-              >
-                <NpcFolderSidebar />
-              </Drawer>
-
-              <Zoom in={!drawerOpen}>
-                <Fab
-                  color="primary"
-                  size="small"
-                  onClick={toggleDrawer}
-                  sx={{ position: "absolute", bottom: 16, left: 16, zIndex: 1 }}
-                >
-                  <FolderIcon />
-                </Fab>
-              </Zoom>
-            </>
-          ) : (
-            <Box sx={{ width: 240, flexShrink: 0, mr: 2 }}>
-              <NpcFolderSidebar onCreateFolder={handleCreateFolder} />
-            </Box>
-          )}
-
-          {/* Main content */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              width: isMobile ? "100%" : "calc(100% - 260px)",
-              overflow: "hidden",
-            }}
-          >
-            <NpcList
-              campaignNpcs={campaignNpcs}
-              expandedNpcId={expandedNpcId}
-              handleExpandNpc={handleExpandNpc}
-              handleEditNpc={handleEditNpc}
-              handleToggleNpc={handleToggleNpc}
-              handleSetAttitude={handleSetAttitude}
-            />
-          </Box>
-        </Box>
-      </Grid>
-    </>
+const EmptyNpcsList = ({ currentFolder, filterType }) => {
+  return (
+    <Box
+      sx={{
+        py: 6,
+        textAlign: "center",
+        border: "1px dashed",
+        borderColor: "divider",
+        borderRadius: 1,
+        mt: 2,
+      }}
+    >
+      <Typography variant="body1" color="text.secondary">
+        {currentFolder
+          ? `No NPCs in folder "${currentFolder.name}"`
+          : filterType === "all"
+          ? "No NPCs match the current search."
+          : filterType === "friendly"
+          ? "No friendly NPCs found."
+          : filterType === "neutral"
+          ? "No neutral NPCs found."
+          : filterType === "hostile"
+          ? "No hostile NPCs found."
+          : "No villains found."}
+      </Typography>
+    </Box>
   );
 };
 
