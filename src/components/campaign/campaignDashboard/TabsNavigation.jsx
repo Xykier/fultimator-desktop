@@ -24,9 +24,9 @@ const TabsNavigation = ({ activeTab, onTabChange }) => {
         allowScrollButtonsMobile
         sx={{ borderBottom: 1, borderColor: "divider" }}
       >
-        <Tab icon={<CampaignIcon />} label="Overview" />
-        <Tab icon={<CalendarIcon />} label="Sessions" />
-        <Tab icon={<CharactersIcon />} label="Characters" />
+        <Tab icon={<CampaignIcon />} label="Overview" value='overview'/>
+        <Tab icon={<CalendarIcon />} label="Sessions" value='sessions'/>
+        <Tab icon={<CharactersIcon />} label="Characters" value='characters' />
         <Tab
           icon={
             <Box sx={{ fontSize: 24, display: "flex", alignItems: "center" }}>
@@ -34,10 +34,11 @@ const TabsNavigation = ({ activeTab, onTabChange }) => {
             </Box>
           }
           label="NPCs"
+          value='npcs'
         />
-        <Tab icon={<NoteIcon />} label="Notes" />
-        <Tab icon={<LocationIcon />} label="Locations" />
-        <Tab icon={<MapIcon />} label="Map" />
+        <Tab icon={<NoteIcon />} label="Notes" value='notes'  />
+        <Tab icon={<LocationIcon />} label="Locations" value='locations' />
+        <Tab icon={<MapIcon />} label="Map" value='map' />
       </Tabs>
     </Paper>
   );

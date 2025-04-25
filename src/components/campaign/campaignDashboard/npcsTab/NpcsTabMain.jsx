@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Grid, Paper } from "@mui/material";
+import {useParams} from 'react-router-dom';
 import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
 import FolderNameDialogComponent from "./FolderNameDialogComponent";
@@ -15,7 +16,9 @@ import { useNpcFiltersStore } from "./stores/npcFiltersStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
 import NpcExplorer from "./NpcExplorer";
 
-const NpcsTabMain = ({ campaignId }) => {
+const NpcsTabMain = () => {
+  const {campaignId} = useParams();
+
   const {
     // State & Derived Values
     isLinkNpcDialogOpen,

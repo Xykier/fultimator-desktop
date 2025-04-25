@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from 'react-router-dom';
 import {
   Box,
   Button,
@@ -16,18 +16,24 @@ import {
 } from "@mui/material";
 import { Event as EventIcon, CalendarMonth as CalendarIcon, Note as NoteIcon } from "@mui/icons-material";
 import { format, parseISO, isToday } from "date-fns";
+import {useCampaignStore} from '../stores/campaignStore.js';
+import {usePCStore} from './charactersTab/stores/characterStore.js';
+import {useLocationStore} from './locationsTab/stores/locationStore.js';
+import {useNoteStore} from './notesTab/stores/noteStore.js';
+import {useNpcStore} from './npcsTab/stores/npcDataStore.js';
+import {useSessionStore} from './sessionsTab/stores/sessionsStore.js';
 
-const OverviewTab = ({
-  campaign,
-  upcomingSession,
-  pastSessions,
-  pcs,
-  npcs,
-  notes,
-  locations,
-  campaignId,
-}) => {
+const OverviewTab = () => {
   const navigate = useNavigate();
+  const {campaignId} = useParams();
+  const {locations} = useLocationStore();
+  const {allNpcs: npcs} = useNpcStore();
+  const {allPcs: pcs} = usePCStore();
+  const {notes} = useNoteStore();
+  const {campaign} = useCampaignStore();
+  const sessionStore = useSessionStore();
+  const upcomingSession = sessionStore.getUpcomingSession()
+  const pastSessions = sessionStore.getPastSessions()
 
   const test = true;
 

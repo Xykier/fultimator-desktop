@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from 'react-router-dom';
 import {
   Box,
   Button,
@@ -15,9 +15,12 @@ import {
 } from "@mui/material";
 import { Add as AddIcon, Edit as EditIcon } from "@mui/icons-material";
 import { format, parseISO } from "date-fns";
+import {useSessionStore} from './sessionsTab/stores/sessionsStore.js';
 
-const SessionsTab = ({ sessions, campaignId }) => {
+const SessionsTab = () => {
   const navigate = useNavigate();
+  const {campaignId} = useParams();
+  const {sessions} = useSessionStore();
 
   // Group sessions by status
   const upcomingSessions = sessions

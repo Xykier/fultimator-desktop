@@ -143,9 +143,9 @@ export const useNpcStore = create((set, get) => ({
       campaignNpcs,
       showSnackbar,
     } = get();
-  
+
     if (!npcIds.length) return;
-  
+
     try {
       // Use Promise.all to remove all NPCs in parallel
       await Promise.all(
@@ -153,16 +153,16 @@ export const useNpcStore = create((set, get) => ({
           disassociateNpcFromCampaign(npcId, campaignId)
         )
       );
-  
+
       // Filter out the removed NPCs from state
       const updatedNpcIds = associatedNpcIds.filter(id => !npcIds.includes(id));
       const updatedCampaignNpcs = campaignNpcs.filter(npc => !npcIds.includes(npc.id));
-  
+
       set({
         associatedNpcIds: updatedNpcIds,
         campaignNpcs: updatedCampaignNpcs,
       });
-  
+
       showSnackbar(`${npcIds.length} NPC(s) removed from campaign`, "info");
     } catch (error) {
       console.error("Error unlinking multiple NPCs:", error);
