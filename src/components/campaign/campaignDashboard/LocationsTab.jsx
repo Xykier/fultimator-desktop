@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from 'react-router-dom';
 import {
   Box,
   Button,
@@ -14,9 +14,12 @@ import {
   Divider,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
+import {useLocationStore} from './locationsTab/stores/locationStore.js';
 
-const LocationsTab = ({ locations, campaignId }) => {
+const LocationsTab = () => {
   const navigate = useNavigate();
+  const {campaignId} = useParams()
+  const {locations} = useLocationStore();
 
   return (
     <Grid container spacing={3}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from 'react-router-dom';
 import {
   Box,
   Button,
@@ -15,9 +15,12 @@ import {
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { format, parseISO } from "date-fns";
+import {useNoteStore} from './notesTab/stores/noteStore.js';
 
-const NotesTab = ({ notes, campaignId }) => {
+const NotesTab = () => {
   const navigate = useNavigate();
+  const {campaignId} = useParams();
+  const {notes} = useNoteStore();
 
   return (
     <Grid container spacing={3}>

@@ -13,19 +13,14 @@ import {
   ArrowBack as ArrowBackIcon,
   Edit as EditIcon,
 } from "@mui/icons-material";
-import {
-  getCampaign,
-  getSessions,
-  getLocationHierarchy,
-  getNoteHierarchy,
-  getRelatedPcs,
-  getRelatedNpcs,
-  updateCampaignLastPlayed,
-  updateCampaign, // Add updateCampaign import
-} from "../../utility/db";
+import {usePCStore} from '../../components/campaign/campaignDashboard/charactersTab/stores/characterStore.js';
+import {useLocationStore} from '../../components/campaign/campaignDashboard/locationsTab/stores/locationStore.js';
+import {useNoteStore} from '../../components/campaign/campaignDashboard/notesTab/stores/noteStore.js';
+import {useNpcStore} from '../../components/campaign/campaignDashboard/npcsTab/stores/npcDataStore.js';
+import {useSessionStore} from '../../components/campaign/campaignDashboard/sessionsTab/stores/sessionsStore.js';
+import {useCampaignStore} from '../../components/campaign/stores/campaignStore.js';
 import Layout from "../../components/Layout";
 import LoadingPage from "../../components/common/LoadingPage";
-import { parseISO, isAfter, isBefore } from "date-fns";
 import OverviewTab from "../../components/campaign/campaignDashboard/OverviewTab";
 import SessionsTab from "../../components/campaign/campaignDashboard/SessionsTab";
 import CharactersTab from "../../components/campaign/campaignDashboard/CharactersTab";
@@ -52,12 +47,6 @@ const CampaignDashboard = () => {
 
   // State management
   const [activeTab, setActiveTab] = useState('overview');
-  const [campaign, setCampaign] = useState(null);
-  const [sessions, setSessions] = useState([]);
-  const [locations, setLocations] = useState([]);
-  const [notes, setNotes] = useState([]);
-  const [pcs, setPcs] = useState([]);
-  const [npcs, setNpcs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showDescription, setShowDescription] = useState(false);
@@ -66,6 +55,14 @@ const CampaignDashboard = () => {
   const [editingCampaign, setEditingCampaign] = useState(null);
   const [actionInProgress, setActionInProgress] = useState(false);
 
+  const locationStore = useLocationStore();
+  const pcsStore = usePCStore();
+  const npcStore = useNpcStore();
+  const noteStore = useNoteStore();
+  const sessionStore = useSessionStore();
+  const campaignStore = useCampaignStore();
+  const campaign = campaignStore.campaign;
+
   // Fetch campaign data
   useEffect(() => {
     const loadCampaignData = async () => {
@@ -73,33 +70,32 @@ const CampaignDashboard = () => {
         setLoading(true);
 
         // Fetch campaign details
-        const campaignData = await getCampaign(parseInt(campaignId));
-        if (!campaignData) {
+        campaignStore.setCampaignId(+campaignId);
+        await campaignStore.loadCampaign()
+        if (!campaign) {
           setError("Campaign not found");
           setLoading(false);
           return;
         }
 
-        setCampaign(campaignData);
+        locationStore.setCampaignId(+campaignId);
+        pcsStore.setCampaignId(+campaignId);
+        npcStore.setCampaignId(+campaignId);
+        noteStore.setCampaignId(+campaignId);
+        sessionStore.setCampaignId(+campaignId);
+
 
         // Update last played timestamp
-        await updateCampaignLastPlayed(parseInt(campaignId));
+        await campaignStore.updateLastPlayed();
 
         // Fetch related data
-        const [sessionsData, locationsData, notesData, pcsData, npcsData] =
-          await Promise.all([
-            getSessions(parseInt(campaignId)),
-            getLocationHierarchy(parseInt(campaignId)),
-            getNoteHierarchy(parseInt(campaignId)),
-            getRelatedPcs(parseInt(campaignId)),
-            getRelatedNpcs(parseInt(campaignId)),
-          ]);
-
-        setSessions(sessionsData || []);
-        setLocations(locationsData || []);
-        setNotes(notesData || []);
-        setPcs(pcsData || []);
-        setNpcs(npcsData || []);
+        await Promise.all([
+          sessionStore.loadSessions(),
+          locationStore.loadLocations(),
+          noteStore.loadNotes(),
+          pcsStore.loadCharacters(),
+          npcStore.loadNpcs(),
+        ]);
       } catch (error) {
         console.error("Error loading campaign data:", error);
         setError("Failed to load campaign data. Please try again.");
@@ -133,7 +129,7 @@ const CampaignDashboard = () => {
   // Navigate to campaign edit - UPDATE THIS
   const handleEditCampaign = () => {
     // Set the campaign to be edited and open the dialog
-    const campaignToEdit = { ...campaign };
+    const campaignToEdit = { ...campaignStore.campaign };
     // Clear the imageUrl if it's the default image
     if (campaignToEdit.imageUrl === '/images/default-campaign.jpg') {
       campaignToEdit.imageUrl = '';
@@ -176,51 +172,16 @@ const CampaignDashboard = () => {
   };
 
   const handleUpdateCampaign = async () => {
-    if (!editingCampaign || !campaign?.id) return;
+    if (!editingCampaign || !campaignId) return;
 
     setActionInProgress(true);
     try {
-      const campaignToUpdate = { ...editingCampaign };
-      // Set default image if no image URL is provided
-      if (!campaignToUpdate.imageUrl) {
-        campaignToUpdate.imageUrl = '/images/default-campaign.jpg';
-      }
-      await updateCampaign(campaignToUpdate);
-      setCampaign(campaignToUpdate);
-      handleEditDialogClose();
+      await campaignStore.updateCampaign(editingCampaign);
     } catch (err) {
       console.error("Error updating campaign:", err);
     } finally {
       setActionInProgress(false);
     }
-  };
-
-  // Helper functions
-  const getUpcomingSession = () => {
-    const now = new Date();
-    return sessions
-      .filter(
-        (session) =>
-          session.plannedDate &&
-          session.status !== "completed" &&
-          isAfter(parseISO(session.plannedDate), now)
-      )
-      .sort((a, b) => parseISO(a.plannedDate) - parseISO(b.plannedDate))[0];
-  };
-
-  const getPastSessions = () => {
-    const now = new Date();
-    return sessions
-      .filter(
-        (session) =>
-          session.status === "completed" ||
-          (session.plannedDate && isBefore(parseISO(session.plannedDate), now))
-      )
-      .sort(
-        (a, b) =>
-          parseISO(b.plannedDate || b.playedDate) -
-          parseISO(a.plannedDate || a.playedDate)
-      );
   };
 
   if (loading) {
@@ -246,9 +207,6 @@ const CampaignDashboard = () => {
       </Layout>
     );
   }
-
-  const upcomingSession = getUpcomingSession();
-  const pastSessions = getPastSessions();
 
   // Render the dashboard
   return (
@@ -369,34 +327,27 @@ const CampaignDashboard = () => {
         <Routes>
           { ['/', '/overview'].map((path) =>
             <Route key={path} path={path} element={
-              <OverviewTab
-                campaign={campaign}
-                upcomingSession={upcomingSession}
-                pastSessions={pastSessions}
-                pcs={pcs}
-                npcs={npcs}
-                notes={notes}
-                locations={locations}
-                campaignId={campaignId}
-              />
+              <OverviewTab/>
             } />
           )}
 
           <Route path="/sessions" element={
-            <SessionsTab sessions={sessions} campaignId={campaignId} />
+            <SessionsTab />
           } />
           <Route path="/characters" element={
-            <CharactersTab pcs={pcs} campaignId={campaignId} />
+            <CharactersTab />
           } />
           <Route path="/npcs" element={
-            <NpcsTab npcs={npcs} campaignId={campaignId} />} />
-          <Route path="/notes" element={<NotesTab notes={notes} campaignId={campaignId} />
+            <NpcsTab />
+          } />
+          <Route path="/notes" element={
+            <NotesTab />
           } />
           <Route path="/locations/*" element={
-            <LocationsTab locations={locations} campaignId={campaignId} />
+            <LocationsTab />
           } />
           <Route path="/map" element={
-            <MapTab locations={locations} campaignId={campaignId} />
+            <MapTab />
           } />
         </Routes>
       </Container>

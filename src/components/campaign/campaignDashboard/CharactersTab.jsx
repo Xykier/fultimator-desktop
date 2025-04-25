@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from 'react-router-dom';
 import {
   Box,
   Button,
@@ -11,9 +11,12 @@ import {
   Divider,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
+import {usePCStore} from './charactersTab/stores/characterStore.js';
 
-const CharactersTab = ({ pcs, campaignId }) => {
+const CharactersTab = () => {
   const navigate = useNavigate();
+  const {campaignId} = useParams();
+  const {allPcs: pcs} = usePCStore();
 
   return (
     <Grid container spacing={3}>

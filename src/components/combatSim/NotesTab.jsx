@@ -30,8 +30,8 @@ const NotesTab = ({ selectedNPC, setSelectedNPC, selectedNPCs, setSelectedNPCs }
             return npc;
           });
 
-          setSelectedNPCs(updatedNPCs);     
-          
+          setSelectedNPCs(updatedNPCs);
+
           // Update selectedNPC
           setSelectedNPC((prev) => ({
             ...prev,
@@ -39,7 +39,7 @@ const NotesTab = ({ selectedNPC, setSelectedNPC, selectedNPCs, setSelectedNPCs }
               ...prev.combatStats,
               combatNotes: e.target.value,
             },
-          }));          
+          }));
         }}
         sx={{ mt: 2 }}
       />

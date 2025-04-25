@@ -2,11 +2,11 @@ import React from "react";
 import { Grid } from "@mui/material";
 import NpcsTabMain from "./npcsTab/NpcsTabMain";
 
-const NpcsTab = ({ campaignId }) => {
+const NpcsTab = () => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <NpcsTabMain campaignId={campaignId} />
+        <NpcsTabMain />
       </Grid>
     </Grid>
   );
