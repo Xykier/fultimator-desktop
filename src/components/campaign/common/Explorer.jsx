@@ -40,7 +40,7 @@ const Explorer = ({
   prepareRenameFolder,
   prepareDeleteFolder,
   handleUnlinkItem,
-  filterType,
+  filterValue,
   ItemCardComponent,
   ItemListComponent,
   EmptyListComponent
@@ -290,7 +290,7 @@ const Explorer = ({
                   folders={folders}
                   emptyList={emptyList}
                   currentFolder={currentFolder}
-                  filterType={filterType}
+                  filterValue={filterValue}
                   ItemCardComponent={ItemCardComponent}
                   ItemListComponent={ItemListComponent}
                   EmptyListComponent={EmptyListComponent}
@@ -330,7 +330,7 @@ const ListContent = ({
   handleOpenMoveDialog,
   folders,
   currentFolder,
-  filterType,
+  filterValue,
   ItemCardComponent,
   ItemListComponent,
   EmptyListComponent
@@ -374,7 +374,7 @@ const ListContent = ({
         // Empty state specific to the selected filter
         <EmptyListComponent
           currentFolder={currentFolder}
-          filterType={filterType}
+          filterValue={filterValue}
         />
       )}
     </Box>

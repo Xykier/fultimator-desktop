@@ -10,7 +10,6 @@ import Explorer from "../../common/Explorer";
 const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
   const { unlinkMultipleNpcs } = useNpcStore();
   const {
-    npcFilterType,
     selectedNpcFolderId,
     getDisplayedNpcs,
     setSelectedNpcFolderId,
@@ -80,7 +79,6 @@ const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
       prepareRenameFolder={prepareRenameFolder}
       prepareDeleteFolder={prepareDeleteFolder}
       handleUnlinkItem={handleToggleNpc}
-      filterType={npcFilterType}
       ItemCardComponent={NpcCard}
       ItemListComponent={NpcListItem}
       EmptyListComponent={EmptyNpcsList}
@@ -88,7 +86,7 @@ const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
   );
 };
 
-const EmptyNpcsList = ({ currentFolder, filterType }) => {
+const EmptyNpcsList = ({ currentFolder }) => {
   return (
     <Box
       sx={{
@@ -103,15 +101,7 @@ const EmptyNpcsList = ({ currentFolder, filterType }) => {
       <Typography variant="body1" color="text.secondary">
         {currentFolder
           ? `No NPCs in folder "${currentFolder.name}"`
-          : filterType === "all"
-          ? "No NPCs match the current search."
-          : filterType === "friendly"
-          ? "No friendly NPCs found."
-          : filterType === "neutral"
-          ? "No neutral NPCs found."
-          : filterType === "hostile"
-          ? "No hostile NPCs found."
-          : "No villains found."}
+          : "No NPCs match the current search."}
       </Typography>
     </Box>
   );
