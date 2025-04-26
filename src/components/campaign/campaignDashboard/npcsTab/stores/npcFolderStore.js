@@ -7,6 +7,7 @@ import {
   updateNpcCampaignFolder,
   getNpcFoldersForCampaign,
 } from "../../../../../utility/db";
+import { useNpcFiltersStore } from "./npcFiltersStore";
 
 export const useNpcFoldersStore = create((set, get) => ({
   // State
@@ -203,7 +204,7 @@ export const useNpcFoldersStore = create((set, get) => ({
   confirmDeleteFolder: async () => {
     const { folderToDeleteConfirmation, npcFolders, campaignId } = get();
     const { showSnackbar, loadNpcs } = get();
-    
+
     if (!folderToDeleteConfirmation) return false;
 
     const folderIdsToDelete = Array.isArray(folderToDeleteConfirmation)
@@ -232,7 +233,53 @@ export const useNpcFoldersStore = create((set, get) => ({
       for (const folderId of folderIdsToDelete) {
         await deleteNpcFolder(folderId, campaignId);
       }
-      
+
+      // Update selectedNpcFolderId if the deleted folder was selected
+      const { selectedNpcFolderId, setSelectedNpcFolderId } = useNpcFiltersStore.getState();
+
+      const findFolder = (folders, folderId) => {
+        for (const folder of folders) {
+          if (folder.id === folderId) {
+            return folder;
+          }
+          if (folder.children && folder.children.length > 0) {
+            const found = findFolder(folder.children, folderId);
+            if (found) {
+              return found;
+            }
+          }
+        }
+        return null;
+      };
+
+      for (const folderId of folderIdsToDelete) {
+        const folder = findFolder(originalFolders, folderId);
+
+        if (selectedNpcFolderId === folderId) {
+          setSelectedNpcFolderId(folder?.parentId || null);
+        }
+      }
+      if (selectedNpcFolderId && folderIdsToDelete.includes(selectedNpcFolderId)) {
+        // Find the parent folder ID
+        let parentFolderId = null;
+        const findParentFolder = (folders, folderId) => {
+          for (const folder of folders) {
+            if (folder.children) {
+              const child = folder.children.find(child => child.id === folderId);
+              if (child) {
+                parentFolderId = folder.id;
+                return;
+              } else {
+                findParentFolder(folder.children, folderId);
+              }
+            }
+          }
+        };
+        findParentFolder(originalFolders, selectedNpcFolderId);
+
+        setSelectedNpcFolderId(parentFolderId);
+      }
+
       if (showSnackbar) showSnackbar("Folder(s) deleted successfully", "success");
       return true;
     } catch (error) {
