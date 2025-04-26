@@ -7,58 +7,113 @@ import {
   Zoom,
   useTheme,
   Grid,
-  Typography,
-  Toolbar,
-  Button,
-  Fade,
-  Tooltip,
-  IconButton,
-  Stack,
 } from "@mui/material";
+import {
+  FolderOpen as FolderOpenIcon,
+  Home as HomeIcon,
+  People as PeopleIcon,
+  ViewList as ViewListIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import FolderIcon from "@mui/icons-material/Folder";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CloseIcon from "@mui/icons-material/Close";
 import FolderBreadcrumbs from "./FolderBreadcrumbs";
 import FolderSidebar from "./FolderSidebar";
 import MoveFolderDialog from "./MoveFolderDialog";
 import FolderHeader from "./FolderHeader";
+import ContentToolbar from "./ContentToolbar";
+import ContentList from "./ContentList";
+import {
+  useTranslate,
+  replacePlaceholders,
+} from "../../../translation/translate";
 
+/**
+ * Explorer component for managing folders and content items
+ *
+ * @param {Object} props
+ * @param {Array} props.folders - Hierarchical folder structure
+ * @param {string|null} props.selectedFolderId - ID of currently selected folder
+ * @param {Function} props.setSelectedFolderId - Function to update selected folder
+ * @param {boolean} props.showAllFolders - Whether to show all folders or only the current folder tree
+ * @param {Function} props.setShowAllFolders - Function to toggle showing all folders
+ * @param {string} props.viewMode - Current view mode (grid/list)
+ * @param {Function} props.setViewMode - Function to update view mode
+ * @param {Array} props.items - Content items to display in current folder
+ * @param {boolean} props.emptyList - Whether the item list is empty
+ * @param {Function} props.setIsNewFolderDialogOpen - Function to open the new folder dialog
+ * @param {Function} props.moveItemToFolder - Function to move an item to a different folder
+ * @param {Function} props.unlinkMultipleItems - Function to unlink multiple items
+ * @param {Function} props.prepareRenameFolder - Function to prepare renaming a folder
+ * @param {Function} props.prepareDeleteFolder - Function to prepare deleting a folder
+ * @param {Function} props.handleUnlinkItem - Function to unlink a single item
+ * @param {string} props.filterValue - Current filter value for filtering items
+ * @param {React.Component} props.ItemCardComponent - Component to render an item in card view
+ * @param {React.Component} props.ItemListComponent - Component to render an item in list view
+ * @param {React.Component} props.EmptyListComponent - Component to render when no items exist
+ * @param {Object} props.itemLabels - Labels for items in singular and plural forms
+ * @param {string} props.itemLabels.singular - Singular form of item label (e.g., "character", "NPC", "location")
+ * @param {string} props.itemLabels.plural - Plural form of item label (e.g., "characters", "NPCs", "locations")
+ * @param {string} props.itemLabels.translationKey - Base translation key for item labels (e.g., "explorer_item_character")
+ */
 const Explorer = ({
-  folders,
-  selectedFolderId,
+  folders = [],
+  selectedFolderId = null,
   setSelectedFolderId,
-  showAllFolders,
+  showAllFolders = false,
   setShowAllFolders,
-  viewMode,
+  viewMode = "grid",
   setViewMode,
-  items,
-  emptyList,
+  items = [],
+  emptyList = false,
   setIsNewFolderDialogOpen,
   moveItemToFolder,
   unlinkMultipleItems,
   prepareRenameFolder,
   prepareDeleteFolder,
   handleUnlinkItem,
-  filterValue,
+  filterValue = "",
   ItemCardComponent,
   ItemListComponent,
-  EmptyListComponent
+  EmptyListComponent,
+  itemLabels = {
+    singular: "item",
+    plural: "items",
+    translationKey: "explorer_item_generic",
+  },
+  headerCustomIcons = {
+    root: <HomeIcon color="primary" sx={{ mr: 1.5 }} />,
+    folder: <FolderOpenIcon color="primary" sx={{ mr: 1.5 }} />,
+    allFolders: <PeopleIcon color="primary" sx={{ mr: 1.5 }} />,
+  },
+  breadcrumbsFolderIcons = {
+    root: <HomeIcon fontSize="small" />,
+    folder: <FolderIcon fontSize="small" />,
+    allFolders: <ViewListIcon fontSize="small" />,
+  },
+  toolbarCustomIcons = {
+    move: <FolderIcon />,
+    unlink: <DeleteIcon />,
+    clear: <CloseIcon fontSize="small" />,
+  },
 }) => {
+  // Initialize the translation hook
+  const { t } = useTranslate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // State management
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Track previous folder ID to detect changes
   const [prevFolderId, setPrevFolderId] = useState(selectedFolderId);
-
-  // Add selection state
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectionMode, setSelectionMode] = useState(false);
   const [moveFolderDialogOpen, setMoveFolderDialogOpen] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState("");
   const [itemToMove, setItemToMove] = useState(null);
 
-  // Clear selection when folder changes
+  /**
+   * Clear selection when folder changes
+   */
   useEffect(() => {
     if (prevFolderId !== selectedFolderId) {
       setSelectedItems([]);
@@ -67,7 +122,9 @@ const Explorer = ({
     }
   }, [selectedFolderId, prevFolderId]);
 
-  // Automatically enable selection mode when there are selected NPCs
+  /**
+   * Automatically manage selection mode based on selected items count
+   */
   useEffect(() => {
     if (selectedItems.length > 0 && !selectionMode) {
       setSelectionMode(true);
@@ -76,19 +133,25 @@ const Explorer = ({
     }
   }, [selectedItems, selectionMode]);
 
-  // Find the selected folder object if a folder is selected
-  const findFolder = (folders, selectedFolderId) => {
-    if (!folders || !Array.isArray(folders)) {
-      console.error("Invalid folders data:", folders);
+  /**
+   * Find folder object by ID from hierarchical folder structure
+   *
+   * @param {Array} folderList - List of folders to search through
+   * @param {string} folderId - ID of folder to find
+   * @returns {Object|null} - Found folder or null
+   */
+  const findFolder = (folderList, folderId) => {
+    if (!folderList || !Array.isArray(folderList)) {
+      console.error(t("explorer_invalid_folders_data"), folderList);
       return null;
     }
 
-    for (const folder of folders) {
-      if (folder.id === selectedFolderId) {
+    for (const folder of folderList) {
+      if (folder.id === folderId) {
         return folder;
       }
       if (folder.children && folder.children.length > 0) {
-        const found = findFolder(folder.children, selectedFolderId);
+        const found = findFolder(folder.children, folderId);
         if (found) {
           return found;
         }
@@ -97,11 +160,17 @@ const Explorer = ({
     return null;
   };
 
+  // Get current folder object
   const currentFolder = selectedFolderId
     ? findFolder(folders, selectedFolderId)
     : null;
 
-  // Selection handlers
+  /**
+   * Handle item selection toggle
+   *
+   * @param {string} itemId - ID of item to select/deselect
+   * @param {boolean} isSelected - Whether item is selected
+   */
   const handleSelectItem = (itemId, isSelected) => {
     if (isSelected) {
       setSelectedItems((prev) => [...prev, itemId]);
@@ -110,65 +179,112 @@ const Explorer = ({
     }
   };
 
+  /**
+   * Handle select all/deselect all toggle
+   */
   const handleSelectAll = () => {
     if (selectedItems.length === items.length) {
       // Deselect all if all are selected
       setSelectedItems([]);
     } else {
-      // Select all displayed NPCs
-      setSelectedItems(items.map((npc) => npc.id));
+      // Select all displayed items
+      setSelectedItems(items.map((item) => item.id));
     }
   };
 
+  /**
+   * Clear all selections and exit selection mode
+   */
   const handleClearSelection = () => {
     setSelectedItems([]);
     setSelectionMode(false);
   };
 
-  const handleCreateFolder = (parentId) => {
+  /**
+   * Open create folder dialog
+   */
+  const handleCreateFolder = () => {
     setIsNewFolderDialogOpen(true);
-    // You might need to set the parent folder ID in your store
-    console.log("handleCreateFolder", parentId);
   };
 
-  // Batch actions for selected NPCs
+  /**
+   * Handle batch unlink operation for selected items
+   */
   const handleBatchUnlink = () => {
     unlinkMultipleItems(selectedItems);
     setSelectedItems([]);
   };
 
+  /**
+   * Open move folder dialog
+   */
   const handleMoveFolderOpen = () => {
     setMoveFolderDialogOpen(true);
   };
 
+  /**
+   * Close move folder dialog and reset selection
+   */
   const handleMoveFolderClose = () => {
     setMoveFolderDialogOpen(false);
     setSelectedFolder("");
   };
 
+  /**
+   * Execute move operation for selected items or single item
+   *
+   * @param {string} folderId - Destination folder ID
+   */
   const handleMoveToFolder = (folderId) => {
     if (itemToMove) {
       moveItemToFolder(itemToMove, folderId);
+      setItemToMove(null);
     } else if (selectedItems.length > 0) {
       selectedItems.forEach((itemId) => {
         moveItemToFolder(itemId, folderId);
       });
       setSelectedItems([]);
     }
+    setMoveFolderDialogOpen(false);
   };
 
+  /**
+   * Handle folder selection change in move dialog
+   *
+   * @param {Object} event - Change event
+   */
   const handleFolderChange = (event) => {
     setSelectedFolder(event.target.value);
   };
 
+  /**
+   * Toggle mobile drawer open/closed
+   */
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const handleOpenMoveDialog = (npcId) => {
-    setItemToMove(npcId);
+  /**
+   * Open move dialog for a single item
+   *
+   * @param {string} itemId - ID of item to move
+   */
+  const handleOpenMoveDialog = (itemId) => {
+    setItemToMove(itemId);
     setMoveFolderDialogOpen(true);
   };
+
+  // Get dialog titles and content with proper translations and item labels
+  const moveDialogTitle = replacePlaceholders(
+    t(`${itemLabels.translationKey}_move_to_folder`),
+    {
+      count: selectedItems.length,
+      itemLabel:
+        selectedItems.length === 1
+          ? t(`${itemLabels.translationKey}_singular`)
+          : t(`${itemLabels.translationKey}_plural`),
+    }
+  );
 
   return (
     <>
@@ -179,6 +295,7 @@ const Explorer = ({
           setSelectedFolderId={setSelectedFolderId}
           showAllFolders={showAllFolders}
           setShowAllFolders={setShowAllFolders}
+          customIcons={breadcrumbsFolderIcons}
         />
       </Grid>
 
@@ -264,6 +381,8 @@ const Explorer = ({
                   onChangeViewMode={setViewMode}
                   onSelectAll={handleSelectAll}
                   showAllFolders={showAllFolders}
+                  customIcons={headerCustomIcons}
+                  itemLabels={itemLabels}
                 />
 
                 {/* Selection Toolbar */}
@@ -273,10 +392,12 @@ const Explorer = ({
                   onClearSelection={handleClearSelection}
                   onMoveToFolder={handleMoveFolderOpen}
                   onUnlink={handleBatchUnlink}
+                  customIcons={toolbarCustomIcons}
+                  itemLabels={itemLabels}
                 />
 
-                {/* NPCs Content */}
-                <ListContent
+                {/* Content List */}
+                <ContentList
                   items={items}
                   viewMode={viewMode}
                   selectedItems={selectedItems}
@@ -291,6 +412,7 @@ const Explorer = ({
                   ItemCardComponent={ItemCardComponent}
                   ItemListComponent={ItemListComponent}
                   EmptyListComponent={EmptyListComponent}
+                  itemLabels={itemLabels}
                 />
               </Box>
 
@@ -307,7 +429,8 @@ const Explorer = ({
                     ? items.find((item) => item.id === itemToMove)?.folderId
                     : null
                 }
-                title={`Move ${selectedItems.length} items to folder`}
+                title={moveDialogTitle}
+                itemLabels={itemLabels}
               />
             </Box>
           </Box>
@@ -316,128 +439,5 @@ const Explorer = ({
     </>
   );
 };
-
-const ListContent = ({
-  items,
-  viewMode,
-  selectedItems,
-  selectionMode,
-  handleSelectItem,
-  handleUnlinkItem,
-  handleOpenMoveDialog,
-  folders,
-  currentFolder,
-  filterValue,
-  ItemCardComponent,
-  ItemListComponent,
-  EmptyListComponent
-}) => {
-  return (
-    <Box sx={{ flex: 1, overflowY: "auto", paddingTop: 1 }}>
-      {items.length > 0 ? (
-        viewMode === "grid" ? (
-          <Grid container spacing={2}>
-            {items.map((item) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
-                <ItemCardComponent
-                  item={item}
-                  onUnlink={handleUnlinkItem}
-                  folders={folders}
-                  onSelect={handleSelectItem}
-                  isSelected={selectedItems.includes(item.id)}
-                  selectionMode={selectionMode}
-                  onMove={handleOpenMoveDialog}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Stack spacing={1}>
-            {items.map((item) => (
-              <ItemListComponent
-                key={item.id}
-                item={item}
-                onUnlink={handleUnlinkItem}
-                folders={folders}
-                onSelect={handleSelectItem}
-                isSelected={selectedItems.includes(item.id)}
-                selectionMode={selectionMode}
-                onMove={handleOpenMoveDialog}
-              />
-            ))}
-          </Stack>
-        )
-      ) : (
-        // Empty state specific to the selected filter
-        <EmptyListComponent
-          currentFolder={currentFolder}
-          filterValue={filterValue}
-        />
-      )}
-    </Box>
-  );
-};
-
-const ContentToolbar = ({
-  selectedItems,
-  selectionMode,
-  onClearSelection,
-  onMoveToFolder,
-  onUnlink,
-}) => {
-  return (
-    <Fade in={selectionMode}>
-      <Toolbar
-        variant="dense"
-        sx={{
-          bgcolor: "primary.main",
-          color: "primary.contrastText",
-          borderRadius: 2,
-          mb: 2,
-          display: selectionMode ? "flex" : "none",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          p: { xs: 1, sm: 1.5 },
-          gap: 1,
-        }}
-      >
-        {/* Selected Count */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="subtitle1">
-            {selectedItems.length} selected
-          </Typography>          
-        </Box>
-
-        {/* Action Buttons */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          <Button
-            size="small"
-            startIcon={<FolderIcon />}
-            variant="outlined"
-            color="inherit"
-            onClick={onMoveToFolder}
-          >
-            Move to Folder
-          </Button>
-          <Button
-            size="small"
-            startIcon={<DeleteIcon />}
-            variant="outlined"
-            color="inherit"
-            onClick={onUnlink}
-          >
-            Unlink Selected
-          </Button>
-          <Tooltip title="Clear Selection">
-            <IconButton size="small" onClick={onClearSelection} color="inherit">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Toolbar>
-    </Fade>
-  );
-};
-
 
 export default Explorer;

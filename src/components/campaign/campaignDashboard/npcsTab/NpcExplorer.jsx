@@ -63,6 +63,12 @@ const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
   // Get displayed NPCs using the store's method
   const displayedNpcs = getDisplayedNpcs(campaignNpcs);
 
+  const itemLabels = {
+    singular: "NPC",
+    plural: "NPCs",
+    translationKey: "explorer_item_npc"
+  };
+
   return (
     <Explorer
       folders={npcFolders}
@@ -82,6 +88,7 @@ const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
       ItemCardComponent={NpcCard}
       ItemListComponent={NpcListItem}
       EmptyListComponent={EmptyNpcsList}
+      itemLabels={itemLabels}
     />
   );
 };

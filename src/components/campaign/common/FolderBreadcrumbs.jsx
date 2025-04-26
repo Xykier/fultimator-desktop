@@ -4,29 +4,45 @@ import {
   Link,
   Button,
   Box,
+  Tooltip,
 } from "@mui/material";
-import {
-  Folder,
-  Home,
-  People,
-} from "@mui/icons-material";
+import { useTranslate } from "../../../translation/translate";
 
+/**
+ * Component for displaying and navigating folder breadcrumbs
+ * 
+ * @param {Object} props
+ * @param {Array} props.folders - Hierarchical folder structure
+ * @param {string|null} props.selectedFolderId - ID of currently selected folder
+ * @param {Function} props.setSelectedFolderId - Function to update selected folder
+ * @param {boolean} props.showAllFolders - Whether to show all folders view
+ * @param {Function} props.setShowAllFolders - Function to toggle showing all folders
+ * @param {Object} props.customIcons - Custom icons for different breadcrumb items
+ * @param {React.ReactNode} props.customIcons.root - Icon for root folder
+ * @param {React.ReactNode} props.customIcons.folder - Icon for regular folders
+ * @param {React.ReactNode} props.customIcons.allFolders - Icon for all folders view
+ */
 const FolderBreadcrumbs = ({
-  folders,
-  selectedFolderId,
+  folders = [],
+  selectedFolderId = null,
   setSelectedFolderId,
-  showAllFolders,
+  showAllFolders = false,
   setShowAllFolders,
+  customIcons
 }) => {
-
+  // Initialize the translation hook
+  const { t } = useTranslate();
+  
   // Process folders to create a flat structure for easier operations
   const [flatFolders, setFlatFolders] = useState([]);
 
-  // Flatten the nested folder structure on component mount or when folders change
+  /**
+   * Flatten the nested folder structure for easier navigation
+   */
   useEffect(() => {
     const flattenedFolders = [];
     
-    const flattenFolders = (folderArray) => {
+    const flattenFolders = (folderArray, parentPath = []) => {
       folderArray.forEach(folder => {
         // Extract children before adding to flat list
         const { children, ...folderWithoutChildren } = folder;
@@ -34,26 +50,39 @@ const FolderBreadcrumbs = ({
         // Ensure parentId is null if undefined
         const normalizedFolder = {
           ...folderWithoutChildren,
-          parentId: folderWithoutChildren.parentId === undefined ? null : folderWithoutChildren.parentId
+          parentId: folderWithoutChildren.parentId === undefined ? null : folderWithoutChildren.parentId,
+          path: [...parentPath]
         };
         
         flattenedFolders.push(normalizedFolder);
         
         // Process children recursively
         if (children && children.length > 0) {
-          flattenFolders(children);
+          flattenFolders(children, [...parentPath, folder.id]);
         }
       });
     };
     
     flattenFolders(folders);
     setFlatFolders(flattenedFolders);
-  }, [folders, setFlatFolders]);
+  }, [folders]);
 
+  /**
+   * Build breadcrumb path from selected folder to root
+   * 
+   * @returns {Array} Array of folder objects representing breadcrumb path
+   */
   const buildBreadcrumbs = () => {
+    if (!selectedFolderId) return [];
+    
     const breadcrumbs = [];
     let currentFolderId = selectedFolderId;
-    while (currentFolderId) {
+    
+    // Prevent infinite loops
+    const maxDepth = 20;
+    let depth = 0;
+    
+    while (currentFolderId && depth < maxDepth) {
       const folder = flatFolders.find((f) => f.id === currentFolderId);
       if (folder) {
         breadcrumbs.unshift(folder);
@@ -61,63 +90,119 @@ const FolderBreadcrumbs = ({
       } else {
         currentFolderId = null;
       }
+      depth++;
     }
+    
     return breadcrumbs;
   };
 
   const breadcrumbs = buildBreadcrumbs();
 
-  const handleBreadcrumbClick = (folderId) => {
+  /**
+   * Handle clicking on a breadcrumb item
+   * 
+   * @param {string} folderId - ID of clicked folder
+   * @param {Event} event - Click event
+   */
+  const handleBreadcrumbClick = (folderId, event) => {
+    event.preventDefault();
     setSelectedFolderId(folderId);
   };
 
-  const goToRoot = () => {
+  /**
+   * Navigate to root folder
+   * 
+   * @param {Event} event - Click event
+   */
+  const goToRoot = (event) => {
+    event.preventDefault();
     setShowAllFolders(false);
     setSelectedFolderId(null);
   };
 
-  const goToAllFolders = () => {
+  /**
+   * Switch to all folders view
+   * 
+   * @param {Event} event - Click event
+   */
+  const goToAllFolders = (event) => {
+    event.preventDefault();
     setShowAllFolders(true);
     setSelectedFolderId(null);
   };
 
+  /**
+   * Get folder name with translation support
+   * 
+   * @param {Object} folder - Folder object
+   * @returns {string} Translated folder name
+   */
+  const getFolderName = (folder) => {
+    if (folder.translationKey) {
+      return t(folder.translationKey);
+    }
+    return folder.name;
+  };
+
   return (
-    <div>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Button
-          variant={showAllFolders ? "contained" : "outlined"}
-          startIcon={<People />}
-          onClick={goToAllFolders}
-          sx={{ mr: 2 }}
-        >
-          All Folders
-        </Button>
-        
-        {!showAllFolders && <Breadcrumbs aria-label="breadcrumb">
-          <Link
-            underline="hover"
-            color="inherit"
-            onClick={goToRoot}
-            sx={{ display: "flex", alignItems: "center" }}
+    <Box 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        width: '100%',
+        mb: 0
+      }}
+      role="navigation"
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Tooltip title={t('explorer_view_all_folders')}>
+          <Button
+            variant={showAllFolders ? "contained" : "outlined"}
+            startIcon={customIcons.allFolders}
+            onClick={goToAllFolders}
+            sx={{ mr: 2 }}
           >
-            <Home sx={{ mr: 0.5 }} fontSize="inherit" />
-            Root
-          </Link>
-          {breadcrumbs.map((folder) => (
+            {t('explorer_all_folders')}
+          </Button>
+        </Tooltip>
+        
+        {!showAllFolders && (
+          <Breadcrumbs 
+            separator="›"
+            sx={{ flexWrap: 'wrap' }}
+          >
             <Link
-              key={folder.id}
               underline="hover"
               color="inherit"
-              onClick={() => handleBreadcrumbClick(folder.id)}
+              onClick={goToRoot}
               sx={{ display: "flex", alignItems: "center" }}
+              href="#"
             >
-              <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
-              {folder.name}
+              <Box sx={{ mr: 0.5, display: 'flex', alignItems: 'center' }}>
+                {customIcons.root}
+              </Box>
+              {t('explorer_root_folder')}
             </Link>
-          ))}
-        </Breadcrumbs>}
+            
+            {breadcrumbs.map((folder) => (
+              <Link
+                key={folder.id}
+                underline="hover"
+                color="inherit"
+                onClick={(e) => handleBreadcrumbClick(folder.id, e)}
+                sx={{ display: "flex", alignItems: "center" }}
+                href="#"
+              >
+                <Box sx={{ mr: 0.5, display: 'flex', alignItems: 'center' }}>
+                  {customIcons.folder}
+                </Box>
+                {getFolderName(folder)}
+              </Link>
+            ))}
+          </Breadcrumbs>
+        )}
       </Box>
-    </div>
+    </Box>
   );
 };
 
