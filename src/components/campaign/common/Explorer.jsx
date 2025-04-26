@@ -18,7 +18,6 @@ import {
 import FolderIcon from "@mui/icons-material/Folder";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
 import FolderBreadcrumbs from "./FolderBreadcrumbs";
 import FolderSidebar from "./FolderSidebar";
 import MoveFolderDialog from "./MoveFolderDialog";
@@ -269,10 +268,8 @@ const Explorer = ({
 
                 {/* Selection Toolbar */}
                 <ContentToolbar
-                  items={items}
                   selectedItems={selectedItems}
                   selectionMode={selectionMode}
-                  onSelectAll={handleSelectAll}
                   onClearSelection={handleClearSelection}
                   onMoveToFolder={handleMoveFolderOpen}
                   onUnlink={handleBatchUnlink}
@@ -382,10 +379,8 @@ const ListContent = ({
 };
 
 const ContentToolbar = ({
-  items,
   selectedItems,
   selectionMode,
-  onSelectAll,
   onClearSelection,
   onMoveToFolder,
   onUnlink,
@@ -397,31 +392,24 @@ const ContentToolbar = ({
         sx={{
           bgcolor: "primary.main",
           color: "primary.contrastText",
-          borderRadius: 1,
+          borderRadius: 2,
           mb: 2,
           display: selectionMode ? "flex" : "none",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          p: { xs: 1, sm: 1.5 },
+          gap: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography variant="subtitle2" sx={{ mr: 1 }}>
+        {/* Selected Count */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="subtitle1">
             {selectedItems.length} selected
-          </Typography>
-
-          <Tooltip
-            title={
-              selectedItems.length === items.length
-                ? "Deselect All"
-                : "Select All"
-            }
-          >
-            <IconButton size="small" onClick={onSelectAll} color="inherit">
-              <CheckIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          </Typography>          
         </Box>
 
-        <Box sx={{ display: "flex", gap: 1 }}>
+        {/* Action Buttons */}
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
           <Button
             size="small"
             startIcon={<FolderIcon />}
@@ -429,9 +417,8 @@ const ContentToolbar = ({
             color="inherit"
             onClick={onMoveToFolder}
           >
-            Move To Folder
+            Move to Folder
           </Button>
-
           <Button
             size="small"
             startIcon={<DeleteIcon />}
@@ -441,10 +428,11 @@ const ContentToolbar = ({
           >
             Unlink Selected
           </Button>
-
-          <IconButton size="small" onClick={onClearSelection} color="inherit">
-            <CloseIcon fontSize="small" />
-          </IconButton>
+          <Tooltip title="Clear Selection">
+            <IconButton size="small" onClick={onClearSelection} color="inherit">
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Toolbar>
     </Fade>
