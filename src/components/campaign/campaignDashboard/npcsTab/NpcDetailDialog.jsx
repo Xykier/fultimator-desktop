@@ -17,7 +17,7 @@ const NpcDetailDialog = ({ open, onClose, npc }) => {
         <NpcPretty npc={npc} collapse={true} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button variant="contained" onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );
