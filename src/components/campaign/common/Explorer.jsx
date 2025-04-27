@@ -27,21 +27,37 @@ import {
   useTranslate,
   replacePlaceholders,
 } from "../../../translation/translate";
+import FolderNameDialogComponent from "./FolderNameDialogComponent";
+import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
 
 /**
- * Explorer component for managing folders and content items
+ * Explorer component for managing folders and content items with a hierarchical structure.
+ * Provides a UI for browsing, selecting, moving, and managing items within folders.
  *
- * @param {Object} props
+ * @param {Object} props - Component props
  * @param {Array} props.folders - Hierarchical folder structure
  * @param {string|null} props.selectedFolderId - ID of currently selected folder
  * @param {Function} props.setSelectedFolderId - Function to update selected folder
  * @param {boolean} props.showAllFolders - Whether to show all folders or only the current folder tree
  * @param {Function} props.setShowAllFolders - Function to toggle showing all folders
- * @param {string} props.viewMode - Current view mode (grid/list)
+ * @param {string} props.viewMode - Current view mode ('grid' or 'list')
  * @param {Function} props.setViewMode - Function to update view mode
  * @param {Array} props.items - Content items to display in current folder
  * @param {boolean} props.emptyList - Whether the item list is empty
- * @param {Function} props.setIsNewFolderDialogOpen - Function to open the new folder dialog
+ * @param {boolean} props.isNewFolderDialogOpen - Whether new folder dialog is open
+ * @param {string} props.newFolderName - New folder name input value
+ * @param {Function} props.setNewFolderName - Function to update new folder name
+ * @param {Function} props.setIsNewFolderDialogOpen - Function to toggle new folder dialog
+ * @param {Function} props.createFolder - Function to create a new folder
+ * @param {boolean} props.isRenameFolderDialogOpen - Whether rename folder dialog is open
+ * @param {Function} props.setIsRenameFolderDialogOpen - Function to toggle rename folder dialog
+ * @param {Function} props.setFolderToRename - Function to set folder to rename
+ * @param {string} props.renamedFolderName - Renamed folder name input value
+ * @param {Function} props.setRenamedFolderName - Function to update renamed folder name
+ * @param {Function} props.confirmRenameFolder - Function to confirm folder rename
+ * @param {boolean} props.isDeleteFolderDialogOpen - Whether delete folder dialog is open
+ * @param {Function} props.confirmDeleteFolder - Function to confirm folder deletion
+ * @param {Function} props.cancelDeleteFolder - Function to cancel folder deletion
  * @param {Function} props.moveItemToFolder - Function to move an item to a different folder
  * @param {Function} props.unlinkMultipleItems - Function to unlink multiple items
  * @param {Function} props.prepareRenameFolder - Function to prepare renaming a folder
@@ -52,30 +68,70 @@ import {
  * @param {React.Component} props.ItemListComponent - Component to render an item in list view
  * @param {React.Component} props.EmptyListComponent - Component to render when no items exist
  * @param {Object} props.itemLabels - Labels for items in singular and plural forms
- * @param {string} props.itemLabels.singular - Singular form of item label (e.g., "character", "NPC", "location")
- * @param {string} props.itemLabels.plural - Plural form of item label (e.g., "characters", "NPCs", "locations")
- * @param {string} props.itemLabels.translationKey - Base translation key for item labels (e.g., "explorer_item_character")
+ * @param {string} props.itemLabels.singular - Singular form of item label (e.g., "character")
+ * @param {string} props.itemLabels.plural - Plural form of item label (e.g., "characters")
+ * @param {string} props.itemLabels.translationKey - Base translation key for item labels
+ * @param {Object} props.headerCustomIcons - Custom icons for header components
+ * @param {React.ReactNode} props.headerCustomIcons.root - Icon for root folder
+ * @param {React.ReactNode} props.headerCustomIcons.folder - Icon for regular folders
+ * @param {React.ReactNode} props.headerCustomIcons.allFolders - Icon for "All" folders view
+ * @param {Object} props.breadcrumbsFolderIcons - Custom icons for breadcrumbs
+ * @param {React.ReactNode} props.breadcrumbsFolderIcons.root - Icon for root in breadcrumbs
+ * @param {React.ReactNode} props.breadcrumbsFolderIcons.folder - Icon for folders in breadcrumbs
+ * @param {React.ReactNode} props.breadcrumbsFolderIcons.allFolders - Icon for "All" in breadcrumbs
+ * @param {Object} props.toolbarCustomIcons - Custom icons for toolbar actions
+ * @param {React.ReactNode} props.toolbarCustomIcons.move - Icon for move action
+ * @param {React.ReactNode} props.toolbarCustomIcons.unlink - Icon for unlink action
+ * @param {React.ReactNode} props.toolbarCustomIcons.clear - Icon for clear selection action
+ * @param {number} props.maxFolderNameLength - Maximum length for folder names
+ * @returns {React.ReactElement} The Explorer component
  */
 const Explorer = ({
+  // Folder structure props
   folders = [],
   selectedFolderId = null,
   setSelectedFolderId,
   showAllFolders = false,
   setShowAllFolders,
+
+  // View mode props
   viewMode = "grid",
   setViewMode,
+
+  // Content items props
   items = [],
   emptyList = false,
+  filterValue = "",
+
+  // Folder operation props
+  isNewFolderDialogOpen = false,
+  newFolderName = "",
+  setNewFolderName,
   setIsNewFolderDialogOpen,
+  createFolder,
+  isRenameFolderDialogOpen = false,
+  setIsRenameFolderDialogOpen,
+  setFolderToRename,
+  renamedFolderName = "",
+  setRenamedFolderName,
+  confirmRenameFolder,
+  isDeleteFolderDialogOpen = false,
+  confirmDeleteFolder,
+  cancelDeleteFolder,
+
+  // Item operation props
   moveItemToFolder,
   unlinkMultipleItems,
   prepareRenameFolder,
   prepareDeleteFolder,
   handleUnlinkItem,
-  filterValue = "",
+
+  // Component props
   ItemCardComponent,
   ItemListComponent,
   EmptyListComponent,
+
+  // Label and icon props
   itemLabels = {
     singular: "item",
     plural: "items",
@@ -96,13 +152,14 @@ const Explorer = ({
     unlink: <DeleteIcon />,
     clear: <CloseIcon fontSize="small" />,
   },
+  maxFolderNameLength = 50,
 }) => {
-  // Initialize the translation hook
+  // Initialize hooks
   const { t } = useTranslate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // State management
+  // Local state management
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [prevFolderId, setPrevFolderId] = useState(selectedFolderId);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -274,7 +331,7 @@ const Explorer = ({
     setMoveFolderDialogOpen(true);
   };
 
-  // Get dialog titles and content with proper translations and item labels
+  // Get move dialog title with proper translations based on selection count
   const moveDialogTitle = replacePlaceholders(
     t(`${itemLabels.translationKey}_move_to_folder`),
     {
@@ -285,6 +342,8 @@ const Explorer = ({
           : t(`${itemLabels.translationKey}_plural`),
     }
   );
+
+  // Get content for delete folder confirmation
 
   return (
     <>
@@ -385,7 +444,7 @@ const Explorer = ({
                   itemLabels={itemLabels}
                 />
 
-                {/* Selection Toolbar */}
+                {/* Selection Toolbar - visible only when items are selected */}
                 <ContentToolbar
                   selectedItems={selectedItems}
                   selectionMode={selectionMode}
@@ -396,7 +455,7 @@ const Explorer = ({
                   itemLabels={itemLabels}
                 />
 
-                {/* Content List */}
+                {/* Content List - displays items in grid or list view */}
                 <ContentList
                   items={items}
                   viewMode={viewMode}
@@ -416,6 +475,7 @@ const Explorer = ({
                 />
               </Box>
 
+              {/* Dialogs */}
               {/* Move Folder Dialog */}
               <MoveFolderDialog
                 open={moveFolderDialogOpen}
@@ -428,11 +488,56 @@ const Explorer = ({
                   itemToMove
                     ? items.find((item) => item.id === itemToMove)?.folderId
                     : selectedItems.length > 0
-                      ? items.find((item) => item.id === selectedItems[0])?.folderId
-                      : null
+                    ? items.find((item) => item.id === selectedItems[0])
+                        ?.folderId
+                    : null
                 }
                 title={moveDialogTitle}
                 itemLabels={itemLabels}
+              />
+
+              {/* Create New Folder Dialog */}
+              <FolderNameDialogComponent
+                open={isNewFolderDialogOpen}
+                handleClose={() => {
+                  setIsNewFolderDialogOpen(false);
+                  setNewFolderName("");
+                }}
+                handleAction={() => createFolder(selectedFolderId)}
+                parentId={selectedFolderId}
+                mode="create"
+                maxLength={maxFolderNameLength}
+                folderName={newFolderName}
+                setFolderName={setNewFolderName}
+                title={t("explorer_create_folder")}
+                confirmButtonText={t("explorer_create")}
+              />
+
+              {/* Rename Folder Dialog */}
+              <FolderNameDialogComponent
+                open={isRenameFolderDialogOpen}
+                handleClose={() => {
+                  setIsRenameFolderDialogOpen(false);
+                  setFolderToRename(null);
+                  setRenamedFolderName("");
+                }}
+                handleAction={() => confirmRenameFolder()}
+                mode="rename"
+                maxLength={maxFolderNameLength}
+                folderName={renamedFolderName}
+                setFolderName={setRenamedFolderName}
+                title={t("explorer_rename_folder")}
+                confirmButtonText={t("explorer_rename")}
+              />
+
+              {/* Delete Confirmation Dialog */}
+              <DeleteFolderDialogComponent
+                open={isDeleteFolderDialogOpen}
+                handleClose={cancelDeleteFolder}
+                handleConfirmDelete={() => confirmDeleteFolder()}
+                title={t("explorer_delete_folder")}
+                confirmButtonText={t("explorer_delete")}
+                cancelButtonText={t("explorer_cancel")}
               />
             </Box>
           </Box>

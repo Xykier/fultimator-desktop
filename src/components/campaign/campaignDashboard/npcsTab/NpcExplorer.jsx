@@ -20,8 +20,22 @@ const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
     npcFolders,
     prepareRenameFolder,
     prepareDeleteFolder,
+    isNewFolderDialogOpen,
     setIsNewFolderDialogOpen,
+    createFolder,
+    newNpcFolderName,
+    setNewNpcFolderName,
+    isRenameFolderDialogOpen,
+    setIsRenameFolderDialogOpen,
+    setFolderToRename,
+    renamedFolderName,
+    setRenamedFolderName,
+    confirmRenameFolder,
+    isDeleteFolderDialogOpen,
+    confirmDeleteFolder,
+    cancelDeleteFolder,
     moveNpcToFolder,
+    getFolderName,
   } = useNpcFoldersStore();
 
   // Initialize viewMode from localStorage or default to "grid"
@@ -89,6 +103,21 @@ const NpcExplorer = ({ campaignNpcs, handleToggleNpc }) => {
       ItemListComponent={NpcListItem}
       EmptyListComponent={EmptyNpcsList}
       itemLabels={itemLabels}
+      maxFolderNameLength = {50}
+      isNewFolderDialogOpen = {isNewFolderDialogOpen}
+      newFolderName = {newNpcFolderName}
+      setNewFolderName = {setNewNpcFolderName}
+      createFolder = {createFolder}
+      isRenameFolderDialogOpen = {isRenameFolderDialogOpen}
+      setIsRenameFolderDialogOpen = {setIsRenameFolderDialogOpen}
+      setFolderToRename = {setFolderToRename}
+      renamedFolderName = {renamedFolderName}
+      setRenamedFolderName = {setRenamedFolderName}
+      confirmRenameFolder = {confirmRenameFolder}
+      isDeleteFolderDialogOpen = {isDeleteFolderDialogOpen}
+      confirmDeleteFolder = {confirmDeleteFolder}
+      cancelDeleteFolder = {cancelDeleteFolder}
+      getFolderName = {getFolderName}
     />
   );
 };

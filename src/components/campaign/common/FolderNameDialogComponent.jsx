@@ -13,12 +13,29 @@ import {
   Tooltip,
   Divider,
 } from "@mui/material";
-import PropTypes from "prop-types";
 import FolderIcon from "@mui/icons-material/Folder";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
+import { useTranslate, replacePlaceholders } from "../../../translation/translate";
 
+/**
+ * Dialog component for creating or renaming folders
+ * 
+ * @param {Object} props - Component props
+ * @param {boolean} props.open - Whether the dialog is open
+ * @param {Function} props.handleClose - Function to close the dialog
+ * @param {string} props.folderName - Current folder name value
+ * @param {Function} props.setFolderName - Function to update folder name
+ * @param {Function} props.handleAction - Function to execute on form submission
+ * @param {string} props.mode - Dialog mode: "create" or "rename"
+ * @param {number} props.maxLength - Maximum length for folder name
+ * @param {string} props.folderNameError - Error message for folder name validation
+ * @param {string} props.title - Custom dialog title (optional, will use default if not provided)
+ * @param {string} props.confirmButtonText - Custom confirm button text (optional)
+ * @param {string} props.cancelButtonText - Custom cancel button text (optional)
+ * @returns {React.ReactElement} Folder name dialog component
+ */
 const FolderNameDialogComponent = ({
   open,
   handleClose,
@@ -28,7 +45,13 @@ const FolderNameDialogComponent = ({
   mode = "create", // "create" or "rename"
   maxLength = 50,
   folderNameError = "",
+  title,
+  confirmButtonText,
+  cancelButtonText,
 }) => {
+  // Initialize translation hook
+  const { t } = useTranslate();
+  
   // Focus the input when dialog opens and select all text when in rename mode
   useEffect(() => {
     if (open) {
@@ -54,9 +77,11 @@ const FolderNameDialogComponent = ({
     }
   };
 
+  // Determine dialog properties based on mode
   const isCreateMode = mode === "create";
-  const dialogTitle = isCreateMode ? "Create New Folder" : "Rename Folder";
-  const actionButtonText = isCreateMode ? "Create" : "Rename";
+  const dialogTitle = title || (isCreateMode ? t("explorer_create_folder") : t("explorer_rename_folder"));
+  const actionButtonText = confirmButtonText || (isCreateMode ? t("explorer_create") : t("explorer_rename"));
+  const buttonCancelText = cancelButtonText || t("explorer_cancel");
   const IconComponent = isCreateMode
     ? CreateNewFolderIcon
     : DriveFileRenameOutlineIcon;
@@ -76,6 +101,7 @@ const FolderNameDialogComponent = ({
     >
       <form onSubmit={handleSubmit}>
         <DialogTitle
+          id="folder-name-dialog-title"
           sx={{
             display: "flex",
             alignItems: "center",
@@ -89,7 +115,6 @@ const FolderNameDialogComponent = ({
           </Box>
           <IconButton
             edge="end"
-            aria-label="close"
             onClick={handleClose}
             size="small"
           >
@@ -104,14 +129,14 @@ const FolderNameDialogComponent = ({
             autoFocus
             margin="dense"
             id="folder-name-input"
-            label="Folder Name"
+            label={t("explorer_folder_name")}
             type="text"
             fullWidth
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
             error={!!folderNameError}
             helperText={
-              folderNameError || `${folderName?.length}/${maxLength} characters`
+              folderNameError || replacePlaceholders(t("explorer_char_count"), { current: folderName?.length || 0, max: maxLength })
             }
             InputProps={{
               startAdornment: (
@@ -134,7 +159,7 @@ const FolderNameDialogComponent = ({
             variant="outlined"
             size="medium"
           >
-            Cancel
+            {buttonCancelText}
           </Button>
           <Tooltip title={folderNameError || ""} placement="top">
             <span>
@@ -153,17 +178,6 @@ const FolderNameDialogComponent = ({
       </form>
     </Dialog>
   );
-};
-
-FolderNameDialogComponent.propTypes = {
-  open: PropTypes.bool.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  folderName: PropTypes.string.isRequired,
-  setFolderName: PropTypes.func.isRequired,
-  handleAction: PropTypes.func.isRequired,
-  mode: PropTypes.oneOf(["create", "rename"]),
-  maxLength: PropTypes.number,
-  folderNameError: PropTypes.string,
 };
 
 export default FolderNameDialogComponent;
