@@ -11,6 +11,7 @@ import {
   Typography,
   Divider,
   Paper,
+  alpha,
 } from "@mui/material";
 import {
   FolderOutlined,
@@ -20,10 +21,11 @@ import {
   Home as HomeIcon,
 } from "@mui/icons-material";
 import { useTranslate } from "../../../translation/translate";
+import { useTheme } from "@mui/material/styles";
 
 /**
  * Sidebar component displaying folder hierarchy with navigation capabilities
- * 
+ *
  * @param {Object} props
  * @param {Array} props.folders - Array of folder objects with hierarchical structure
  * @param {string|null} props.selectedFolderId - ID of the currently selected folder
@@ -48,13 +50,30 @@ const FolderSidebar = ({
 }) => {
   // Translation hook
   const { t } = useTranslate();
-  
+
+  // Theme hook
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
+  // Enhanced colors for better contrast in dark mode
+  const selectedBgColor = isDarkMode
+    ? alpha(theme.palette.primary.main, 0.3) // Increased from default 0.16
+    : "action.selected";
+
+  const selectedHoverBgColor = isDarkMode
+    ? alpha(theme.palette.primary.main, 0.4) // Increased from default 0.24
+    : "action.hover";
+
+  const selectedTextColor = isDarkMode
+    ? theme.palette.primary.contrastText
+    : theme.palette.primary.main;
+
   // State for tracking which folders are expanded in the sidebar
   const [expandedFolders, setExpandedFolders] = useState(initialExpandedState);
 
   /**
    * Toggle expansion state of a folder
-   * 
+   *
    * @param {string} folderId - ID of folder to toggle
    * @param {Event} e - Click event
    */
@@ -68,19 +87,19 @@ const FolderSidebar = ({
 
   /**
    * Handle folder selection
-   * 
+   *
    * @param {string} folderId - ID of the folder to select
    */
   const handleSelectFolder = (folderId) => {
     // Toggle selection if clicking the same folder again
     const newSelectedId = folderId === selectedFolderId ? null : folderId;
     setSelectedFolderId(newSelectedId);
-    
+
     // Reset "show all folders" view if active
     if (showAllFolders) {
       setShowAllFolders(false);
     }
-    
+
     // Call optional callback if provided
     if (onFolderSelect) {
       onFolderSelect(newSelectedId);
@@ -93,7 +112,7 @@ const FolderSidebar = ({
   const handleSelectRoot = () => {
     setSelectedFolderId(null);
     setShowAllFolders(false);
-    
+
     if (onFolderSelect) {
       onFolderSelect(null);
     }
@@ -101,7 +120,7 @@ const FolderSidebar = ({
 
   /**
    * Recursively render folder hierarchy
-   * 
+   *
    * @param {Array} folderList - Array of folders to render
    * @param {number} depth - Current nesting depth for indentation
    * @returns {React.ReactNode} - Rendered folder list items
@@ -132,7 +151,15 @@ const FolderSidebar = ({
                 m: 0.5,
                 pl: 1,
                 "&.Mui-selected": {
-                  backgroundColor: "action.selected",
+                  backgroundColor: selectedBgColor,
+                  "&:hover": {
+                    backgroundColor: selectedHoverBgColor,
+                  },
+                },
+                "&:hover": {
+                  backgroundColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.08)"
+                    : "rgba(0, 0, 0, 0.04)",
                 },
               }}
             >
@@ -141,7 +168,13 @@ const FolderSidebar = ({
                 <IconButton
                   size="small"
                   onClick={(e) => toggleFolderExpand(folder.id, e)}
-                  sx={{ mr: 0.5, p: 0 }}
+                  sx={{
+                    mr: 0.5,
+                    p: 0,
+                    color: isDarkMode
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(0, 0, 0, 0.54)",
+                  }}
                 >
                   {isExpanded ? (
                     <ExpandMore fontSize="small" />
@@ -152,22 +185,34 @@ const FolderSidebar = ({
               ) : (
                 <Box sx={{ width: 24, mr: 0.5 }} />
               )}
-              
+
               {/* Folder icon */}
               <ListItemIcon sx={{ minWidth: 32 }}>
-                  {isExpanded ? (
-                    <FolderOpenOutlined
-                      fontSize="small"
-                      color={isSelected ? "primary" : "action"}
-                    />
-                  ) : (
-                    <FolderOutlined
-                      fontSize="small"
-                      color={isSelected ? "primary" : "action"}
-                    />
-                  )}
+                {isExpanded ? (
+                  <FolderOpenOutlined
+                    fontSize="small"
+                    sx={{
+                      color: isSelected
+                        ? selectedTextColor
+                        : isDarkMode
+                        ? "rgba(255, 255, 255, 0.7)"
+                        : "rgba(0, 0, 0, 0.54)",
+                    }}
+                  />
+                ) : (
+                  <FolderOutlined
+                    fontSize="small"
+                    sx={{
+                      color: isSelected
+                        ? selectedTextColor
+                        : isDarkMode
+                        ? "rgba(255, 255, 255, 0.7)"
+                        : "rgba(0, 0, 0, 0.54)",
+                    }}
+                  />
+                )}
               </ListItemIcon>
-              
+
               {/* Folder name */}
               <ListItemText
                 primary={
@@ -176,6 +221,13 @@ const FolderSidebar = ({
                     noWrap
                     fontWeight={isSelected ? 600 : 400}
                     title={folder.name}
+                    sx={{
+                      color: isSelected
+                        ? selectedTextColor
+                        : isDarkMode
+                        ? "rgba(255, 255, 255, 0.85)"
+                        : "text.secondary",
+                    }}
                   >
                     {folder.name}
                   </Typography>
@@ -183,7 +235,7 @@ const FolderSidebar = ({
               />
             </ListItemButton>
           </ListItem>
-          
+
           {/* Nested folders (children) */}
           {hasChildren && collapsible && (
             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
@@ -192,7 +244,7 @@ const FolderSidebar = ({
               </List>
             </Collapse>
           )}
-          
+
           {/* Always show children if collapsible is false */}
           {hasChildren && !collapsible && (
             <List component="div" disablePadding>
@@ -213,20 +265,39 @@ const FolderSidebar = ({
         width: 240,
         overflowY: "auto",
         borderRadius: 1,
+        backgroundColor: isDarkMode
+          ? theme.palette.background.paper
+          : undefined,
+        borderColor: isDarkMode ? "rgba(255, 255, 255, 0.12)" : undefined,
       }}
     >
       {/* Sidebar header */}
-      <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
+      <Box
+        sx={{
+          p: 1,
+          display: "flex",
+          alignItems: "center",
+          backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.05)" : undefined,
+        }}
+      >
         <Typography
           variant="subtitle2"
           fontWeight={600}
-          sx={{ ml: 1, flex: 1 }}
+          sx={{
+            ml: 1,
+            flex: 1,
+            color: isDarkMode ? "rgba(255, 255, 255, 0.9)" : undefined,
+          }}
         >
           {t("explorer_folders")}
         </Typography>
       </Box>
-      <Divider />
-      
+      <Divider
+        sx={{
+          borderColor: isDarkMode ? "rgba(255, 255, 255, 0.12)" : undefined,
+        }}
+      />
+
       {/* Folder list */}
       <List dense disablePadding>
         {/* Root folder item */}
@@ -238,21 +309,46 @@ const FolderSidebar = ({
               borderRadius: 1,
               m: 0.5,
               "&.Mui-selected": {
-                backgroundColor: "action.selected",
+                backgroundColor: selectedBgColor,
+                "&:hover": {
+                  backgroundColor: selectedHoverBgColor,
+                },
+              },
+              "&:hover": {
+                backgroundColor: isDarkMode
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(0, 0, 0, 0.04)",
               },
             }}
           >
             <ListItemIcon sx={{ minWidth: 36 }}>
               <HomeIcon
                 fontSize="small"
-                color={selectedFolderId === null && !showAllFolders ? "primary" : "action"}
+                sx={{
+                  color:
+                    selectedFolderId === null && !showAllFolders
+                      ? selectedTextColor
+                      : isDarkMode
+                      ? "rgba(255, 255, 255, 0.7)"
+                      : "rgba(0, 0, 0, 0.54)",
+                }}
               />
             </ListItemIcon>
             <ListItemText
               primary={
                 <Typography
                   variant="body2"
-                  fontWeight={selectedFolderId === null && !showAllFolders ? 600 : 400}
+                  fontWeight={
+                    selectedFolderId === null && !showAllFolders ? 600 : 400
+                  }
+                  sx={{
+                    color:
+                      selectedFolderId === null && !showAllFolders
+                        ? selectedTextColor
+                        : isDarkMode
+                        ? "rgba(255, 255, 255, 0.85)"
+                        : "text.secondary",
+                  }}
                 >
                   {rootFolderName || t("explorer_root_folder")}
                 </Typography>
@@ -260,7 +356,7 @@ const FolderSidebar = ({
             />
           </ListItemButton>
         </ListItem>
-        
+
         {/* Render all folders recursively */}
         {renderFolders(folders)}
       </List>
