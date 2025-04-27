@@ -1,4 +1,3 @@
-// src/stores/npcStore.js
 import { create } from "zustand";
 import {
   getRelatedNpcs,
@@ -7,8 +6,11 @@ import {
   disassociateNpcFromCampaign,
   getNpcFoldersForCampaign,
 } from "../../../../../utility/db";
+import { t, replacePlaceholders } from "../../../../../translation/translate";
 
 export const useNpcStore = create((set, get) => ({
+
+
   // Data
   allNpcs: [],
   associatedNpcIds: [],
@@ -75,7 +77,7 @@ export const useNpcStore = create((set, get) => ({
         set({ npcFolders: foldersList });
       } catch (folderErr) {
         console.error("Error loading NPC folders:", folderErr);
-        set({ loadError: "Failed to load NPC folders. Please try again." });
+        set({ loadError: t('npc_folders_load_error') });
       }
 
       return {
@@ -85,7 +87,7 @@ export const useNpcStore = create((set, get) => ({
       };
     } catch (err) {
       console.error("Error loading NPCs:", err);
-      set({ loadError: "Failed to load NPCs. Please try again." });
+      set({ loadError: t('npcs_load_error') });
       throw err;
     } finally {
       set({ isLoading: false });
@@ -111,7 +113,7 @@ export const useNpcStore = create((set, get) => ({
           campaignNpcs: campaignNpcs.filter((npc) => npc.id !== npcId),
         });
 
-        showSnackbar("NPC removed from campaign", "info");
+        showSnackbar(t('npc_remove_success'), "info");
         return true;
       } else {
         // Add NPC to campaign
@@ -124,14 +126,14 @@ export const useNpcStore = create((set, get) => ({
             campaignNpcs: [...campaignNpcs, npc],
           });
 
-          showSnackbar("NPC added to campaign", "success");
+          showSnackbar(t('npc_add_success'), "success");
           return true;
         }
       }
       return false;
     } catch (error) {
       console.error("Error toggling NPC association:", error);
-      showSnackbar("Failed to update NPC association", "error");
+      showSnackbar(t('npc_association_update_error'), "error");
       return false;
     }
   },
@@ -163,10 +165,15 @@ export const useNpcStore = create((set, get) => ({
         campaignNpcs: updatedCampaignNpcs,
       });
 
-      showSnackbar(`${npcIds.length} NPC(s) removed from campaign`, "info");
+      showSnackbar(
+        replacePlaceholders(t('npc_remove_multiple_success'), { 
+          count: npcIds.length 
+        }), 
+        "info"
+      );
     } catch (error) {
       console.error("Error unlinking multiple NPCs:", error);
-      showSnackbar("Failed to remove NPCs from campaign", "error");
+      showSnackbar(t('npc_remove_error'), "error");
     }
   },
 

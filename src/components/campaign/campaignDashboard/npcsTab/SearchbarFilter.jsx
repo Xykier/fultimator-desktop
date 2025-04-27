@@ -35,22 +35,27 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 import { getSpeciesIcon, getRankIcon } from "../../../../libs/npcIcons";
 import { useNpcFiltersStore } from "./stores/npcFiltersStore";
+import { t } from "../../../../translation/translate";
 
 const attitudeOptions = [
-  { value: "all", label: "All Attitudes", icon: <PeopleIcon fontSize="small" /> },
+  {
+    value: "all",
+    label: t("npc_attitude_all"),
+    icon: <PeopleIcon fontSize="small" />,
+  },
   {
     value: "friendly",
-    label: "Friendly",
+    label: t("npc_attitude_friendly"),
     icon: <FriendlyIcon fontSize="small" />,
   },
   {
     value: "neutral",
-    label: "Neutral",
+    label: t("npc_attitude_neutral"),
     icon: <NeutralIcon fontSize="small" />,
   },
   {
     value: "hostile",
-    label: "Hostile",
+    label: t("npc_attitude_hostile"),
     icon: <HostileIcon fontSize="small" />,
   },
 ];
@@ -59,22 +64,38 @@ const SearchbarFilter = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [expanded, setExpanded] = useState(false);
-  
+
   // Extract state from the store with individual selectors to prevent unnecessary re-renders
-  const filterSearchText = useNpcFiltersStore((state) => state.filterSearchText);
+  const filterSearchText = useNpcFiltersStore(
+    (state) => state.filterSearchText
+  );
   const npcSortOrder = useNpcFiltersStore((state) => state.npcSortOrder);
-  const npcSortDirection = useNpcFiltersStore((state) => state.npcSortDirection);
-  const npcAttitudeFilter = useNpcFiltersStore((state) => state.npcAttitudeFilter);
-  const showVillainsOnly = useNpcFiltersStore((state) => state.showVillainsOnly);
+  const npcSortDirection = useNpcFiltersStore(
+    (state) => state.npcSortDirection
+  );
+  const npcAttitudeFilter = useNpcFiltersStore(
+    (state) => state.npcAttitudeFilter
+  );
+  const showVillainsOnly = useNpcFiltersStore(
+    (state) => state.showVillainsOnly
+  );
   const npcRank = useNpcFiltersStore((state) => state.npcRank);
   const npcSpecies = useNpcFiltersStore((state) => state.npcSpecies);
-  
+
   // Extract actions from the store
-  const setFilterSearchText = useNpcFiltersStore((state) => state.setFilterSearchText);
+  const setFilterSearchText = useNpcFiltersStore(
+    (state) => state.setFilterSearchText
+  );
   const setNpcSortOrder = useNpcFiltersStore((state) => state.setNpcSortOrder);
-  const setNpcSortDirection = useNpcFiltersStore((state) => state.setNpcSortDirection);
-  const setNpcAttitudeFilter = useNpcFiltersStore((state) => state.setNpcAttitudeFilter);
-  const setShowVillainsOnly = useNpcFiltersStore((state) => state.setShowVillainsOnly);
+  const setNpcSortDirection = useNpcFiltersStore(
+    (state) => state.setNpcSortDirection
+  );
+  const setNpcAttitudeFilter = useNpcFiltersStore(
+    (state) => state.setNpcAttitudeFilter
+  );
+  const setShowVillainsOnly = useNpcFiltersStore(
+    (state) => state.setShowVillainsOnly
+  );
   const setNpcRank = useNpcFiltersStore((state) => state.setNpcRank);
   const setNpcSpecies = useNpcFiltersStore((state) => state.setNpcSpecies);
 
@@ -255,12 +276,12 @@ const SearchbarFilter = () => {
             size="small"
             sx={{ minWidth: isMobile ? "100%" : "150px", flexGrow: 1 }}
           >
-            <InputLabel id="attitude-label">Attitude</InputLabel>
+            <InputLabel id="attitude-label">{t("npc_attitude_label")}</InputLabel>
             <Select
               labelId="attitude-label"
               id="attitude"
               value={npcAttitudeFilter}
-              label="Attitude"
+              label={t("npc_attitude_label")}
               onChange={handleAttitudeChange}
               renderValue={(selected) => {
                 const option = attitudeOptions.find(

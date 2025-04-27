@@ -8,6 +8,7 @@ import {
   getNpcFoldersForCampaign,
 } from "../../../../../utility/db";
 import { useNpcFiltersStore } from "./npcFiltersStore";
+import { t, replacePlaceholders } from "../../../../../translation/translate";
 
 export const useNpcFoldersStore = create((set, get) => ({
   // State
@@ -63,11 +64,11 @@ export const useNpcFoldersStore = create((set, get) => ({
         newNpcFolderName: ""
       });
       
-      if (showSnackbar) showSnackbar("Folder created successfully", "success");
+      if (showSnackbar) showSnackbar(t('folder_create_success'), "success");
       return true;
     } catch (error) {
       console.error("Error creating folder:", error);
-      if (showSnackbar) showSnackbar("Failed to create folder", "error");
+      if (showSnackbar) showSnackbar(t('folder_create_error'), "error");
       return false;
     }
   },
@@ -78,12 +79,15 @@ export const useNpcFoldersStore = create((set, get) => ({
     
     try {
       await updateNpcCampaignFolder(npcId, campaignId, folderId);
-      if (showSnackbar) showSnackbar("NPC moved to folder successfully", "success");
+      if (showSnackbar) showSnackbar(t('npc_move_success'), "success");
       if (loadNpcs) await loadNpcs(); // Reload NPCs to reflect the change
       return true;
     } catch (error) {
       console.error("Error moving NPC to folder:", error);
-      if (showSnackbar) showSnackbar("Failed to move NPC to folder", "error");
+      if (showSnackbar) showSnackbar(
+        replacePlaceholders(t('npc_move_error'), { error: error.message }), 
+        "error"
+      );
       return false;
     }
   },
@@ -116,7 +120,7 @@ export const useNpcFoldersStore = create((set, get) => ({
       });
     } else {
       console.error("Folder not found for renaming:", folderId);
-      if (showSnackbar) showSnackbar("Could not find the folder to rename.", "error");
+      if (showSnackbar) showSnackbar(t('folder_rename_not_found'), "error");
     }
   },
   
@@ -134,7 +138,7 @@ export const useNpcFoldersStore = create((set, get) => ({
         parentId: folderToRename.parentId,
       });
       
-      if (showSnackbar) showSnackbar("Folder renamed successfully", "success");
+      if (showSnackbar) showSnackbar(t('folder_rename_success'), "success");
       
       // Refresh folders list
       await get().fetchFolders();
@@ -147,7 +151,7 @@ export const useNpcFoldersStore = create((set, get) => ({
       return true;
     } catch (error) {
       console.error("Error renaming folder:", error);
-      if (showSnackbar) showSnackbar("Failed to rename folder", "error");
+      if (showSnackbar) showSnackbar(t('folder_rename_error'), "error");
       return false;
     }
   },
@@ -280,11 +284,14 @@ export const useNpcFoldersStore = create((set, get) => ({
         setSelectedNpcFolderId(parentFolderId);
       }
 
-      if (showSnackbar) showSnackbar("Folder(s) deleted successfully", "success");
+      if (showSnackbar) showSnackbar(t('folder_delete_success'), "success");
       return true;
     } catch (error) {
       console.error("Failed to delete folder:", error);
-      if (showSnackbar) showSnackbar(`Failed to delete folder: ${error.message}`, "error");
+      if (showSnackbar) showSnackbar(
+        replacePlaceholders(t('folder_delete_error'), { error: error.message }),
+        "error"
+      );
       // Revert the optimistic update
       set({ npcFolders: originalFolders });
       return false;
@@ -301,7 +308,7 @@ export const useNpcFoldersStore = create((set, get) => ({
         if (loadNpcs) await loadNpcs();
       } catch (refreshError) {
         console.error("Failed to refresh folders/NPCs after delete:", refreshError);
-        if (showSnackbar) showSnackbar("Failed to refresh data after deletion.", "warning");
+        if (showSnackbar) showSnackbar(t('folder_delete_refresh_error'), "warning");
       }
     }
   },

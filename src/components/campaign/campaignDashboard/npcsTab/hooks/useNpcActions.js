@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { updateNpcCampaignAttitude } from "../../../../../utility/db";
+import { useTranslate, replacePlaceholders } from "../../../../../translation/translate";
 
 export const useNpcActions = (campaignId, loadNpcs, showSnackbar) => {
+  const { t } = useTranslate();
   const navigate = useNavigate();
 
   const handleEditNpc = (npcId) => {
@@ -11,11 +13,16 @@ export const useNpcActions = (campaignId, loadNpcs, showSnackbar) => {
   const handleSetAttitude = async (npcId, newAttitude) => {
     try {
       await updateNpcCampaignAttitude(npcId, campaignId, newAttitude);
-      showSnackbar(`NPC attitude set to ${newAttitude}`, "success");
-      await loadNpcs(); // Reload NPCs to reflect the change
+      showSnackbar(
+        replacePlaceholders(t('npc_attitude_update_success'), { 
+          attitude: t("npc_attitude_" + newAttitude)
+        }), 
+        "success"
+      );
+      await loadNpcs();
     } catch (err) {
       console.error("Error updating NPC attitude:", err);
-      showSnackbar("Failed to update NPC attitude", "error");
+      showSnackbar(t('npc_attitude_update_error'), "error");
     }
   };
 
