@@ -427,7 +427,9 @@ const Explorer = ({
                 currentFolderId={
                   itemToMove
                     ? items.find((item) => item.id === itemToMove)?.folderId
-                    : null
+                    : selectedItems.length > 0
+                      ? items.find((item) => item.id === selectedItems[0])?.folderId
+                      : null
                 }
                 title={moveDialogTitle}
                 itemLabels={itemLabels}
