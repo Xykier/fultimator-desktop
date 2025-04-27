@@ -62,6 +62,7 @@ const attitudeOptions = [
 
 const SearchbarFilter = () => {
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [expanded, setExpanded] = useState(false);
 
@@ -191,6 +192,7 @@ const SearchbarFilter = () => {
           startIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           sx={{ minWidth: "auto", whiteSpace: "nowrap" }}
           size="small"
+          color={isDarkMode ? "white" : "primary"}
         >
           {expanded ? "Hide Filters" : "More Filters"}
         </Button>
@@ -199,6 +201,7 @@ const SearchbarFilter = () => {
             onClick={clearAllFilters}
             sx={{ minWidth: "auto", whiteSpace: "nowrap" }}
             size="small"
+            color={isDarkMode ? "white" : "primary"}
           >
             <DeleteSweepIcon />
           </Button>
@@ -255,7 +258,7 @@ const SearchbarFilter = () => {
 
             <IconButton
               onClick={handleSortDirectionChange}
-              color="primary"
+              color={isDarkMode ? "white" : "primary"}
               size="small"
               sx={{
                 border: 1,
@@ -312,7 +315,6 @@ const SearchbarFilter = () => {
               <Switch
                 checked={showVillainsOnly}
                 onChange={handleVillainToggle}
-                color="warning"
                 size="small"
               />
             }

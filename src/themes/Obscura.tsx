@@ -268,19 +268,24 @@ const darkObscura = createTheme({
     MuiSwitch: {
       styleOverrides: {
         switchBase: {
+          color: "#b0b0b0",
           "&.Mui-checked": {
-            color: "#9176AC",
+            color: "#9176AC", // Secondary
             "& + .MuiSwitch-track": {
-              backgroundColor: "#4C5D8B",
+              backgroundColor: "#4C5D8B", // Quaternary
+              opacity: 1,
             },
           },
-        },
-        thumb: {
-          backgroundColor: "#9176AC", 
+          "&.Mui-disabled": {
+            color: "#4C5D8B66",
+          },
+          "&.Mui-disabled + .MuiSwitch-track": {
+            backgroundColor: "#55555540",
+          },
         },
         track: {
-          backgroundColor: "#1e1e1e",
-          transition: "background-color 0.3s",
+          backgroundColor: "#55555580",
+          transition: "background-color 0.3s, opacity 0.3s",
         },
       },
     },

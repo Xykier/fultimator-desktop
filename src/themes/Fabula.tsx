@@ -268,19 +268,24 @@ const darkFabula = createTheme({
     MuiSwitch: {
       styleOverrides: {
         switchBase: {
+          color: "#b0b0b0", // Unchecked thumb color
           "&.Mui-checked": {
-            color: "#85C3B1",
+            color: "#85C3B1", // Checked thumb color (secondary)
             "& + .MuiSwitch-track": {
-              backgroundColor: "#47645b",
+              backgroundColor: "#47645b", // Checked track color (quaternary)
+              opacity: 1,
             },
           },
-        },
-        thumb: {
-          backgroundColor: "#85C3B1", 
+          "&.Mui-disabled": {
+            color: "#47645b66", // Disabled thumb (quaternary with 40% opacity)
+          },
+          "&.Mui-disabled + .MuiSwitch-track": {
+            backgroundColor: "#55555540", // Disabled track
+          },
         },
         track: {
-          backgroundColor: "#1e1e1e",
-          transition: "background-color 0.3s",
+          backgroundColor: "#55555580", // Unchecked track color (dark grey with 50% opacity)
+          transition: "background-color 0.3s, opacity 0.3s",
         },
       },
     },

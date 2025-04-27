@@ -268,19 +268,24 @@ const darkBravely = createTheme({
     MuiSwitch: {
       styleOverrides: {
         switchBase: {
+          color: "#b0b0b0", // Unchecked thumb
           "&.Mui-checked": {
-            color: "#dccdc4",
+            color: "#dccdc4", // Secondary
             "& + .MuiSwitch-track": {
-              backgroundColor: "#756449",
+              backgroundColor: "#756449", // Quaternary
+              opacity: 1,
             },
           },
-        },
-        thumb: {
-          backgroundColor: "#dccdc4", 
+          "&.Mui-disabled": {
+            color: "#75644966", // Quaternary 40% opacity
+          },
+          "&.Mui-disabled + .MuiSwitch-track": {
+            backgroundColor: "#55555540",
+          },
         },
         track: {
-          backgroundColor: "#1e1e1e",
-          transition: "background-color 0.3s",
+          backgroundColor: "#55555580", // Dark gray with 50% opacity
+          transition: "background-color 0.3s, opacity 0.3s",
         },
       },
     },

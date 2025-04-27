@@ -268,19 +268,24 @@ const darkTechno = createTheme({
     MuiSwitch: {
       styleOverrides: {
         switchBase: {
+          color: "#b0b0b0",
           "&.Mui-checked": {
-            color: "#879da9",
+            color: "#879da9", // Secondary
             "& + .MuiSwitch-track": {
-              backgroundColor: "#1A1D1E",
+              backgroundColor: "#406376", // Quaternary
+              opacity: 1,
             },
           },
-        },
-        thumb: {
-          backgroundColor: "#879da9", 
+          "&.Mui-disabled": {
+            color: "#1A1D1E66",
+          },
+          "&.Mui-disabled + .MuiSwitch-track": {
+            backgroundColor: "#55555540",
+          },
         },
         track: {
-          backgroundColor: "#1e1e1e",
-          transition: "background-color 0.3s",
+          backgroundColor: "#55555580",
+          transition: "background-color 0.3s, opacity 0.3s",
         },
       },
     },

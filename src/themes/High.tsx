@@ -268,19 +268,24 @@ const darkHigh = createTheme({
     MuiSwitch: {
       styleOverrides: {
         switchBase: {
+          color: "#b0b0b0",
           "&.Mui-checked": {
-            color: "#725759",
+            color: "#725759", // Secondary
             "& + .MuiSwitch-track": {
-              backgroundColor: "#a24b4d",
+              backgroundColor: "#a24b4d", // Quaternary
+              opacity: 1,
             },
           },
-        },
-        thumb: {
-          backgroundColor: "#725759", 
+          "&.Mui-disabled": {
+            color: "#a24b4d66",
+          },
+          "&.Mui-disabled + .MuiSwitch-track": {
+            backgroundColor: "#55555540",
+          },
         },
         track: {
-          backgroundColor: "#1e1e1e",
-          transition: "background-color 0.3s",
+          backgroundColor: "#55555580",
+          transition: "background-color 0.3s, opacity 0.3s",
         },
       },
     },
