@@ -15,6 +15,8 @@ import {
   ViewList as ViewListIcon,
   Delete as DeleteIcon,
   Close as CloseIcon,
+  FolderSpecial as FolderSpecialIcon,
+  NavigateNext as NavigateNextIcon,
 } from "@mui/icons-material";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderBreadcrumbs from "./FolderBreadcrumbs";
@@ -40,10 +42,13 @@ import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
  * @param {Function} props.setSelectedFolderId - Function to update selected folder
  * @param {boolean} props.showAllFolders - Whether to show all folders or only the current folder tree
  * @param {Function} props.setShowAllFolders - Function to toggle showing all folders
+ * @param {string} props.rootFolderName - Name of the root folder
+ * @param {boolean} props.collapsibleSidebar - Whether the sidebar can be collapsed
+ * @param {Object} props.sidebarInitialExpandedState - Initial expanded state of folders in sidebar
+ * @param {Function} props.onSidebarFolderSelect - Callback when a folder is selected in sidebar
  * @param {string} props.viewMode - Current view mode ('grid' or 'list')
  * @param {Function} props.setViewMode - Function to update view mode
  * @param {Array} props.items - Content items to display in current folder
- * @param {boolean} props.emptyList - Whether the item list is empty
  * @param {boolean} props.isNewFolderDialogOpen - Whether new folder dialog is open
  * @param {string} props.newFolderName - New folder name input value
  * @param {Function} props.setNewFolderName - Function to update new folder name
@@ -83,7 +88,26 @@ import DeleteFolderDialogComponent from "./DeleteFolderDialogComponent";
  * @param {React.ReactNode} props.toolbarCustomIcons.move - Icon for move action
  * @param {React.ReactNode} props.toolbarCustomIcons.unlink - Icon for unlink action
  * @param {React.ReactNode} props.toolbarCustomIcons.clear - Icon for clear selection action
+ * @param {Object} props.moveDialogCustomIcons - Custom icons for move dialog
+ * @param {React.ReactNode} props.moveDialogCustomIcons.root - Icon for root folder in move dialog
+ * @param {React.ReactNode} props.moveDialogCustomIcons.folder - Icon for regular folders in move dialog
+ * @param {React.ReactNode} props.moveDialogCustomIcons.current - Icon for current folder in move dialog
+ * @param {React.ReactNode} props.moveDialogCustomIcons.breadcrumbSeparator - Icon for breadcrumb separator in move dialog
+ * @param {string} props.moveDialogSize - Size of the move dialog ('xs', 'sm', 'md', 'lg', 'xl')
+ * @param {number} props.moveDialogTreeHeight - Height of the folder tree in move dialog
  * @param {number} props.maxFolderNameLength - Maximum length for folder names
+ * @param {string} props.folderNameDialogError - Error message for folder name dialog
+ * @param {string} props.folderNameDialogTitle - Title for folder name dialog
+ * @param {string} props.folderNameDialogConfirmButtonText - Confirm button text for folder name dialog
+ * @param {string} props.folderNameDialogCancelButtonText - Cancel button text for folder name dialog
+ * @param {string} props.renameFolderDialogError - Error message for rename folder dialog
+ * @param {string} props.renameFolderDialogTitle - Title for rename folder dialog
+ * @param {string} props.renameFolderDialogConfirmButtonText - Confirm button text for rename folder dialog
+ * @param {string} props.renameFolderDialogCancelButtonText - Cancel button text for rename folder dialog
+ * @param {string} props.deleteFolderDialogTitle - Title for delete folder dialog
+ * @param {string} props.deleteFolderDialogMessage - Message shown in delete folder dialog
+ * @param {string} props.deleteFolderDialogConfirmButtonText - Confirm button text for delete folder dialog
+ * @param {string} props.deleteFolderDialogCancelButtonText - Cancel button text for delete folder dialog
  * @returns {React.ReactElement} The Explorer component
  */
 const Explorer = ({
@@ -93,6 +117,10 @@ const Explorer = ({
   setSelectedFolderId,
   showAllFolders = false,
   setShowAllFolders,
+  rootFolderName = "",
+  collapsibleSidebar = true,
+  sidebarInitialExpandedState = {},
+  onSidebarFolderSelect = null,
 
   // View mode props
   viewMode = "grid",
@@ -100,7 +128,6 @@ const Explorer = ({
 
   // Content items props
   items = [],
-  emptyList = false,
   filterValue = "",
 
   // Folder operation props
@@ -152,7 +179,27 @@ const Explorer = ({
     unlink: <DeleteIcon />,
     clear: <CloseIcon fontSize="small" />,
   },
+  moveDialogCustomIcons = {
+    root: <HomeIcon fontSize="small" />,
+    folder: <FolderIcon fontSize="small" />,
+    current: <FolderSpecialIcon fontSize="small" />,
+    breadcrumbSeparator: <NavigateNextIcon fontSize="small" />,
+  },
+  moveDialogSize = "sm",
+  moveDialogTreeHeight = 350,
   maxFolderNameLength = 50,
+  folderNameDialogError,
+  folderNameDialogTitle,
+  folderNameDialogConfirmButtonText,
+  folderNameDialogCancelButtonText,
+  renameFolderDialogError,
+  renameFolderDialogTitle,
+  renameFolderDialogConfirmButtonText,
+  renameFolderDialogCancelButtonText,
+  deleteFolderDialogTitle,
+  deleteFolderDialogMessage,
+  deleteFolderDialogConfirmButtonText,
+  deleteFolderDialogCancelButtonText,
 }) => {
   // Initialize hooks
   const { t } = useTranslate();
@@ -306,15 +353,6 @@ const Explorer = ({
   };
 
   /**
-   * Handle folder selection change in move dialog
-   *
-   * @param {Object} event - Change event
-   */
-  const handleFolderChange = (event) => {
-    setSelectedFolder(event.target.value);
-  };
-
-  /**
    * Toggle mobile drawer open/closed
    */
   const toggleDrawer = () => {
@@ -386,6 +424,10 @@ const Explorer = ({
                   setSelectedFolderId={setSelectedFolderId}
                   showAllFolders={showAllFolders}
                   setShowAllFolders={setShowAllFolders}
+                  rootFolderName={rootFolderName}
+                  collapsible={collapsibleSidebar}
+                  initialExpandedState={sidebarInitialExpandedState}
+                  onFolderSelect={onSidebarFolderSelect}
                 />
               </Drawer>
 
@@ -408,6 +450,10 @@ const Explorer = ({
                 setSelectedFolderId={setSelectedFolderId}
                 showAllFolders={showAllFolders}
                 setShowAllFolders={setShowAllFolders}
+                rootFolderName={rootFolderName}
+                collapsible={collapsibleSidebar}
+                initialExpandedState={sidebarInitialExpandedState}
+                onFolderSelect={onSidebarFolderSelect}
               />
             </Box>
           )}
@@ -465,13 +511,11 @@ const Explorer = ({
                   handleUnlinkItem={handleUnlinkItem}
                   handleOpenMoveDialog={handleOpenMoveDialog}
                   folders={folders}
-                  emptyList={emptyList}
                   currentFolder={currentFolder}
                   filterValue={filterValue}
                   ItemCardComponent={ItemCardComponent}
                   ItemListComponent={ItemListComponent}
                   EmptyListComponent={EmptyListComponent}
-                  itemLabels={itemLabels}
                 />
               </Box>
 
@@ -482,7 +526,6 @@ const Explorer = ({
                 onClose={handleMoveFolderClose}
                 selectedFolder={selectedFolder}
                 folders={folders}
-                handleFolderChange={handleFolderChange}
                 handleMoveToFolder={handleMoveToFolder}
                 currentFolderId={
                   itemToMove
@@ -494,6 +537,9 @@ const Explorer = ({
                 }
                 title={moveDialogTitle}
                 itemLabels={itemLabels}
+                size={moveDialogSize}
+                treeHeight={moveDialogTreeHeight}
+                customIcons={moveDialogCustomIcons}
               />
 
               {/* Create New Folder Dialog */}
@@ -503,14 +549,15 @@ const Explorer = ({
                   setIsNewFolderDialogOpen(false);
                   setNewFolderName("");
                 }}
-                handleAction={() => createFolder(selectedFolderId)}
-                parentId={selectedFolderId}
-                mode="create"
-                maxLength={maxFolderNameLength}
                 folderName={newFolderName}
                 setFolderName={setNewFolderName}
-                title={t("explorer_create_folder")}
-                confirmButtonText={t("explorer_create")}
+                handleAction={() => createFolder(selectedFolderId)}
+                mode="create"
+                maxLength={maxFolderNameLength}
+                folderNameError={folderNameDialogError}
+                title={folderNameDialogTitle}
+                confirmButtonText={folderNameDialogConfirmButtonText}
+                cancelButtonText={folderNameDialogCancelButtonText}
               />
 
               {/* Rename Folder Dialog */}
@@ -521,13 +568,15 @@ const Explorer = ({
                   setFolderToRename(null);
                   setRenamedFolderName("");
                 }}
+                folderName={renamedFolderName}
+                setFolderName={setRenamedFolderName}
                 handleAction={() => confirmRenameFolder()}
                 mode="rename"
                 maxLength={maxFolderNameLength}
-                folderName={renamedFolderName}
-                setFolderName={setRenamedFolderName}
-                title={t("explorer_rename_folder")}
-                confirmButtonText={t("explorer_rename")}
+                folderNameError={renameFolderDialogError}
+                title={renameFolderDialogTitle}
+                confirmButtonText={renameFolderDialogConfirmButtonText}
+                cancelButtonText={renameFolderDialogCancelButtonText}
               />
 
               {/* Delete Confirmation Dialog */}
@@ -535,9 +584,10 @@ const Explorer = ({
                 open={isDeleteFolderDialogOpen}
                 handleClose={cancelDeleteFolder}
                 handleConfirmDelete={() => confirmDeleteFolder()}
-                title={t("explorer_delete_folder")}
-                confirmButtonText={t("explorer_delete")}
-                cancelButtonText={t("explorer_cancel")}
+                title={deleteFolderDialogTitle}
+                message={deleteFolderDialogMessage}
+                confirmButtonText={deleteFolderDialogConfirmButtonText}
+                cancelButtonText={deleteFolderDialogCancelButtonText}
               />
             </Box>
           </Box>
