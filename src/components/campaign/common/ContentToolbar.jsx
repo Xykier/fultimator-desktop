@@ -7,6 +7,8 @@ import {
   Tooltip,
   Typography,
   Button,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   useTranslate,
@@ -46,6 +48,9 @@ const ContentToolbar = ({
 }) => {
   // Initialize the translation hook
   const { t } = useTranslate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isExtraSmall = useMediaQuery("(max-width:380px)");
 
   // Get properly formatted item count text with translation
   const getSelectionText = () => {
@@ -56,13 +61,13 @@ const ContentToolbar = ({
     const phraseKey = isSingular
       ? `${itemLabels.translationKey}_selected_singular`
       : `${itemLabels.translationKey}_selected_plural`;
-  
+
     return replacePlaceholders(t(phraseKey), {
       count: selectedItems.length,
       itemLabel: t(labelKey),
     });
   };
-  
+
   return (
     <Fade in={selectionMode}>
       <Toolbar
@@ -73,45 +78,96 @@ const ContentToolbar = ({
           borderRadius: 2,
           mb: 2,
           display: selectionMode ? "flex" : "none",
-          justifyContent: "space-between",
+          justifyContent: { xs: "center", sm: "space-between" },
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: "center",
           flexWrap: "wrap",
           p: { xs: 1, sm: 1.5 },
           gap: 1,
         }}
       >
         {/* Selected Count */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="subtitle1">{getSelectionText()}</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: { xs: "center", sm: "flex-start" },
+            width: { xs: "100%", sm: "auto" },
+            mb: { xs: 1, sm: 0 },
+            textAlign: { xs: "center", sm: "left" },
+          }}
+        >
+          <Typography variant={isMobile ? "subtitle2" : "subtitle1"} noWrap>
+            {getSelectionText()}
+          </Typography>
         </Box>
 
         {/* Action Buttons */}
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          <Button
-            size="small"
-            startIcon={customIcons.move}
-            variant="outlined"
-            color="inherit"
-            onClick={onMoveToFolder}
-            aria-label={t("explorer_move_to_folder")}
-          >
-            {t("explorer_move_to_folder")}
-          </Button>
-          <Button
-            size="small"
-            startIcon={customIcons.unlink}
-            variant="outlined"
-            color="inherit"
-            onClick={onUnlink}
-            aria-label={t("explorer_unlink_selected")}
-          >
-            {t("explorer_unlink_selected")}
-          </Button>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1,
+            justifyContent: "center",
+            width: { xs: "100%", sm: "auto" },
+          }}
+        >
+          {isExtraSmall ? (
+            <>
+              <Tooltip title={t("explorer_move_to_folder")}>
+                <IconButton
+                  size="small"
+                  onClick={onMoveToFolder}
+                  color="inherit"
+                >
+                  {customIcons.move}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={t("explorer_unlink_selected")}>
+                <IconButton
+                  size="small"
+                  onClick={onUnlink}
+                  color="inherit"
+                >
+                  {customIcons.unlink}
+                </IconButton>
+              </Tooltip>
+            </>
+          ) : (
+            <>
+              <Button
+                size={isMobile ? "small" : "medium"}
+                startIcon={customIcons.move}
+                variant="outlined"
+                color="inherit"
+                onClick={onMoveToFolder}
+                sx={{
+                  minWidth: isMobile ? 0 : undefined,
+                  px: isMobile ? 1 : 2,
+                }}
+              >
+                {t("explorer_move_to_folder")}
+              </Button>
+              <Button
+                size={isMobile ? "small" : "medium"}
+                startIcon={customIcons.unlink}
+                variant="outlined"
+                color="inherit"
+                onClick={onUnlink}
+                sx={{
+                  minWidth: isMobile ? 0 : undefined,
+                  px: isMobile ? 1 : 2,
+                }}
+              >
+                {t("explorer_unlink_selected")}
+              </Button>
+            </>
+          )}
           <Tooltip title={t("explorer_clear_selection")}>
             <IconButton
               size="small"
               onClick={onClearSelection}
               color="inherit"
-              aria-label={t("explorer_clear_selection")}
             >
               {customIcons.clear}
             </IconButton>

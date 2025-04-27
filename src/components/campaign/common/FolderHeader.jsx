@@ -11,6 +11,8 @@ import {
   Paper,
   Tooltip,
   Button,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   MoreVert as MoreVertIcon,
@@ -20,6 +22,7 @@ import {
   ViewList as ViewListIcon,
   Add as AddIcon,
   CheckBoxOutlined as SelectionIcon,
+  MoreHoriz as MoreHorizIcon,
 } from "@mui/icons-material";
 import {
   useTranslate,
@@ -65,25 +68,49 @@ const FolderHeader = ({
 }) => {
   // Initialize the translation hook
   const { t } = useTranslate();
+  const theme = useTheme();
 
-  // Menu state management
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  // Responsive breakpoints
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+
+  // Menu states
+  const [folderMenuAnchor, setFolderMenuAnchor] = useState(null);
+  const [actionsMenuAnchor, setActionsMenuAnchor] = useState(null);
+  
+  const folderMenuOpen = Boolean(folderMenuAnchor);
+  const actionsMenuOpen = Boolean(actionsMenuAnchor);
 
   /**
    * Handle opening the folder options menu
    *
    * @param {Event} event - Click event
    */
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleFolderMenuOpen = (event) => {
+    setFolderMenuAnchor(event.currentTarget);
+  };
+
+  /**
+   * Handle opening the actions menu (for mobile)
+   *
+   * @param {Event} event - Click event
+   */
+  const handleActionsMenuOpen = (event) => {
+    setActionsMenuAnchor(event.currentTarget);
   };
 
   /**
    * Close the folder options menu
    */
-  const handleMenuClose = () => {
-    setAnchorEl(null);
+  const handleFolderMenuClose = () => {
+    setFolderMenuAnchor(null);
+  };
+
+  /**
+   * Close the actions menu
+   */
+  const handleActionsMenuClose = () => {
+    setActionsMenuAnchor(null);
   };
 
   /**
@@ -91,7 +118,7 @@ const FolderHeader = ({
    */
   const handleRename = () => {
     onRenameFolder(selectedFolder.id);
-    handleMenuClose();
+    handleFolderMenuClose();
   };
 
   /**
@@ -99,7 +126,7 @@ const FolderHeader = ({
    */
   const handleDelete = () => {
     onDeleteFolder(selectedFolder.id);
-    handleMenuClose();
+    handleFolderMenuClose();
   };
 
   /**
@@ -146,12 +173,36 @@ const FolderHeader = ({
     });
   };
 
+  /**
+   * Handle view mode change from mobile menu
+   */
+  const handleViewModeChange = () => {
+    onChangeViewMode(viewMode === "grid" ? "list" : "grid");
+    handleActionsMenuClose();
+  };
+
+  /**
+   * Handle select all from mobile menu
+   */
+  const handleSelectAll = () => {
+    onSelectAll();
+    handleActionsMenuClose();
+  };
+
+  /**
+   * Handle new folder creation from mobile menu
+   */
+  const handleCreateFolder = () => {
+    onCreateFolder(selectedFolder?.id);
+    handleActionsMenuClose();
+  };
+
   return (
     <Paper
       elevation={0}
       variant="outlined"
       sx={{
-        p: 2,
+        p: { xs: 1.5, sm: 2 },
         mb: 2,
         display: "flex",
         flexDirection: "column",
@@ -164,72 +215,117 @@ const FolderHeader = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          mb: 0,
+          flexWrap: { xs: "wrap", sm: "nowrap" },
+          gap: 1,
         }}
       >
         {/* Folder title with icon */}
-        <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+        <Box 
+          sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            flex: { xs: 1, sm: "1 0 auto" },
+            minWidth: 0, // This helps with text overflow
+          }}
+        >
           {getFolderIcon()}
-          <Typography variant="h5" component="h2" sx={{ fontWeight: 500 }}>
+          <Typography 
+            variant={isMobile ? "h6" : "h5"} 
+            component="h2" 
+            sx={{ 
+              fontWeight: 500,
+              ml: 1,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
             {getFolderTitle()}
           </Typography>
         </Box>
 
-        {/* Action buttons */}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Tooltip title={t("explorer_new_folder")}>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              size="small"
-              onClick={() => onCreateFolder(selectedFolder?.id)}
-              sx={{ mr: 1 }}
-            >
-              {t("explorer_new_folder")}
-            </Button>
-          </Tooltip>
+        {/* Action buttons - Desktop & tablet */}
+        {!isMobile && (
+          <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+            <Tooltip title={t("explorer_new_folder")}>
+              <Button
+                startIcon={<AddIcon />}
+                variant="outlined"
+                size="small"
+                onClick={() => onCreateFolder(selectedFolder?.id)}
+                sx={{ mr: 1, display: { xs: "none", md: "flex" } }}
+              >
+                {t("explorer_new_folder")}
+              </Button>
+            </Tooltip>
+            
+            {/* Icon-only on tablet */}
+            {isTablet && !isMobile && (
+              <Tooltip title={t("explorer_new_folder")}>
+                <IconButton 
+                  size="small" 
+                  onClick={() => onCreateFolder(selectedFolder?.id)}
+                  sx={{ mr: 1 }}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Tooltip>
+            )}
 
-          <Tooltip title={getSelectAllLabel()}>
-            <IconButton size="small" onClick={onSelectAll} sx={{ mr: 1 }}>
-              <SelectionIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip
-            title={
-              viewMode === "grid"
-                ? t("explorer_list_view")
-                : t("explorer_grid_view")
-            }
-          >
-            <IconButton
-              size="small"
-              onClick={() =>
-                onChangeViewMode(viewMode === "grid" ? "list" : "grid")
-              }
-              sx={{ mr: 1 }}
-            >
-              {viewMode === "grid" ? <ViewListIcon /> : <GridViewIcon />}
-            </IconButton>
-          </Tooltip>
-
-          {/* Folder options menu (only for selected folders) */}
-          {selectedFolder && (
-            <Tooltip title={t("explorer_folder_options")}>
-              <IconButton onClick={handleMenuOpen} size="small">
-                <MoreVertIcon />
+            <Tooltip title={getSelectAllLabel()}>
+              <IconButton size="small" onClick={onSelectAll} sx={{ mr: 1 }}>
+                <SelectionIcon />
               </IconButton>
             </Tooltip>
-          )}
-        </Box>
+
+            <Tooltip
+              title={
+                viewMode === "grid"
+                  ? t("explorer_list_view")
+                  : t("explorer_grid_view")
+              }
+            >
+              <IconButton
+                size="small"
+                onClick={() =>
+                  onChangeViewMode(viewMode === "grid" ? "list" : "grid")
+                }
+                sx={{ mr: 1 }}
+              >
+                {viewMode === "grid" ? <ViewListIcon /> : <GridViewIcon />}
+              </IconButton>
+            </Tooltip>
+
+            {/* Folder options menu (only for selected folders) */}
+            {selectedFolder && (
+              <Tooltip title={t("explorer_folder_options")}>
+                <IconButton onClick={handleFolderMenuOpen} size="small">
+                  <MoreVertIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
+        )}
+
+        {/* Mobile actions menu button */}
+        {isMobile && (
+          <IconButton 
+            size="small" 
+            onClick={handleActionsMenuOpen}
+            edge="end"
+            sx={{ ml: "auto" }}
+          >
+            <MoreHorizIcon />
+          </IconButton>
+        )}
       </Box>
 
       {/* Folder options menu */}
       <Menu
         id="folder-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleMenuClose}
+        anchorEl={folderMenuAnchor}
+        open={folderMenuOpen}
+        onClose={handleFolderMenuClose}
         PaperProps={{
           elevation: 3,
           sx: {
@@ -254,6 +350,62 @@ const FolderHeader = ({
           </ListItemIcon>
           <ListItemText>{t("explorer_delete_folder")}</ListItemText>
         </MenuItem>
+      </Menu>
+
+      {/* Mobile actions menu */}
+      <Menu
+        id="actions-menu"
+        anchorEl={actionsMenuAnchor}
+        open={actionsMenuOpen}
+        onClose={handleActionsMenuClose}
+        PaperProps={{
+          elevation: 3,
+          sx: {
+            minWidth: 200,
+            overflow: "visible",
+            mt: 1.5,
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        <MenuItem onClick={handleCreateFolder}>
+          <ListItemIcon>
+            <AddIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{t("explorer_new_folder")}</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleSelectAll}>
+          <ListItemIcon>
+            <SelectionIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{getSelectAllLabel()}</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleViewModeChange}>
+          <ListItemIcon>
+            {viewMode === "grid" ? <ViewListIcon fontSize="small" /> : <GridViewIcon fontSize="small" />}
+          </ListItemIcon>
+          <ListItemText>
+            {viewMode === "grid" ? t("explorer_list_view") : t("explorer_grid_view")}
+          </ListItemText>
+        </MenuItem>
+        {selectedFolder && (
+          <>
+            <Divider />
+            <MenuItem onClick={handleRename}>
+              <ListItemIcon>
+                <EditIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{t("explorer_rename_folder")}</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
+              <ListItemIcon>
+                <DeleteIcon fontSize="small" sx={{ color: "error.main" }} />
+              </ListItemIcon>
+              <ListItemText>{t("explorer_delete_folder")}</ListItemText>
+            </MenuItem>
+          </>
+        )}
       </Menu>
     </Paper>
   );

@@ -3,10 +3,9 @@ import {
   Box,
   Drawer,
   useMediaQuery,
-  Fab,
-  Zoom,
   useTheme,
   Grid,
+  Button,
 } from "@mui/material";
 import {
   FolderOpen as FolderOpenIcon,
@@ -17,6 +16,7 @@ import {
   Close as CloseIcon,
   FolderSpecial as FolderSpecialIcon,
   NavigateNext as NavigateNextIcon,
+  Menu as MenuIcon,
 } from "@mui/icons-material";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderBreadcrumbs from "./FolderBreadcrumbs";
@@ -381,19 +381,37 @@ const Explorer = ({
     }
   );
 
-  // Get content for delete folder confirmation
-
   return (
     <>
       <Grid item xs={12}>
-        <FolderBreadcrumbs
-          folders={folders}
-          selectedFolderId={selectedFolderId}
-          setSelectedFolderId={setSelectedFolderId}
-          showAllFolders={showAllFolders}
-          setShowAllFolders={setShowAllFolders}
-          customIcons={breadcrumbsFolderIcons}
-        />
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {/* Mobile drawer toggle button */}
+          {isMobile && (
+            <Button
+              color="primary"
+              variant="outlined"
+              edge="start"
+              onClick={toggleDrawer}
+              sx={{ mr: 1 }}
+            >
+              <MenuIcon />
+            </Button>
+          )}
+
+          {/* Breadcrumbs navigation */}
+          {!isMobile && (
+            <Box sx={{ flexGrow: 1 }}>
+              <FolderBreadcrumbs
+                folders={folders}
+                selectedFolderId={selectedFolderId}
+                setSelectedFolderId={setSelectedFolderId}
+                showAllFolders={showAllFolders}
+                setShowAllFolders={setShowAllFolders}
+                customIcons={breadcrumbsFolderIcons}
+              />
+            </Box>
+          )}
+        </Box>
       </Grid>
 
       <Grid item xs={12}>
@@ -408,40 +426,34 @@ const Explorer = ({
         >
           {/* Folder sidebar - permanent on desktop, drawer on mobile */}
           {isMobile ? (
-            <>
-              <Drawer
-                variant="temporary"
-                open={drawerOpen}
-                onClose={toggleDrawer}
-                ModalProps={{ keepMounted: true }}
-                sx={{
-                  "& .MuiDrawer-paper": { width: 280, boxSizing: "border-box" },
+            <Drawer
+              variant="temporary"
+              open={drawerOpen}
+              onClose={toggleDrawer}
+              ModalProps={{ keepMounted: true }}
+              sx={{
+                "& .MuiDrawer-paper": { width: 280, boxSizing: "border-box" },
+              }}
+            >
+              <FolderSidebar
+                folders={folders}
+                selectedFolderId={selectedFolderId}
+                setSelectedFolderId={setSelectedFolderId}
+                showAllFolders={showAllFolders}
+                setShowAllFolders={setShowAllFolders}
+                rootFolderName={rootFolderName}
+                collapsible={collapsibleSidebar}
+                initialExpandedState={sidebarInitialExpandedState}
+                onFolderSelect={(folderId) => {
+                  if (onSidebarFolderSelect) {
+                    onSidebarFolderSelect(folderId);
+                  }
+                  if (isMobile) {
+                    toggleDrawer(); // Close drawer after selection on mobile
+                  }
                 }}
-              >
-                <FolderSidebar
-                  folders={folders}
-                  selectedFolderId={selectedFolderId}
-                  setSelectedFolderId={setSelectedFolderId}
-                  showAllFolders={showAllFolders}
-                  setShowAllFolders={setShowAllFolders}
-                  rootFolderName={rootFolderName}
-                  collapsible={collapsibleSidebar}
-                  initialExpandedState={sidebarInitialExpandedState}
-                  onFolderSelect={onSidebarFolderSelect}
-                />
-              </Drawer>
-
-              <Zoom in={!drawerOpen}>
-                <Fab
-                  color="primary"
-                  size="small"
-                  onClick={toggleDrawer}
-                  sx={{ position: "absolute", bottom: 16, left: 16, zIndex: 1 }}
-                >
-                  <FolderIcon />
-                </Fab>
-              </Zoom>
-            </>
+              />
+            </Drawer>
           ) : (
             <Box sx={{ width: 240, flexShrink: 0, mr: 2 }}>
               <FolderSidebar
