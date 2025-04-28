@@ -1,18 +1,23 @@
 import { dbPromise, NPC_STORE_NAME, PC_STORE_NAME, NPC_CAMPAIGN_STORE_NAME } from "../db";
 
 // Retrieves all NPCs related to a specific campaign.
-export const getRelatedNpcs = async (campaignId) => {
+export const getRelatedNpcs = async (campaignId, options = {}) => {
   const db = await dbPromise;
   const npcs = await db.getAll(NPC_STORE_NAME);
   const relatedNpcs = [];
 
   for (const npc of npcs) {
+    // Skip if we're only looking for specific NPC types
+    if (options.onlySimplified && !npc.isSimplified) continue;
+    if (options.onlyRegular && npc.isSimplified) continue;
+
     const npcCampaign = await db.get(NPC_CAMPAIGN_STORE_NAME, [npc.id, campaignId]);
     if (npcCampaign) {
       relatedNpcs.push({
         ...npc,
         attitude: npcCampaign.attitude,
         folderId: npcCampaign.folderId,
+        isCampaignSpecific: !!npc.isSimplified // Flag for UI differentiation
       });
     }
   }

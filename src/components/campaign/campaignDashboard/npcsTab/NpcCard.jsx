@@ -74,6 +74,7 @@ const NpcCard = ({
   );
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSimple = item.isSimplified;
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -84,6 +85,7 @@ const NpcCard = ({
   const LONG_PRESS_DURATION = 600; // 600ms long press duration
 
   const handleDetailsOpen = (e) => {
+    if (isSimple) return;
     e.stopPropagation();
     setDetailsDialogOpen(true);
   };
@@ -218,13 +220,14 @@ const NpcCard = ({
           species={item.species}
           rank={item.rank}
           villain={item.villain}
+          isSimple={isSimple}
         />
 
         {/* Card Actions */}
         <NpcCardActions
           npcId={item.id}
           attitude={item.attitude || "neutral"}
-          onEdit={() => handleEditNpc(item.id)}
+          onEdit={() => handleEditNpc(item)}
           onUnlink={() => onUnlink && onUnlink(item.id)}
           onNotes={() => onNotes && onNotes(item.id)}
           onDetails={handleDetailsOpen}
@@ -232,6 +235,7 @@ const NpcCard = ({
           onSetAttitude={(newAttitude) =>
             handleSetAttitude(item.id, newAttitude)
           }
+          isSimple={isSimple}
         />
       </StyledCard>
 

@@ -1,21 +1,15 @@
 import { useMemo } from "react";
-import { useNpcDialogs } from "./useNpcDialogs";
 import { useNpcActions } from "./useNpcActions";
 import { useNpcStore } from "../stores/npcDataStore";
+import { useNpcDialogsStore } from "../stores/npcDialogsStore";
 
 export const useCampaignNpcs = (campaignId) => {
   const { allNpcs, loadNpcs, showSnackbar } = useNpcStore();
 
   // Dialog state management
   const {
-    isLinkNpcDialogOpen,
     linkNpcSearchText,
-    expandedNpcId,
-    handleAddExistingNpc,
-    handleCloseLinkDialog,
-    handleExpandNpc,
-    setLinkNpcSearchText,
-  } = useNpcDialogs();
+  } = useNpcDialogsStore();
 
   // NPC action handlers
   const { handleEditNpc, handleSetAttitude } = useNpcActions(
@@ -36,22 +30,14 @@ export const useCampaignNpcs = (campaignId) => {
     // NPC Lists and Display Data
     allNpcs,
 
-    // UI State
-    expandedNpcId,
-    isLinkNpcDialogOpen,
-
     // Search and Filter States
     linkNpcSearchText,
     filteredNpcsForDialog,
 
     // Event Handlers and Methods
     loadNpcs,
-    handleAddExistingNpc,
-    handleCloseLinkDialog,
     handleEditNpc,
-    handleExpandNpc,
     handleSetAttitude,
-    setLinkNpcSearchText,
   };
 };
 

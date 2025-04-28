@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Button, Typography } from "@mui/material";
-import { Link as LinkIcon } from "@mui/icons-material";
+import { Link as LinkIcon, Add as AddIcon } from "@mui/icons-material";
 
-const NpcsTabHeader = ({ handleAddExistingNpc }) => {
+const NpcsTabHeader = ({ onCreateSimpleNpc, onLinkNpc }) => {
   return (
     <Box
       sx={{
@@ -17,8 +17,18 @@ const NpcsTabHeader = ({ handleAddExistingNpc }) => {
         <Button
           variant="contained"
           color="primary"
+          startIcon={<AddIcon />}
+          onClick={onCreateSimpleNpc}
+          sx={{ mr: 1 }}
+        >
+          Add Simplified NPC
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
           startIcon={<LinkIcon />}
-          onClick={handleAddExistingNpc}
+          onClick={onLinkNpc}
           sx={{ mr: 1 }}
         >
           Link NPC

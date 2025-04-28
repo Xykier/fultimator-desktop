@@ -4,6 +4,7 @@ import {useParams} from 'react-router-dom';
 import NpcsTabHeader from "./NpcsTabHeader";
 import SearchbarFilter from "./SearchbarFilter";
 import LinkNpcDialog from "./LinkNpcDialog";
+import SimpleNpcDialogEdit from "./SimpleNpcDialogEdit";
 import EmptyNpcsList from "./EmptyNpcsList";
 import NpcListLoading from "./NpcListLoading";
 import NpcListError from "./NpcListError";
@@ -11,6 +12,7 @@ import FeedbackSnackbar from "./FeedbackSnackbar";
 import useCampaignNpcs from "./hooks/useCampaignNpcs";
 import { useNpcStore } from "./stores/npcDataStore";
 import { useNpcFoldersStore } from "./stores/npcFolderStore";
+import {useNpcDialogsStore} from "./stores/npcDialogsStore";
 import NpcExplorer from "./NpcExplorer";
 
 const NpcsTabMain = () => {
@@ -18,14 +20,7 @@ const NpcsTabMain = () => {
 
   const {
     // State & Derived Values
-    isLinkNpcDialogOpen,
-    linkNpcSearchText,
-    filteredNpcsForDialog, // For the link dialog
-
-    // Handlers & Setters
-    handleAddExistingNpc,
-    handleCloseLinkDialog: handleClose, // Rename for clarity
-    setLinkNpcSearchText,
+    filteredNpcsForDialog
   } = useCampaignNpcs(campaignId);
 
   const {
@@ -38,6 +33,7 @@ const NpcsTabMain = () => {
     handleSnackbarClose,
     associatedNpcIds,
     toggleNpc: handleToggleNpc,
+    handleCreateSimpleNpc,
   } = useNpcStore();
 
   const {
@@ -46,6 +42,20 @@ const NpcsTabMain = () => {
     setLoadNpcs,
     setShowSnackbar,
   } = useNpcFoldersStore();
+
+  const {
+    // Dialog states
+    isLinkNpcDialogOpen,
+    linkNpcSearchText,
+    isSimpleNpcDialogEditOpen,
+    simpleNpcItem,
+    // Actions
+    handleAddExistingNpc,
+    handleCloseLinkDialog,
+    setLinkNpcSearchText,
+    handleOpenSimpleNpcDialogEdit,
+    handleCloseSimpleNpcDialogEdit,
+  } = useNpcDialogsStore();
 
   useEffect(() => {
     initializeNpcs(campaignId);
@@ -60,7 +70,7 @@ const NpcsTabMain = () => {
     setLoadNpcs,
     showSnackbar,
     setShowSnackbar,
-    initializeNpcs,
+    initializeNpcs
   ]);
 
   return (
@@ -68,7 +78,7 @@ const NpcsTabMain = () => {
       <Grid container spacing={1}>
         {/* Header */}
         <Grid item xs={12}>
-          <NpcsTabHeader handleAddExistingNpc={handleAddExistingNpc} />
+          <NpcsTabHeader onCreateSimpleNpc={handleOpenSimpleNpcDialogEdit} onLinkNpc={handleAddExistingNpc} />
         </Grid>
 
         {/* Search, sort, and filter controls */}
@@ -112,13 +122,19 @@ const NpcsTabMain = () => {
         {/* Link NPC Dialog */}
        <LinkNpcDialog
           open={isLinkNpcDialogOpen}
-          handleClose={handleClose}
+          handleClose={handleCloseLinkDialog}
           searchText={linkNpcSearchText}
           setSearchText={setLinkNpcSearchText}
           filteredNpcs={filteredNpcsForDialog}
           associatedNpcIds={associatedNpcIds}
           handleToggleNpc={handleToggleNpc}
-        />        
+        />
+        <SimpleNpcDialogEdit
+          open={isSimpleNpcDialogEditOpen}
+          onClose={handleCloseSimpleNpcDialogEdit}
+          onSubmit={handleCreateSimpleNpc}
+          initialNpc={simpleNpcItem}
+        />
 
         {/* Feedback snackbar */}
         <FeedbackSnackbar

@@ -4,6 +4,18 @@ export const useNpcDialogs = () => {
   const [isLinkNpcDialogOpen, setIsLinkNpcDialogOpen] = useState(false);
   const [linkNpcSearchText, setLinkNpcSearchText] = useState("");
   const [expandedNpcId, setExpandedNpcId] = useState(null);
+  const [isSimpleNpcDialogEditOpen, setIsSimpleNpcDialogEditOpen] = useState(false);
+  const [selectedNpcId, setSelectedNpcId] = useState(null);
+
+  const handleOpenSimpleNpcDialogEdit = (npcId) => {
+    setSelectedNpcId(npcId);
+    setIsSimpleNpcDialogEditOpen(true);
+  };
+
+  const handleCloseSimpleNpcDialogEdit = () => {
+    setSelectedNpcId(null);
+    setIsSimpleNpcDialogEditOpen(false);
+  };
 
   const handleAddExistingNpc = () => setIsLinkNpcDialogOpen(true);
   
@@ -21,10 +33,14 @@ export const useNpcDialogs = () => {
     isLinkNpcDialogOpen,
     linkNpcSearchText,
     expandedNpcId,
+    isSimpleNpcDialogEditOpen,
+    selectedNpcId,
     // Actions
     handleAddExistingNpc,
     handleCloseLinkDialog,
     handleExpandNpc,
-    setLinkNpcSearchText
+    setLinkNpcSearchText,
+    handleOpenSimpleNpcDialogEdit,
+    handleCloseSimpleNpcDialogEdit,
   };
 };

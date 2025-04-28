@@ -20,7 +20,7 @@ import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { LinkOff } from "@mui/icons-material";
+import { LinkOff, Delete as DeleteIcon } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 
@@ -32,9 +32,10 @@ const ActionsContainer = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
   padding: theme.spacing(0.75, 1),
-  backgroundColor: theme.palette.mode === 'dark' 
-    ? theme.palette.grey[900] 
-    : theme.palette.grey[50],
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[900]
+      : theme.palette.grey[50],
   borderTop: `1px solid ${theme.palette.divider}`,
 }));
 
@@ -46,13 +47,15 @@ const ActionButtonsGroup = styled(Box)(({ theme }) => ({
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
   padding: 6,
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.mode === 'dark' 
-    ? 'rgba(255, 255, 255, 0.05)' 
-    : 'rgba(0, 0, 0, 0.02)',
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "rgba(255, 255, 255, 0.05)"
+      : "rgba(0, 0, 0, 0.02)",
   "&:hover": {
-    backgroundColor: theme.palette.mode === 'dark' 
-      ? 'rgba(255, 255, 255, 0.1)' 
-      : 'rgba(0, 0, 0, 0.05)',
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.1)"
+        : "rgba(0, 0, 0, 0.05)",
   },
   "& svg": {
     fontSize: ICON_SIZE,
@@ -92,6 +95,7 @@ const NpcCardActions = ({
   onDetails,
   onMove,
   onSetAttitude,
+  isSimple,
 }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -114,17 +118,23 @@ const NpcCardActions = ({
       onSetAttitude(newAttitude);
     }
   };
-  
+
   const getAttitudeColor = (attitudeValue) => {
     const isSelected = currentAttitude === attitudeValue;
-    
+
     switch (attitudeValue) {
       case "friendly":
-        return isSelected ? theme.palette.success.main : theme.palette.text.disabled;
+        return isSelected
+          ? theme.palette.success.main
+          : theme.palette.text.disabled;
       case "neutral":
-        return isSelected ? theme.palette.secondary.main : theme.palette.text.disabled;
+        return isSelected
+          ? theme.palette.secondary.main
+          : theme.palette.text.disabled;
       case "hostile":
-        return isSelected ? theme.palette.error.main : theme.palette.text.disabled;
+        return isSelected
+          ? theme.palette.error.main
+          : theme.palette.text.disabled;
       default:
         return theme.palette.text.disabled;
     }
@@ -157,17 +167,19 @@ const NpcCardActions = ({
           </StyledIconButton>
         </Tooltip>
 
-        <Tooltip title="View Details" arrow>
-          <StyledIconButton 
-            onClick={(e) => {
-              e.stopPropagation();
-              onDetails(e);
-            }} 
-            size="small"
-          >
-            <SearchIcon />
-          </StyledIconButton>
-        </Tooltip>
+        {!isSimple && (
+          <Tooltip title="View Details" arrow>
+            <StyledIconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onDetails(e);
+              }}
+              size="small"
+            >
+              <SearchIcon />
+            </StyledIconButton>
+          </Tooltip>
+        )}
       </ActionButtonsGroup>
 
       <Tooltip title="More options" arrow>
@@ -195,19 +207,19 @@ const NpcCardActions = ({
         onClose={(e) => handleMenuClose(e)}
         PaperProps={{
           elevation: 5,
-          sx: { 
+          sx: {
             borderRadius: 2,
             minWidth: 200,
-          }
+          },
         }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         onClick={(e) => e.stopPropagation()}
       >
         <MenuItem
-          onClick={() => {
+          onClick={(e) => {
             onEdit();
-            handleMenuClose();
+            handleMenuClose(e);
           }}
         >
           <ListItemIcon>
@@ -223,20 +235,33 @@ const NpcCardActions = ({
           }}
         >
           <ListItemIcon>
-            <LinkOff
-              sx={{
-                fontSize: ICON_SIZE,
-                color: theme.palette.error.main,
-              }}
-            />
+            {isSimple ? (
+              <DeleteIcon
+                sx={{
+                  fontSize: ICON_SIZE,
+                  color: theme.palette.error.main,
+                }}
+              />
+            ) : (
+              <LinkOff
+                sx={{
+                  fontSize: ICON_SIZE,
+                  color: theme.palette.error.main,
+                }}
+              />
+            )}
           </ListItemIcon>
-          <ListItemText>Unlink from Campaign</ListItemText>
+          <ListItemText>
+            {isSimple ? "Delete NPC" : "Unlink from Campaign"}
+          </ListItemText>
         </MenuItem>
 
-        <MenuItem onClick={() => {
-          onMove();
-          handleMenuClose();
-        }}>
+        <MenuItem
+          onClick={(e) => {
+            onMove();
+            handleMenuClose(e);
+          }}
+        >
           <ListItemIcon>
             <FolderIcon sx={{ fontSize: ICON_SIZE }} />
           </ListItemIcon>
@@ -244,12 +269,16 @@ const NpcCardActions = ({
         </MenuItem>
 
         <Divider sx={{ my: 1 }} />
-        
+
         <Box sx={{ px: 1, py: 0.5 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ pl: 1, mb: 1, fontSize: '0.75rem' }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ pl: 1, mb: 1, fontSize: "0.75rem" }}
+          >
             NPC ATTITUDE
           </Typography>
-          
+
           <StyledToggleButtonGroup
             value={currentAttitude}
             exclusive

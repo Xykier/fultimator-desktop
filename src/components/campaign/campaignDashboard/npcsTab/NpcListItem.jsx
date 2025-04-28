@@ -235,7 +235,7 @@ const NpcListItem = ({
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleEditNpc(item.id);
+                  handleEditNpc(item);
                 }}
                 size="small"
               >
@@ -293,7 +293,7 @@ const NpcListItem = ({
       >
         <MenuItem
           onClick={() => {
-            handleEditNpc(item.id);
+            handleEditNpc(item);
             handleMenuClose();
           }}
         >

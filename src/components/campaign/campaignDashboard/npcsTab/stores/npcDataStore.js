@@ -5,12 +5,12 @@ import {
   associateNpcWithCampaign,
   disassociateNpcFromCampaign,
   getNpcFoldersForCampaign,
+  addCampaignNpc,
+  deleteCampaignNpc,
 } from "../../../../../utility/db";
 import { t, replacePlaceholders } from "../../../../../translation/translate";
 
 export const useNpcStore = create((set, get) => ({
-
-
   // Data
   allNpcs: [],
   associatedNpcIds: [],
@@ -77,7 +77,7 @@ export const useNpcStore = create((set, get) => ({
         set({ npcFolders: foldersList });
       } catch (folderErr) {
         console.error("Error loading NPC folders:", folderErr);
-        set({ loadError: t('npc_folders_load_error') });
+        set({ loadError: t("npc_folders_load_error") });
       }
 
       return {
@@ -87,7 +87,7 @@ export const useNpcStore = create((set, get) => ({
       };
     } catch (err) {
       console.error("Error loading NPCs:", err);
-      set({ loadError: t('npcs_load_error') });
+      set({ loadError: t("npcs_load_error") });
       throw err;
     } finally {
       set({ isLoading: false });
@@ -104,61 +104,64 @@ export const useNpcStore = create((set, get) => ({
     } = get();
 
     try {
+      const npc = campaignNpcs.find((npc) => npc.id === npcId);
+
       if (associatedNpcIds.includes(npcId)) {
-        // Remove NPC from campaign
         await disassociateNpcFromCampaign(npcId, campaignId);
+
+        // If NPC is simplified, delete it entirely
+        if (npc?.isSimplified) {
+          await deleteCampaignNpc(npcId);
+        }
 
         set({
           associatedNpcIds: associatedNpcIds.filter((id) => id !== npcId),
           campaignNpcs: campaignNpcs.filter((npc) => npc.id !== npcId),
         });
 
-        showSnackbar(t('npc_remove_success'), "info");
+        showSnackbar(t("npc_remove_success"), "info");
         return true;
       } else {
         // Add NPC to campaign
         await associateNpcWithCampaign(npcId, campaignId);
 
-        const npc = allNpcs.find((n) => n.id === npcId);
-        if (npc) {
+        const npcToAdd = allNpcs.find((n) => n.id === npcId);
+        if (npcToAdd) {
           set({
             associatedNpcIds: [...associatedNpcIds, npcId],
-            campaignNpcs: [...campaignNpcs, npc],
+            campaignNpcs: [...campaignNpcs, npcToAdd],
           });
 
-          showSnackbar(t('npc_add_success'), "success");
+          showSnackbar(t("npc_add_success"), "success");
           return true;
         }
       }
       return false;
     } catch (error) {
       console.error("Error toggling NPC association:", error);
-      showSnackbar(t('npc_association_update_error'), "error");
+      showSnackbar(t("npc_association_update_error"), "error");
       return false;
     }
   },
 
   unlinkMultipleNpcs: async (npcIds = []) => {
-    const {
-      campaignId,
-      associatedNpcIds,
-      campaignNpcs,
-      showSnackbar,
-    } = get();
+    const { campaignId, associatedNpcIds, campaignNpcs, showSnackbar } = get();
 
     if (!npcIds.length) return;
 
     try {
       // Use Promise.all to remove all NPCs in parallel
       await Promise.all(
-        npcIds.map((npcId) =>
-          disassociateNpcFromCampaign(npcId, campaignId)
-        )
+        npcIds.map((npcId) => disassociateNpcFromCampaign(npcId, campaignId))
       );
 
       // Filter out the removed NPCs from state
-      const updatedNpcIds = associatedNpcIds.filter(id => !npcIds.includes(id));
-      const updatedCampaignNpcs = campaignNpcs.filter(npc => !npcIds.includes(npc.id));
+      const updatedNpcIds = associatedNpcIds.filter(
+        (id) => !npcIds.includes(id)
+      );
+      const updatedCampaignNpcs = campaignNpcs.filter(
+        (npc) => !npcIds.includes(npc.id)
+      );
 
       set({
         associatedNpcIds: updatedNpcIds,
@@ -166,14 +169,29 @@ export const useNpcStore = create((set, get) => ({
       });
 
       showSnackbar(
-        replacePlaceholders(t('npc_remove_multiple_success'), { 
-          count: npcIds.length 
-        }), 
+        replacePlaceholders(t("npc_remove_multiple_success"), {
+          count: npcIds.length,
+        }),
         "info"
       );
     } catch (error) {
       console.error("Error unlinking multiple NPCs:", error);
-      showSnackbar(t('npc_remove_error'), "error");
+      showSnackbar(t("npc_remove_error"), "error");
+    }
+  },
+
+  handleCreateSimpleNpc: async (npc) => {
+    const { campaignId, showSnackbar, loadNpcs } = get();
+    try {
+      const newNpcId = await addCampaignNpc(npc, campaignId);
+      showSnackbar(t("npc_create_success"), "success");
+      return newNpcId;
+    } catch (error) {
+      console.error("Error creating simple NPC:", error);
+      showSnackbar(t("npc_create_error"), "error");
+      return null;
+    } finally {
+      loadNpcs();
     }
   },
 

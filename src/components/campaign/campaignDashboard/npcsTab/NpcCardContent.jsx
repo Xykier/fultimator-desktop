@@ -73,7 +73,7 @@ const getRankName = (rank) => {
   return rank ? rank.charAt(0).toUpperCase() + rank.slice(1) : "";
 };
 
-const NpcCardContent = ({ name, level, species, rank, villain }) => {
+const NpcCardContent = ({ name, level, species, rank, villain, isSimple }) => {
   const SpeciesIcon = getSpeciesIcon(species);
 
   // Get rank icon and color
@@ -89,37 +89,39 @@ const NpcCardContent = ({ name, level, species, rank, villain }) => {
     <ContentContainer>
       <NpcName variant="body2">{name}</NpcName>
 
-      <BadgesContainer>
-        {/* Level Badge */}
-        <Tooltip title={`Level ${level}`} arrow>
-          <LevelChip label={level} size="small" />
-        </Tooltip>
+      {!isSimple && (
+        <BadgesContainer>
+          {/* Level Badge */}
+          <Tooltip title={`Level ${level}`} arrow>
+            <LevelChip label={level} size="small" />
+          </Tooltip>
 
-        {/* Rank Badge */}
-        <Tooltip title={rankName} arrow>
-          <IconBadge bgcolor={rankColor} iconcolor={rankIconColor}>
-            <RankIcon />
-          </IconBadge>
-        </Tooltip>
-
-        {/* Species Icon */}
-        {SpeciesIcon && (
-          <Tooltip title={species} arrow>
-            <IconBadge>
-              <SpeciesIcon />
+          {/* Rank Badge */}
+          <Tooltip title={rankName} arrow>
+            <IconBadge bgcolor={rankColor} iconcolor={rankIconColor}>
+              <RankIcon />
             </IconBadge>
           </Tooltip>
-        )}
 
-        {/* Villain Badge */}
-        {villain && (
-          <Tooltip title={`Villain: ${villain}`} arrow>
-            <IconBadge bgcolor="#f44336" iconcolor="#ffffff">
-              <ReportProblemIcon />
-            </IconBadge>
-          </Tooltip>
-        )}
-      </BadgesContainer>
+          {/* Species Icon */}
+          {SpeciesIcon && (
+            <Tooltip title={species} arrow>
+              <IconBadge>
+                <SpeciesIcon />
+              </IconBadge>
+            </Tooltip>
+          )}
+
+          {/* Villain Badge */}
+          {villain && (
+            <Tooltip title={`Villain: ${villain}`} arrow>
+              <IconBadge bgcolor="#f44336" iconcolor="#ffffff">
+                <ReportProblemIcon />
+              </IconBadge>
+            </Tooltip>
+          )}
+        </BadgesContainer>
+      )}
     </ContentContainer>
   );
 };
